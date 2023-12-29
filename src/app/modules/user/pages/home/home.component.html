@@ -1,0 +1,12 @@
+<form [formGroup]="controlForm" fxLayout="column" fxLayoutGap="10" (submit)="leerArchivo()">
+
+    <div>
+        <button type="button" mat-raised-button (click)="fileInput.click()">Subir Archivo</button>
+        <input hidden (change)="onFileSelected($event)" formControlName="archivo" #fileInput type="file" id="file">
+    </div>
+
+    <button type="submit" class="sendInfo" mat-raised-button color="primary" > Leer Datos </button>
+
+</form>
+
+<pre> {{respData | json }} </pre>

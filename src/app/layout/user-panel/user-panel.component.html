@@ -1,0 +1,97 @@
+<mat-sidenav-container class="example-sidenav-content" fullscreen>
+
+
+    <mat-sidenav #sidenav mode="side" opened [disableClose]="true" class="example-sidenav"
+        [class.mat-elevation-z5]="true">
+
+        <div class="logo-container" routerLink="/home" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="10" >
+           
+            <div fxLayout="column" fxLayoutAlign="center " >
+                <span class="empTitle"> NCN </span>
+                
+            </div>
+        </div>
+
+        <div class="separator" fxLayout="row" fxLayoutAlign="center center">
+            <mat-divider></mat-divider>
+        </div>
+
+        <div class="mini-profile" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10">
+           
+            <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="5">
+                <span> <strong>USER 01</strong> </span>
+                <div class="rol-profile" fxLayout="row" fxLayoutGap="5" fxLayoutAlign="start center">
+                    <div class="led"></div>
+                    <span>rol_user</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="separator" fxLayout="row" fxLayoutAlign="center center">
+            <mat-divider></mat-divider>
+        </div>
+
+        <div class="sidenavList">
+            <mat-selection-list [multiple]="false">
+
+                <mat-list-option routerLink="/admin/dashboard">
+                    <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" class="iconNavList">
+                        <span><mat-icon inline="true">dashboard</mat-icon></span>
+                        <h2>Dashboard</h2>
+                    </div>
+                </mat-list-option>
+
+                <mat-list-option routerLink="/admin/formularios">
+                    <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" class="iconNavList">
+                        <span><mat-icon inline="true">list</mat-icon></span>
+                        <h2>Archivos</h2>
+                    </div>
+                </mat-list-option>
+
+                <mat-list-option routerLink="/admin/archivo">
+                    <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" class="iconNavList">
+                        <span><mat-icon inline="true">description</mat-icon></span>
+                        <h2>Metricas</h2>
+                    </div>
+                </mat-list-option>
+
+
+            </mat-selection-list>
+        </div>
+
+    </mat-sidenav>
+
+    <div style="padding: 10px;">
+
+        <mat-toolbar [class.mat-elevation-z2]="true" style="border-radius: 20px;">
+            <mat-toolbar-row >
+               
+                <div>
+                    <button (click)="sidenav.toggle()" mat-icon-button>
+                        <mat-icon>menu</mat-icon>
+                    </button>
+                </div>
+
+                <div fxLayout="row" fxLayoutGap="10">
+                    <mat-form-field appearance="standard">
+                        <input matInput placeholder="Buscar...">
+                    </mat-form-field>
+                </div>
+
+                <span class="spacer"></span>
+
+              
+                <button mat-icon-button (click)="logout()">
+                    <mat-icon>logout</mat-icon>
+                </button>
+
+            </mat-toolbar-row>
+        </mat-toolbar>
+
+    </div>
+
+    <div class="container">
+        <router-outlet></router-outlet>
+    </div>
+
+</mat-sidenav-container>
