@@ -6,11 +6,13 @@ import { HomeComponent } from './pages/home/home.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MaterialModule } from 'src/app/material/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { VisorGraphComponent } from './pages/visor-graph/visor-graph.component';
 
 
 @NgModule({
   declarations: [
-    HomeComponent
+    HomeComponent,
+    VisorGraphComponent
   ],
   imports: [
     CommonModule,

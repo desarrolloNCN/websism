@@ -1,0 +1,121 @@
+p,
+h2,
+h4 {
+    margin: 0;
+}
+
+p {
+    color: #707070;
+}
+
+h2 {
+    color: #444444
+}
+
+h4 {
+    color: #747474
+}
+
+.winTitle {
+    padding-bottom: 20px;
+}
+
+.dndZoneContainer {
+    background-color: whitesmoke;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.dndZone {
+    background-color: rgba(231, 231, 231, 0.438);
+    padding: 10px;
+    border-radius: 10px;
+    border: 0.5px dashed #B6B6B6;
+}
+
+.colorIcon {
+    color: #606060;
+}
+
+.sendInfo {
+    width: 100px;
+}
+
+.inputUrl {
+    width: 450px;
+    padding: 8px;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
+}
+
+.uploadbtn {
+    width: 220px;
+    border-radius: 5px;
+    background-color: #D09E52;
+    color: white;
+    box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
+}
+
+.stInfo {
+    padding: 5px;
+    background-color: rgb(243, 243, 243);
+    border-radius: 5px;
+}
+
+.listSt {
+    border-radius: 5px;
+    padding: 5px;
+    background-color: rgb(248, 248, 248);
+    height: 275px;
+}
+
+.scrlSta {
+    overflow: scroll;
+    border-radius: 5px;
+}
+
+.scrlSta *>p {
+    font-weight: bold;
+    color: white;
+}
+
+.scrlSta::-webkit-scrollbar {
+    display: none;
+}
+
+.listSt>.inputUrl {
+    width: auto;
+}
+
+.stGraph {
+    padding: 5px;
+    background-color: rgb(243, 243, 243);
+    border-radius: 5px;
+}
+
+.graphBar {
+    padding: 3px;
+    border-radius: 5px;
+    background-color: white;
+    box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
+}
+
+.colorIconBar {
+    height: 30px;
+    width: 30px;
+    color: #969696;
+    font-size: 30px;
+}
+
+.selected-group {
+    background-color: rgba(173, 216, 230, 0);
+}
+
+.color-par {
+    background-color: rgb(77, 115, 196);
+}
+
+.color-impar {
+    background-color: rgb(255, 182, 73);
+}

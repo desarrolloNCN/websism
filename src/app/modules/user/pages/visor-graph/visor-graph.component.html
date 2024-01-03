@@ -1,0 +1,108 @@
+<div class="winTitle">
+    <h2><b>Lector de Archivos Acelerográficos</b></h2>
+    <h4>Puede cargar archivos de diferentes dispositivos acelerograficos para la leectura, edicion y exportacion de
+        datos, o tambien puede ingresar una direccion valida</h4>
+</div>
+
+<div class="dndZoneContainer">
+    <div class="dndZone" fxLayout="row" fxLayoutAlign="center start">
+        <form [formGroup]="controlForm" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="10"
+            (submit)="leerArchivo()">
+
+            <div class="inputUrl" fxLayout="row" fxLayoutGap="5">
+                <mat-icon class="colorIcon">link</mat-icon>
+                <input matInput type="text" placeholder="Ejm: http://examples.obspy.org/RJOB_061005_072159.ehz.new">
+            </div>
+
+            <p>O</p>
+
+            <div>
+                <div class="uploadbtn" fxLayout="row" fxLayoutAlign="center center">
+                    <button type="submit" mat-button (click)="fileInput.click()">
+                        SUBIR UN ARCHIVO
+                    </button>
+
+                    <button mat-icon-button [matMenuTriggerFor]="menuFile">
+                        <mat-icon inline="true">expand_more</mat-icon>
+                    </button>
+                    <mat-menu #menuFile>
+                        <button mat-menu-item>
+                            <mat-icon>add_to_drive</mat-icon>
+                            Google Drive
+                        </button>
+                        <button mat-menu-item>
+                            <mat-icon>add_to_drive</mat-icon>
+                            Google Drive
+                        </button>
+                    </mat-menu>
+                </div>
+
+                <input hidden (change)="onFileSelected($event)" formControlName="archivo" #fileInput type="file"
+                    id="file">
+            </div>
+
+            <button type="submit" class="sendInfo" mat-raised-button color="primary"> Leer Datos </button>
+
+        </form>
+    </div>
+</div>
+
+<div style="padding-top: 10px;" fxLayout="row" fxLayoutGap="10">
+    <div class="stInfo" fxFlex="30" fxLayout="column" fxLayoutGap="5">
+        <div>
+            <div>
+                <h2><b>ESTACIONES ENCONTRADAS</b></h2>
+                <h4>Busque y eliga la estacion que quiera consultar</h4>
+            </div>
+            <div class="listSt" fxLayout="column" fxLayoutGap="5">
+                <div class="inputUrl" fxLayout="row" fxLayoutGap="5">
+                    <mat-icon class="colorIcon">search</mat-icon>
+                    <input matInput type="text" placeholder="Ejm: Station, Network, Channels , etc">
+                </div>
+
+                <div class="scrlSta">
+                    <div *ngFor="let sta of groupedData | keyvalue; let i = index">
+                        <div [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
+                            (click)="selectGroup(sta.key)" fxLayout="column" fxLayoutAlign="space-around">
+                            <div *ngFor="let item of getGroupValues(sta)" fxLayout="row" fxLayoutAlign="space-around"
+                                (click)="leer(item)">
+                                <mat-icon style="color: white;">router</mat-icon>
+                                <p> {{item.network}} </p>
+                                <p> {{item.station}} </p>
+                                <p> {{item.channel}} </p>
+                            </div>
+
+                        </div>
+                        <div style="height: 5px;"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div>
+            <div>
+                <h2><b>INFORMACION DE ESTACION</b></h2>
+                <h4>Datos relevantes de la estacion seleccionada</h4>
+            </div>
+            <div class="listSt" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
+                <p> NETWORK: <b>{{stationInfo.network}} </b> </p>
+                <p> STATION: <b>{{stationInfo.station}}</b> </p>
+                <p> LOCATION: <b>{{stationInfo.location}}</b> </p>
+                <p> CHANNEL: <b>{{stationInfo.channel}}</b> </p>
+                <p> SAMPLING RATE: <b>{{stationInfo.sampling_rate}}</b> </p>
+                <p> DELTA: <b>{{stationInfo.delta}}</b> </p>
+                <p> NPTS: <b>{{stationInfo.npts}}</b> </p>
+                <p> CALIB: <b>{{stationInfo.calib}}</b> </p>
+            </div>
+        </div>
+    </div>
+    <div class="stGraph" fxFlex="70">
+        <div class="graphBar" fxLayout="row" fxLayoutGap="5">
+            <mat-icon class="colorIconBar">search</mat-icon>
+            <mat-icon class="colorIconBar">compare_arrows</mat-icon>
+            <mat-icon class="colorIconBar">build</mat-icon>
+            <mat-icon class="colorIconBar">add_chart</mat-icon>
+            <mat-icon class="colorIconBar">donut_large</mat-icon>
+        </div>
+    </div>
+</div>

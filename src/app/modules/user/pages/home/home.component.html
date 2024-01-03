@@ -1,12 +1,76 @@
-<form [formGroup]="controlForm" fxLayout="column" fxLayoutGap="10" (submit)="leerArchivo()">
+<div class="winTitle">
+    <h2><b>Lector de Archivos Acelerográficos</b></h2>
+    <h4>Puede cargar archivos de diferentes dispositivos acelerograficos para la leectura, edicion y exportacion de
+        datos, o tambien puede ingresar una direccion valida</h4>
+</div>
 
-    <div>
-        <button type="button" mat-raised-button (click)="fileInput.click()">Subir Archivo</button>
-        <input hidden (change)="onFileSelected($event)" formControlName="archivo" #fileInput type="file" id="file">
+<div class="dndZoneContainer">
+    <div cdkDropList (cdkDropListDropped)="drop($event)"  class="dndZone" fxLayout="column" fxLayoutAlign="center center">
+        <form [formGroup]="controlForm" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10"
+            (submit)="leerArchivo()">
+
+            <div class="inputUrl" fxLayout="row" fxLayoutGap="5">
+                <mat-icon class="colorIcon">link</mat-icon>
+                <input matInput type="text" placeholder="Ejm: http://examples.obspy.org/RJOB_061005_072159.ehz.new">
+            </div>
+
+            <p>O</p>
+
+            <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="5">
+                <div class="uploadbtn" fxLayout="row" fxLayoutAlign="center center">
+                    <button type="button" mat-button (click)="fileInput.click()">
+                        SUBIR UN ARCHIVO
+                    </button>
+
+                    <button mat-icon-button [matMenuTriggerFor]="menuFile">
+                        <mat-icon inline="true">expand_more</mat-icon>
+                    </button>
+                    <mat-menu #menuFile>
+                        <button mat-menu-item>
+                            <mat-icon>add_to_drive</mat-icon>
+                            Google Drive
+                        </button>
+                        <button mat-menu-item>
+                            <mat-icon>add_to_drive</mat-icon>
+                            Google Drive
+                        </button>
+                    </mat-menu>
+                </div>
+                <p>o arraste su archivo aqui</p>
+
+                <input hidden (change)="onFileSelected($event)" formControlName="archivo" #fileInput type="file"
+                    id="file">
+            </div>
+
+            <!-- <button type="submit" class="sendInfo" mat-raised-button color="primary"> Leer Datos </button> -->
+
+        </form>
     </div>
+</div>
 
-    <button type="submit" class="sendInfo" mat-raised-button color="primary" > Leer Datos </button>
+<br>
 
-</form>
+<div fxLayout="row" fxLayoutGap="30" fxLayoutAlign="center center">
+    <div fxFlex="30" class="infoDiv" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10">
+        <mat-icon class="infoIconDiv">explore</mat-icon>
+        <h3> <b>Explora el Mundo Sísmico</b> </h3>
+        <p>Sumérgete en el análisis sísmico con nuestro servicio de lectura de archivos acelerográficos, abarcando
+            marcas destacadas como Kinemetrics, Reftek, Gaiacode y más. </p>
+    </div>
+    <div fxFlex="30" class="infoDiv" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10">
+        <mat-icon class="infoIconDiv">security</mat-icon>
+        <h3><b>Procesamiento de Archivos</b></h3>
+        <p>Sumérgete en el análisis sísmico con nuestro servicio de lectura de archivos acelerográficos, abarcando
+            marcas destacadas como Kinemetrics, Reftek, Gaiacode y más. </p>
+    </div>
+    <div fxFlex="30" class="infoDiv" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10">
+        <mat-icon class="infoIconDiv">troubleshoot</mat-icon>
+        <h3><b>Explora el Mundo Sísmico</b></h3>
+        <p>Sumérgete en el análisis sísmico con nuestro servicio de lectura de archivos acelerográficos, abarcando
+            marcas destacadas como Kinemetrics, Reftek, Gaiacode y más. </p>
+    </div>
+</div>
+
+
 
 <pre> {{respData | json }} </pre>

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
+import { CdkDragDrop, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop'
 
 @Component({
   selector: 'app-home',
@@ -28,6 +29,19 @@ export class HomeComponent implements OnInit {
       archivo: new FormControl('', [Validators.required])
     })
 
+  }
+
+  drop(event:any): void {
+    if(event.previousContainer === event.container){
+      moveItemInArray(this.arch, event.previousIndex, event.currentIndex)
+    }else{
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      )
+    }
   }
 
   onFileSelected(event: any) {

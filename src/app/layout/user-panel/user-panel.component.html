@@ -34,27 +34,19 @@
         <div class="sidenavList">
             <mat-selection-list [multiple]="false">
 
-                <mat-list-option routerLink="/admin/dashboard">
+                <mat-list-option routerLink="/user/home">
                     <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" class="iconNavList">
                         <span><mat-icon inline="true">dashboard</mat-icon></span>
                         <h2>Dashboard</h2>
                     </div>
                 </mat-list-option>
 
-                <mat-list-option routerLink="/admin/formularios">
-                    <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" class="iconNavList">
-                        <span><mat-icon inline="true">list</mat-icon></span>
-                        <h2>Archivos</h2>
-                    </div>
-                </mat-list-option>
-
-                <mat-list-option routerLink="/admin/archivo">
+                <mat-list-option routerLink="/user/visor">
                     <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" class="iconNavList">
                         <span><mat-icon inline="true">description</mat-icon></span>
-                        <h2>Metricas</h2>
+                        <h2>Lector</h2>
                     </div>
                 </mat-list-option>
-
 
             </mat-selection-list>
         </div>
