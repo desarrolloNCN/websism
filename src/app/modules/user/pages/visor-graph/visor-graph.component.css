@@ -38,7 +38,7 @@ h4 {
 }
 
 .sendInfo {
-    width: 100px;
+    width: 140px;
 }
 
 .inputUrl {
@@ -52,9 +52,22 @@ h4 {
 .uploadbtn {
     width: 220px;
     border-radius: 5px;
-    background-color: #D09E52;
+    background-color: rgb(241, 174, 72);
     color: white;
     box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
+}
+
+.uploadbtnComplete {
+    padding-inline: 5px;
+    border-radius: 5px;
+    background-color: rgb(68, 129, 59);
+    color: white;
+    box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
+}
+
+.separator {
+    border-top-color: rgba(0, 0, 0, 0.12);
+    height: 40px;
 }
 
 .stInfo {
@@ -76,7 +89,6 @@ h4 {
 }
 
 .scrlSta *>p {
-    font-weight: bold;
     color: white;
 }
 
@@ -118,4 +130,21 @@ h4 {
 
 .color-impar {
     background-color: rgb(255, 182, 73);
+}
+
+
+.stainfospan {
+    padding-inline: 25px;
+    padding-top: 3px;
+    padding-top: 3px;
+    width: 100%;
+    border-radius: 3px;
+    background-color: #eeeeee;
+}
+
+.iconstainfo {
+    height: 16px;
+    width: 15px;
+    font-size: 15px;
+    color: #6b6b6b;
 }

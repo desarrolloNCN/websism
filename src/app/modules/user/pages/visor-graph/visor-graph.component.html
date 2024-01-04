@@ -11,37 +11,54 @@
 
             <div class="inputUrl" fxLayout="row" fxLayoutGap="5">
                 <mat-icon class="colorIcon">link</mat-icon>
-                <input matInput type="text" placeholder="Ejm: http://examples.obspy.org/RJOB_061005_072159.ehz.new">
+                <input matInput type="text" formControlName="url"
+                    placeholder="Ejm: http://examples.obspy.org/RJOB_061005_072159.ehz.new">
             </div>
 
             <p>O</p>
 
             <div>
-                <div class="uploadbtn" fxLayout="row" fxLayoutAlign="center center">
-                    <button type="submit" mat-button (click)="fileInput.click()">
-                        SUBIR UN ARCHIVO
-                    </button>
+                <div [hidden]="btnShow">
+                    <div class="uploadbtn" fxLayout="row" fxLayoutAlign="center center">
+                        <button type="button" mat-button (click)="fileInput.click()">
+                            SUBIR UN ARCHIVO
+                        </button>
 
-                    <button mat-icon-button [matMenuTriggerFor]="menuFile">
-                        <mat-icon inline="true">expand_more</mat-icon>
-                    </button>
-                    <mat-menu #menuFile>
-                        <button mat-menu-item>
-                            <mat-icon>add_to_drive</mat-icon>
-                            Google Drive
+                        <button mat-icon-button [matMenuTriggerFor]="menuFile">
+                            <mat-icon inline="true">expand_more</mat-icon>
                         </button>
-                        <button mat-menu-item>
-                            <mat-icon>add_to_drive</mat-icon>
-                            Google Drive
+                        <mat-menu #menuFile>
+                            <button mat-menu-item>
+                                <mat-icon>add_to_drive</mat-icon>
+                                Google Drive
+                            </button>
+                            <button mat-menu-item>
+                                <mat-icon>add_to_drive</mat-icon>
+                                Google Drive
+                            </button>
+                        </mat-menu>
+                    </div>
+                </div>
+
+                <div [hidden]="btnCancel">
+                    <div class="uploadbtnComplete" fxLayout="row" fxLayoutAlign="center center">
+                        <h3 style="margin: 0; padding-left: 10px;"> {{arch.name}} </h3>
+                        <button mat-icon-button type="button" (click)="deleteFile()">
+                            <mat-icon inline="true">cancel</mat-icon>
                         </button>
-                    </mat-menu>
+                    </div>
                 </div>
 
                 <input hidden (change)="onFileSelected($event)" formControlName="archivo" #fileInput type="file"
                     id="file">
             </div>
 
-            <button type="submit" class="sendInfo" mat-raised-button color="primary"> Leer Datos </button>
+            <mat-divider class="separator" vertical="true"></mat-divider>
+
+            <button type="submit" class="sendInfo" mat-raised-button color="primary">
+                <mat-icon>query_stats</mat-icon>
+                LEER DATOS
+            </button>
 
         </form>
     </div>
@@ -85,24 +102,99 @@
                 <h4>Datos relevantes de la estacion seleccionada</h4>
             </div>
             <div class="listSt" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
-                <p> NETWORK: <b>{{stationInfo.network}} </b> </p>
-                <p> STATION: <b>{{stationInfo.station}}</b> </p>
-                <p> LOCATION: <b>{{stationInfo.location}}</b> </p>
-                <p> CHANNEL: <b>{{stationInfo.channel}}</b> </p>
-                <p> SAMPLING RATE: <b>{{stationInfo.sampling_rate}}</b> </p>
-                <p> DELTA: <b>{{stationInfo.delta}}</b> </p>
-                <p> NPTS: <b>{{stationInfo.npts}}</b> </p>
-                <p> CALIB: <b>{{stationInfo.calib}}</b> </p>
+                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                        <p>  NETWORK:</p>
+                    </div>
+                    <P><b>{{stationInfo.network}} </b></P>
+                </div>
+
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                        <p> STATION:</p>
+                    </div>
+                    <P><b>{{stationInfo.station}} </b></P>
+                </div>
+
+                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                        <p> LOCATION:</p>
+                    </div>
+                    <P><b>{{stationInfo.location}} </b></P>
+                </div>
+
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                        <p> CHANNEL:</p>
+                    </div>
+                    <P><b>{{stationInfo.channel}} </b></P>
+                </div>
+
+                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                        <p> SAMPLING RATE:</p>
+                    </div>
+                    <P><b>{{stationInfo.sampling_rate}} </b></P>
+                </div>
+
+                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                        <p> START TIME:</p>
+                    </div>
+                    <P><b>{{stationInfo.starttime | date: 'short'}} </b></P>
+                </div>
+
+                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                        <p> END TIME:</p>
+                    </div>
+                    <P><b>{{stationInfo.endtime | date: 'short'}} </b></P>
+                </div>
+
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                        <p> DELTA:</p>
+                    </div>
+                    <P><b>{{stationInfo.delta}} </b></P>
+                </div>
+
+                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                        <p> NPTS</p>
+                    </div>
+                    <P><b>{{stationInfo.npts}} </b></P>
+                </div>
+
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                        <p> CALIB:</p>
+                    </div>
+                    <P><b>{{stationInfo.calib}} </b></P>
+                </div>
             </div>
         </div>
     </div>
     <div class="stGraph" fxFlex="70">
         <div class="graphBar" fxLayout="row" fxLayoutGap="5">
-            <mat-icon class="colorIconBar">search</mat-icon>
+            <mat-icon class="colorIconBar" title="Buscar">search</mat-icon>
             <mat-icon class="colorIconBar">compare_arrows</mat-icon>
             <mat-icon class="colorIconBar">build</mat-icon>
             <mat-icon class="colorIconBar">add_chart</mat-icon>
             <mat-icon class="colorIconBar">donut_large</mat-icon>
+        </div>
+
+        <div>
+            <pre> {{tracedata | json}} </pre>
         </div>
     </div>
 </div>

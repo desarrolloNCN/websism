@@ -13,12 +13,14 @@ export class VisorGraphComponent implements OnInit {
 
   enproges = false
 
-  arch: File | any
+  arch: File | any = ''
   rarch: File | any
 
-  respData : any = []
-  stationInfo : any = {}
-
+  respData: any = []
+  stationInfo: any = {}
+  tracedata: any = []
+  btnShow = false
+  btnCancel = true
 
   constructor(
     private obsApi: ObspyAPIService
@@ -26,12 +28,26 @@ export class VisorGraphComponent implements OnInit {
 
   ngOnInit(): void {
     this.controlForm = new FormGroup({
-      archivo: new FormControl('', [Validators.required])
+      url: new FormControl(''),
+      archivo: new FormControl('')
     })
   }
 
   onFileSelected(event: any) {
-    this.arch = event.target.files[0];
+    this.controlForm.get('url').setValue('');
+    this.arch = null
+    const archivos = event.target.files;
+
+    if (archivos && archivos.length > 0) {
+      this.arch = archivos[0];
+      this.btnShow = true;
+      this.btnCancel = false;
+    } else {
+      console.log('No se seleccionó ningún archivo');
+      this.btnShow = false;
+      this.btnCancel = true;
+      this.arch = null;
+    }
   }
 
   groupedData: { [key: string]: any[] } = {};
@@ -61,15 +77,23 @@ export class VisorGraphComponent implements OnInit {
     return Object.values(group.value);
   }
 
-  leerArchivo() {   
-    if (this.arch instanceof File) {
-      this.obsApi.postFicha(this.arch).subscribe({
+  leerArchivo() {
+    const textoValue = this.controlForm.get('url').value;
+    const archivoValue = this.arch;
+
+    this.groupedData = {}
+
+    let valorNoVacio: string | File | undefined;
+
+    if (archivoValue instanceof File || typeof textoValue === 'string') {
+      valorNoVacio = archivoValue || textoValue
+      this.obsApi.postFicha(valorNoVacio).subscribe({
         next: value => {
-          this.respData = value.data
           this.groupedData = this.groupByNetworkAndStation(value.data)
+          this.tracedata = value.traces
         },
-        error: err => console.error('Observable emitted an error: ' + err),
-        complete: () => console.log('Observable emitted the complete notification')
+        error: err => console.error('Respuesta API ERROR: ' + err),
+        complete: () => console.log('Respuesta de API completada')
       }
       )
     } else {
@@ -77,8 +101,15 @@ export class VisorGraphComponent implements OnInit {
     }
   }
 
-  leer(e :any){
+  leer(e: any) {
     this.stationInfo = e
+  }
+
+  deleteFile() {
+    this.btnShow = false;
+    this.btnCancel = true;
+    this.arch = ''
+    this.groupedData = {}
   }
 
 }
