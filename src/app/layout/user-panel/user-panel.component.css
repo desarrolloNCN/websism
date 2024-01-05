@@ -31,7 +31,7 @@
 
 .example-sidenav {
     user-select: none;
-    background: rgb(8, 20, 53);
+    background: #31456D; /* rgb(8, 20, 53)
     /* background: linear-gradient(180deg, rgba(38, 66, 37, 1) 0%, rgba(58, 99, 57, 1) 53%, rgba(23, 55, 80, 1) 100%); */
     border-right: 0px;
     width: 250px;

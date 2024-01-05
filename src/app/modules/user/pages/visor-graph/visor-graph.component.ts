@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 
 @Component({
@@ -13,17 +14,21 @@ export class VisorGraphComponent implements OnInit {
 
   enproges = false
 
-  arch: File | any = ''
-  rarch: File | any
+  arch: File[] | any = ''
 
   respData: any = []
   stationInfo: any = {}
-  tracedata: any = []
+
+  loadingSpinner = false
+
   btnShow = false
   btnCancel = true
 
+  hideStaPanel = true
+
   constructor(
-    private obsApi: ObspyAPIService
+    private obsApi: ObspyAPIService,
+    private snackBar: MatSnackBar
   ) { }
 
   ngOnInit(): void {
@@ -34,9 +39,8 @@ export class VisorGraphComponent implements OnInit {
   }
 
   onFileSelected(event: any) {
-    this.controlForm.get('url').setValue('');
-    this.arch = null
-    const archivos = event.target.files;
+    let archivos = event.target.files;
+    this.controlForm.get('url').setValue('')
 
     if (archivos && archivos.length > 0) {
       this.arch = archivos[0];
@@ -48,6 +52,63 @@ export class VisorGraphComponent implements OnInit {
       this.btnCancel = true;
       this.arch = null;
     }
+  }
+
+  leerArchivo() {
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 3 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    let textoValue = this.controlForm.get('url').value;
+    let archivoValue = this.arch;
+
+    this.groupedData = {}
+
+    let valorNoVacio: string | File | undefined;
+
+    this.loadingSpinner = true
+    this.controlForm.get('url').disable()
+    
+    if (archivoValue instanceof File || typeof textoValue === 'string' && textoValue.trim() !== '') {
+
+      valorNoVacio = archivoValue || textoValue
+      console.log(valorNoVacio);
+      
+      this.obsApi.postFicha(valorNoVacio).subscribe({
+        next: value => {
+          this.groupedData = this.groupByNetworkAndStation(value.data)
+        },
+        error: err => console.error('Respuesta API ERROR: ' + err.message),
+        complete: () => {
+          this.controlForm.get('url').enable()
+          this.loadingSpinner = false
+        }
+      }
+      )
+    } else {
+      this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
+      this.loadingSpinner = false
+      this.controlForm.get('url').enable()
+    }
+  }
+
+  leer(e: any) {
+    this.stationInfo = e
+  }
+
+  @ViewChild('fileInput') fileInput!: ElementRef
+
+  deleteFile() {
+    this.btnShow = false;
+    this.btnCancel = true;
+    this.controlForm.get('url').setValue('');
+    this.fileInput.nativeElement.value = ''
+    this.groupedData = {}
+  }
+
+  togglePanel() {
+    this.hideStaPanel = !this.hideStaPanel
   }
 
   groupedData: { [key: string]: any[] } = {};
@@ -75,41 +136,6 @@ export class VisorGraphComponent implements OnInit {
 
   getGroupValues(group: any): any[] {
     return Object.values(group.value);
-  }
-
-  leerArchivo() {
-    const textoValue = this.controlForm.get('url').value;
-    const archivoValue = this.arch;
-
-    this.groupedData = {}
-
-    let valorNoVacio: string | File | undefined;
-
-    if (archivoValue instanceof File || typeof textoValue === 'string') {
-      valorNoVacio = archivoValue || textoValue
-      this.obsApi.postFicha(valorNoVacio).subscribe({
-        next: value => {
-          this.groupedData = this.groupByNetworkAndStation(value.data)
-          this.tracedata = value.traces
-        },
-        error: err => console.error('Respuesta API ERROR: ' + err),
-        complete: () => console.log('Respuesta de API completada')
-      }
-      )
-    } else {
-      console.log('Selecciona un archivo');
-    }
-  }
-
-  leer(e: any) {
-    this.stationInfo = e
-  }
-
-  deleteFile() {
-    this.btnShow = false;
-    this.btnCancel = true;
-    this.arch = ''
-    this.groupedData = {}
   }
 
 }

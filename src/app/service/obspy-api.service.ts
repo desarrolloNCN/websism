@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpEventType, HttpHeaders } from '@angular/common/http'
-import { environment } from 'src/environments/environment';
-import { Observable, tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http'
+import { Observable, catchError, of, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ObspyAPIService {
 
-  private baseUrl = environment.baseUrl;
+  // private baseUrl = environment.baseUrl;
 
 
   constructor(private http: HttpClient) { }
@@ -27,19 +26,23 @@ export class ObspyAPIService {
   //   return this.http.post<any>(url, formData)
   // }
 
-  postFicha(data: File | string| undefined): Observable<any> {
+  postFicha(data: File | string | undefined): Observable<any> {
     const formData = new FormData();
-
-    if (data instanceof File) {
-        formData.append('file', data);
-    } else if (typeof data === 'string') {
-        formData.append('data', data);
-    } else {
-        throw new Error('Se espera un archivo (File) o una cadena (string).');
-    }
     const url = `seismic_data/`;
 
-    return this.http.post<any>(url, formData);
-}
+    if (data instanceof File) {
+      formData.append('file', data);
+    } else if (typeof data === 'string') {
+      formData.append('data', data);
+    } else {
+      throw new Error('Se espera un archivo (File) o una cadena (string).');
+    }
+
+    return this.http.post<any>(url, formData).pipe(
+      catchError(error =>{
+        return of(error)
+      })
+    );
+  }
 
 }

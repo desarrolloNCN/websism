@@ -1,10 +1,10 @@
-<div class="winTitle">
+<div *ngIf="hideStaPanel" class="winTitle">
     <h2><b>Lector de Archivos Acelerográficos</b></h2>
     <h4>Puede cargar archivos de diferentes dispositivos acelerograficos para la leectura, edicion y exportacion de
         datos, o tambien puede ingresar una direccion valida</h4>
 </div>
 
-<div class="dndZoneContainer">
+<div *ngIf="hideStaPanel" class="dndZoneContainer">
     <div class="dndZone" fxLayout="row" fxLayoutAlign="center start">
         <form [formGroup]="controlForm" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="10"
             (submit)="leerArchivo()">
@@ -42,7 +42,7 @@
 
                 <div [hidden]="btnCancel">
                     <div class="uploadbtnComplete" fxLayout="row" fxLayoutAlign="center center">
-                        <h3 style="margin: 0; padding-left: 10px;"> {{arch.name}} </h3>
+                        <h3 style="margin: 0; padding-left: 10px;"> {{arch?.name}} </h3>
                         <button mat-icon-button type="button" (click)="deleteFile()">
                             <mat-icon inline="true">cancel</mat-icon>
                         </button>
@@ -60,12 +60,15 @@
                 LEER DATOS
             </button>
 
+            <mat-progress-spinner *ngIf="loadingSpinner" mode="indeterminate" style="margin:0 auto;"
+                [diameter]="30"></mat-progress-spinner>
+
         </form>
     </div>
 </div>
 
 <div style="padding-top: 10px;" fxLayout="row" fxLayoutGap="10">
-    <div class="stInfo" fxFlex="30" fxLayout="column" fxLayoutGap="5">
+    <div *ngIf="hideStaPanel"  class="stInfo"  fxLayout="column" fxLayoutGap="5">
         <div>
             <div>
                 <h2><b>ESTACIONES ENCONTRADAS</b></h2>
@@ -81,8 +84,8 @@
                     <div *ngFor="let sta of groupedData | keyvalue; let i = index">
                         <div [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
                             (click)="selectGroup(sta.key)" fxLayout="column" fxLayoutAlign="space-around">
-                            <div *ngFor="let item of getGroupValues(sta)" fxLayout="row" fxLayoutAlign="space-around"
-                                (click)="leer(item)">
+                            <div *ngFor="let item of getGroupValues(sta)" fxLayout="row"
+                                fxLayoutAlign="space-around center" (click)="leer(item)" style="cursor: pointer;">
                                 <mat-icon style="color: white;">router</mat-icon>
                                 <p> {{item.network}} </p>
                                 <p> {{item.station}} </p>
@@ -105,7 +108,7 @@
                 <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
                     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
-                        <p>  NETWORK:</p>
+                        <p> NETWORK:</p>
                     </div>
                     <P><b>{{stationInfo.network}} </b></P>
                 </div>
@@ -184,17 +187,33 @@
             </div>
         </div>
     </div>
-    <div class="stGraph" fxFlex="70">
-        <div class="graphBar" fxLayout="row" fxLayoutGap="5">
-            <mat-icon class="colorIconBar" title="Buscar">search</mat-icon>
-            <mat-icon class="colorIconBar">compare_arrows</mat-icon>
-            <mat-icon class="colorIconBar">build</mat-icon>
-            <mat-icon class="colorIconBar">add_chart</mat-icon>
-            <mat-icon class="colorIconBar">donut_large</mat-icon>
+    <div class="stGraph" >
+
+        <div class="graphBar" fxLayout="row" >
+            <div fxLayout="row" fxLayoutGap="5">
+                <button mat-icon-button type="button" (click)="togglePanel()">
+                    <mat-icon class="colorIconBar" title="Buscar">arrow_left</mat-icon>
+                </button>
+            </div>
+            <button mat-icon-button type="button">
+                <mat-icon class="colorIconBar" title="Buscar">search</mat-icon>
+            </button>
+            <button mat-icon-button type="button">
+                <mat-icon class="colorIconBar">compare_arrows</mat-icon>
+            </button>
+            <button mat-icon-button type="button">
+                <mat-icon class="colorIconBar">build</mat-icon>
+            </button>
+            <button mat-icon-button type="button">
+                <mat-icon class="colorIconBar">add_chart</mat-icon>
+            </button>
+            <button mat-icon-button type="button">
+                <mat-icon class="colorIconBar">donut_large</mat-icon>
+            </button>
         </div>
 
         <div>
-            <pre> {{tracedata | json}} </pre>
+
         </div>
     </div>
 </div>

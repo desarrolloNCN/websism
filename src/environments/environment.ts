@@ -4,7 +4,7 @@
 
 export const environment = {
   // baseUrl : 'http://localhost:8000/',
-  baseUrl : 'http://pedro.ncn.pe:8000/',
+  // baseUrl : 'http://pedro.ncn.pe:8000/',
   production: false
 };
 

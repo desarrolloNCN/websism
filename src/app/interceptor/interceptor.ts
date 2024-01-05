@@ -24,7 +24,8 @@ export class HttpHeadersInterceptor implements HttpInterceptor {
           Authorization: authHeader,
           
         },
-        url: `http://pedro.ncn.pe:8000/${req.url}`
+        // url: `http://pedro.ncn.pe:8000/${req.url}`
+        url: `http://localhost:8000/${req.url}`
       });
     }
 
