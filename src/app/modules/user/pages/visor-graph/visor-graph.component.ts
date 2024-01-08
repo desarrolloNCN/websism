@@ -1,14 +1,22 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
+import { EChartsOption } from 'echarts';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
+
+
 
 @Component({
   selector: 'app-visor-graph',
   templateUrl: './visor-graph.component.html',
-  styleUrls: ['./visor-graph.component.css']
+  styleUrls: ['./visor-graph.component.css'],
+
 })
 export class VisorGraphComponent implements OnInit {
+
+  accel: EChartsOption | any;
+  vel: EChartsOption | any;
+  dsp: EChartsOption | any;
 
   controlForm: FormGroup | any
 
@@ -20,6 +28,7 @@ export class VisorGraphComponent implements OnInit {
   stationInfo: any = {}
 
   loadingSpinner = false
+  loadingSpinnerGraph = false
 
   btnShow = false
   btnCancel = true
@@ -43,6 +52,9 @@ export class VisorGraphComponent implements OnInit {
       url: new FormControl(''),
 
     })
+
+
+
   }
 
   onFileSelected(event: any) {
@@ -85,8 +97,8 @@ export class VisorGraphComponent implements OnInit {
 
       this.obsApi.uploadFile(valorNoVacio).subscribe({
         next: value => {
-          this.idFile = value.id,
-            this.urlFile = value.file
+          this.idFile = value.id
+          this.urlFile = value.file
           this.stringdata = value.string_data
           localStorage.setItem('idSesion', value.id)
           localStorage.setItem('urlFileUpload', value.file)
@@ -129,21 +141,175 @@ export class VisorGraphComponent implements OnInit {
   }
 
   leer(e: any) {
-
+    this.loadingSpinnerGraph = true
     this.stationInfo = e
 
-    let dataFile: string = localStorage.getItem('urlFileUpload')!
-    let dataString: string = localStorage.getItem('urlSearched')!
+    this.accel= {}
+    this.vel = {}
+    this.dsp = {}
+
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
+    var dataString: string = localStorage.getItem('urlSearched')!
 
     let dataToUse: string = dataFile !== null ? dataFile : dataString !== null ? dataString : "";
 
-    this.obsApi.getPlotStation(dataToUse, e.station, e.channel).subscribe({
+    this.obsApi.getTraceData(dataToUse, e.station, e.channel).subscribe({
       next: value => {
         this.plotedimages = value
+
+        this.accel = {
+          title: {
+            text: `Aceleracion - ${e.network}.${e.station}.${e.channel} - ${e.starttime} | ${e.endtime} `,
+          },
+          tooltip: {
+            trigger: 'axis',
+          },
+          xAxis: {
+            data: value[0].tiempo_a,
+            name: "Tiempo [s]",
+            silent: false,
+            splitLine: {
+              show: false,
+            },
+          },
+          yAxis: {
+            name: "Aceleracion"
+          },
+          dataZoom: [
+            {
+              type: 'inside',
+              start: 0,
+              end: 100
+            },
+            {
+              start: 0,
+              end: 100,
+              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
+              handleSize: '100%',
+              handleStyle: {
+                color: '#ddd'
+              }
+            }
+          ],
+          series: [
+            {
+              name: 'Aceleracion (mk/s/s)',
+              type: 'line',
+              showSymbol: false,
+              data: value[0].traces_a,
+              animationDelay: (idx: number) => idx * 10,
+            },
+          ],
+          animationEasing: 'elasticOut',
+          animationDelayUpdate: (idx: number) => idx * 5,
+        };
+
+        this.vel = {
+          title: {
+            text: `Velocidad - ${e.network}.${e.station}.${e.channel} - ${e.starttime} | ${e.endtime} `,
+          },
+          tooltip: {
+            trigger: 'axis',
+          },
+          xAxis: {
+            data: value[0].tiempo_a,
+            silent: false,
+            name: "Tiempo [s]",
+            splitLine: {
+              show: false,
+            },
+          },
+          yAxis: {
+            name: "Velocidad"
+          },
+          dataZoom: [
+            {
+              type: 'inside',
+              start: 0,
+              end: 100
+            },
+            {
+              start: 0,
+              end: 100,
+              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
+              handleSize: '100%',
+              handleStyle: {
+                color: '#ddd'
+              }
+            }
+          ],
+          series: [
+            {
+              name: 'Aceleracion (mk/s/s)',
+              type: 'line',
+              showSymbol: false,
+              data: value[0].traces_v,
+              animationDelay: (idx: number) => idx * 10,
+            },
+          ],
+          animationEasing: 'elasticOut',
+          animationDelayUpdate: (idx: number) => idx * 5,
+        };
+
+        this.dsp = {
+          title: {
+            text: `Desplazamiento - ${e.network}.${e.station}.${e.channel} - ${e.starttime} | ${e.endtime} `,
+          },
+          tooltip: {
+            trigger: 'axis',
+          },
+          xAxis: {
+            data: value[0].tiempo_a,
+            silent: false,
+            name: "Tiempo [s]",
+            splitLine: {
+              show: false,
+            },
+          },
+          yAxis: {
+            name: "Desplazamiento"
+          },
+          dataZoom: [
+            {
+              type: 'inside',
+              start: 0,
+              end: 100
+            },
+            {
+              start: 0,
+              end: 100,
+              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
+              handleSize: '100%',
+              handleStyle: {
+                color: '#ddd'
+              }
+            }
+          ],
+          series: [
+            {
+              name: 'Aceleracion (mk/s/s)',
+              type: 'line',
+              showSymbol: false,
+              data: value[0].traces_d,
+              animationDelay: (idx: number) => idx * 10,
+            },
+          ],
+          animationEasing: 'elasticOut',
+          animationDelayUpdate: (idx: number) => idx * 5,
+        };
+
       },
       error: err => console.error('REQUEST API ERROR: ' + err.message),
-      complete: () => { }
+      complete: () => { this.loadingSpinnerGraph = false }
     })
+
+    // this.obsApi.getPlotStation(dataToUse, e.station, e.channel).subscribe({
+    //   next: value => {
+    //     this.plotedimages = value
+    //   },
+    //   error: err => console.error('REQUEST API ERROR: ' + err.message),
+    //   complete: () => { }
+    // })
 
   }
 

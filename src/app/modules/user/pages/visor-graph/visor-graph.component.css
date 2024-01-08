@@ -71,7 +71,6 @@ h4 {
 }
 
 .stInfo {
-    width: 40%;
     padding: 5px;
     background-color: rgb(243, 243, 243);
     border-radius: 5px;
@@ -102,7 +101,6 @@ h4 {
 }
 
 .stGraph {
-    width: 100%;
     padding: 5px;
     background-color: rgb(243, 243, 243);
     border-radius: 5px;

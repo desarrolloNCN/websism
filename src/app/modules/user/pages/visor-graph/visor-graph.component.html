@@ -68,9 +68,9 @@
 </div>
 
 <div style="padding-top: 10px;" fxLayout="row" fxLayoutGap="10">
-    <div *ngIf="hideStaPanel"  class="stInfo"  fxLayout="column" fxLayoutGap="5">
-        <div>
-            <div>
+    <div *ngIf="hideStaPanel"  class="stInfo"  fxLayout="column" fxLayoutGap="10" fxFlex="23">
+        <div fxLayout="column" fxLayoutGap="5">
+            <div style="padding-left: 10px;">
                 <h2><b>ESTACIONES ENCONTRADAS</b></h2>
                 <h4>Busque y eliga la estacion que quiera consultar</h4>
             </div>
@@ -99,8 +99,8 @@
 
             </div>
         </div>
-        <div>
-            <div>
+        <div fxLayout="column" fxLayoutGap="5">
+            <div style="padding-left: 10px;">
                 <h2><b>INFORMACION DE ESTACION</b></h2>
                 <h4>Datos relevantes de la estacion seleccionada</h4>
             </div>
@@ -187,7 +187,7 @@
             </div>
         </div>
     </div>
-    <div class="stGraph" >
+    <div class="stGraph" fxLayout="column" fxLayoutGap="10" fxFlex>
 
         <div class="graphBar" fxLayout="row" >
             <div fxLayout="row" fxLayoutGap="5">
@@ -213,11 +213,18 @@
             </button>
         </div>
 
-        <div>
-            <div *ngFor="let item of plotedimages">
-                <pre> {{item | json}} </pre>
-                <img src="{{item.image_path}}" style="width: 100%;" >
+        <div style="padding: 5px; background-color: white; height: 100%;" fxLayout="column" fxLayoutAlign="center center">
+
+            <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+                <mat-progress-spinner  mode="indeterminate" style="margin:0 auto;"
+                [diameter]="50"></mat-progress-spinner>
+                <h3> <b>Cargando Datos ....</b> </h3>
             </div>
+
+            <div echarts [options]="accel" style="padding: 8px; width: 900px;"></div>
+            <div echarts [options]="vel" style="padding: 8px; width: 900px;"></div>
+            <div echarts [options]="dsp" style="padding: 8px; width: 900px;"></div>
+
         </div>
     </div>
 </div>
