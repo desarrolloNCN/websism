@@ -4,7 +4,7 @@
         datos, o tambien puede ingresar una direccion valida</h4>
 </div>
 
-<div *ngIf="hideStaPanel" class="dndZoneContainer">
+<div class="dndZoneContainer">
     <div class="dndZone" fxLayout="row" fxLayoutAlign="center start">
         <form [formGroup]="controlForm" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="10"
             (submit)="leerArchivo()">
@@ -49,7 +49,7 @@
                     </div>
                 </div>
 
-                <input hidden (change)="onFileSelected($event)" formControlName="archivo" #fileInput type="file"
+                <input hidden (change)="onFileSelected($event)"  #fileInput type="file"
                     id="file">
             </div>
 
@@ -192,8 +192,9 @@
         <div class="graphBar" fxLayout="row" >
             <div fxLayout="row" fxLayoutGap="5">
                 <button mat-icon-button type="button" (click)="togglePanel()">
-                    <mat-icon class="colorIconBar" title="Buscar">arrow_left</mat-icon>
+                    <mat-icon class="colorIconBar" title="Ocultar Paneles">hide_source</mat-icon>
                 </button>
+                <mat-divider class="separator" vertical="true"></mat-divider>
             </div>
             <button mat-icon-button type="button">
                 <mat-icon class="colorIconBar" title="Buscar">search</mat-icon>
@@ -213,7 +214,10 @@
         </div>
 
         <div>
-
+            <div *ngFor="let item of plotedimages">
+                <pre> {{item | json}} </pre>
+                <img src="{{item.image_path}}" style="width: 100%;" >
+            </div>
         </div>
     </div>
 </div>

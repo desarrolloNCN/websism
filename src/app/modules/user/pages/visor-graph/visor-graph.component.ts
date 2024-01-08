@@ -26,15 +26,22 @@ export class VisorGraphComponent implements OnInit {
 
   hideStaPanel = true
 
+  urlFile = ''
+  idFile = ''
+  stringdata = ''
+
+  plotedimages: any = []
+
   constructor(
     private obsApi: ObspyAPIService,
     private snackBar: MatSnackBar
   ) { }
 
   ngOnInit(): void {
+    localStorage.clear()
     this.controlForm = new FormGroup({
       url: new FormControl(''),
-      archivo: new FormControl('')
+
     })
   }
 
@@ -46,6 +53,7 @@ export class VisorGraphComponent implements OnInit {
       this.arch = archivos[0];
       this.btnShow = true;
       this.btnCancel = false;
+      this.controlForm.get('url').disable()
     } else {
       console.log('No se seleccionó ningún archivo');
       this.btnShow = false;
@@ -53,6 +61,8 @@ export class VisorGraphComponent implements OnInit {
       this.arch = null;
     }
   }
+
+  @ViewChild('fileInput') fileInput!: ElementRef
 
   leerArchivo() {
 
@@ -67,44 +77,83 @@ export class VisorGraphComponent implements OnInit {
 
     let valorNoVacio: string | File | undefined;
 
-    this.loadingSpinner = true
-    this.controlForm.get('url').disable()
-    
+    //this.loadingSpinner = true
+
     if (archivoValue instanceof File || typeof textoValue === 'string' && textoValue.trim() !== '') {
 
       valorNoVacio = archivoValue || textoValue
-      console.log(valorNoVacio);
-      
-      this.obsApi.postFicha(valorNoVacio).subscribe({
+
+      this.obsApi.uploadFile(valorNoVacio).subscribe({
         next: value => {
-          this.groupedData = this.groupByNetworkAndStation(value.data)
+          this.idFile = value.id,
+            this.urlFile = value.file
+          this.stringdata = value.string_data
+          localStorage.setItem('idSesion', value.id)
+          localStorage.setItem('urlFileUpload', value.file)
+          localStorage.setItem('urlSearched', value.string_data)
         },
-        error: err => console.error('Respuesta API ERROR: ' + err.message),
+        error: err => console.error('REQUEST API ERROR: ' + err.message),
         complete: () => {
-          this.controlForm.get('url').enable()
-          this.loadingSpinner = false
+
+          if (this.urlFile == null) {
+            this.obsApi.getData(this.stringdata).subscribe({
+              next: value => {
+                this.groupedData = this.groupByNetworkAndStation(value.data)
+              },
+              error: err => console.error('REQUEST API ERROR: ' + err.message),
+              complete: () => {
+                this.loadingSpinner = false
+              }
+            })
+
+          } else if (this.stringdata == null) {
+            this.obsApi.getData(this.urlFile).subscribe({
+              next: value => {
+                this.groupedData = this.groupByNetworkAndStation(value.data)
+              },
+              error: err => console.error('REQUEST API ERROR: ' + err.message),
+              complete: () => {
+                this.loadingSpinner = false
+              }
+            })
+          } else {
+            this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+          }
+
         }
-      }
-      )
+      })
     } else {
       this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
       this.loadingSpinner = false
-      this.controlForm.get('url').enable()
     }
   }
 
   leer(e: any) {
-    this.stationInfo = e
-  }
 
-  @ViewChild('fileInput') fileInput!: ElementRef
+    this.stationInfo = e
+
+    let dataFile: string = localStorage.getItem('urlFileUpload')!
+    let dataString: string = localStorage.getItem('urlSearched')!
+
+    let dataToUse: string = dataFile !== null ? dataFile : dataString !== null ? dataString : "";
+
+    this.obsApi.getPlotStation(dataToUse, e.station, e.channel).subscribe({
+      next: value => {
+        this.plotedimages = value
+      },
+      error: err => console.error('REQUEST API ERROR: ' + err.message),
+      complete: () => { }
+    })
+
+  }
 
   deleteFile() {
     this.btnShow = false;
     this.btnCancel = true;
-    this.controlForm.get('url').setValue('');
     this.fileInput.nativeElement.value = ''
     this.groupedData = {}
+    this.arch = ''
+    this.controlForm.get('url').enable()
   }
 
   togglePanel() {

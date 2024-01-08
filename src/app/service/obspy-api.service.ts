@@ -7,42 +7,64 @@ import { Observable, catchError, of, throwError } from 'rxjs';
 })
 export class ObspyAPIService {
 
-  // private baseUrl = environment.baseUrl;
-
 
   constructor(private http: HttpClient) { }
 
-  // postFicha(sFile: File): Observable<any> {
-  //   const formData = new FormData()
 
-  //   formData.append('file', sFile)
-
-  //   const headers = new HttpHeaders({
-  //     Authorization: 'Basic ' + btoa(`${this.user}:${this.pass}`)
-  //   })
-
-  //   const url = `${this.baseUrl}seismic_data/`
-
-  //   return this.http.post<any>(url, formData)
-  // }
-
-  postFicha(data: File | string | undefined): Observable<any> {
+  uploadFile(data: File | string | undefined): Observable<any> {
     const formData = new FormData();
-    const url = `seismic_data/`;
+    const url = `upload/`;
 
     if (data instanceof File) {
       formData.append('file', data);
     } else if (typeof data === 'string') {
-      formData.append('data', data);
+      formData.append('string_data', data);
     } else {
-      throw new Error('Se espera un archivo (File) o una cadena (string).');
+      throw new Error('SREV-POST: Se espera un archivo (File) o una cadena (string).');
     }
 
     return this.http.post<any>(url, formData).pipe(
-      catchError(error =>{
+      catchError(error => {
         return of(error)
       })
     );
+  }
+
+  getData(data: File | string | undefined): Observable<any> {
+    const formData = new FormData();
+    const url = `seismic_data/`;
+
+    if (typeof data === 'string') {
+      formData.append('data', data);
+    } else {
+      throw new Error('SREV-GET: Se espera un archivo datos para Lectura');
+    }
+
+    return this.http.post<any>(url, formData).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    );
+  }
+
+  getPlotStation(data: string, station_selected : string, channel_selected: string) :Observable<any>{
+    const formData = new FormData();
+    const url = 'plot/'
+
+    if (typeof data === 'string') {
+      formData.append('data', data);
+      formData.append('station_selected', station_selected)
+      formData.append('channel_selected', channel_selected)
+    } else {
+      throw new Error('SREV-GET: Se espera un archivo datos para Lectura');
+    }
+
+    return this.http.post<any>(url, formData).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    ); 
+
   }
 
 }

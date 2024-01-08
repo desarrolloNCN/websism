@@ -4,11 +4,11 @@
     <mat-sidenav #sidenav mode="side" opened [disableClose]="true" class="example-sidenav"
         [class.mat-elevation-z5]="true">
 
-        <div class="logo-container" routerLink="/home" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="10" >
-           
-            <div fxLayout="column" fxLayoutAlign="center " >
+        <div class="logo-container" routerLink="/home" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="10">
+
+            <div fxLayout="column" fxLayoutAlign="center ">
                 <span class="empTitle"> QuakeSense </span>
-                
+
             </div>
         </div>
 
@@ -17,7 +17,7 @@
         </div>
 
         <div class="mini-profile" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10">
-           
+
             <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="5">
                 <span> <strong>USER 01</strong> </span>
                 <div class="rol-profile" fxLayout="row" fxLayoutGap="5" fxLayoutAlign="start center">
@@ -55,24 +55,22 @@
 
     <div style="padding: 10px;">
 
-        <mat-toolbar [class.mat-elevation-z2]="true" style="border-radius: 20px;">
-            <mat-toolbar-row >
-               
+        <mat-toolbar [class.mat-elevation-z2]="true" style="border-radius: 10px;">
+            <mat-toolbar-row>
+
                 <div>
                     <button (click)="sidenav.toggle()" mat-icon-button>
                         <mat-icon>menu</mat-icon>
                     </button>
                 </div>
 
-                <div fxLayout="row" fxLayoutGap="10">
-                    <mat-form-field appearance="standard">
-                        <input matInput placeholder="Buscar...">
-                    </mat-form-field>
+                <div>
+                    <input matInput type="text" placeholder="Buscar...">
                 </div>
 
                 <span class="spacer"></span>
 
-              
+
                 <button mat-icon-button (click)="logout()">
                     <mat-icon>logout</mat-icon>
                 </button>

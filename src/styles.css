@@ -9,10 +9,25 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .container{
     margin: 0px;
-    padding: 15px;
+    padding: 0 15px 15px 15px;
 }
 
 .snackBar-validator{
     font-size: 25px !important; 
     background-color: #31456D;
+}
+
+.mat-input-element {
+    font: inherit;
+    background: rgba(0,0,0,0);
+    color: currentColor;
+    border: none;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+    vertical-align: bottom;
+    text-align: inherit;
+    box-sizing: content-box;
 }
