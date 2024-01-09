@@ -1,3 +1,4 @@
+import { trigger, transition, style, animate, state } from '@angular/animations';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
@@ -8,6 +9,19 @@ import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 
 @Component({
   selector: 'app-visor-graph',
+  animations: [
+    trigger(
+      'enterAnimation', [
+      transition(':enter', [
+        style({ transform: 'translateX(-100%)', opacity: 0 }),
+        animate('200ms', style({ transform: 'translateX(0)', opacity: 1 }))
+      ]),
+      transition(':leave', [
+        style({ transform: 'translateX(0)', opacity: 1 }),
+        animate('200ms', style({ transform: 'translateX(-100%)', opacity: 0 }))
+      ])
+    ]),
+  ],
   templateUrl: './visor-graph.component.html',
   styleUrls: ['./visor-graph.component.css'],
 
@@ -29,6 +43,7 @@ export class VisorGraphComponent implements OnInit {
 
   loadingSpinner = false
   loadingSpinnerGraph = false
+  ToggleGraph = false
 
   btnShow = false
   btnCancel = true
@@ -52,9 +67,6 @@ export class VisorGraphComponent implements OnInit {
       url: new FormControl(''),
 
     })
-
-
-
   }
 
   onFileSelected(event: any) {
@@ -89,7 +101,7 @@ export class VisorGraphComponent implements OnInit {
 
     let valorNoVacio: string | File | undefined;
 
-    //this.loadingSpinner = true
+    this.loadingSpinner = true
 
     if (archivoValue instanceof File || typeof textoValue === 'string' && textoValue.trim() !== '') {
 
@@ -141,20 +153,29 @@ export class VisorGraphComponent implements OnInit {
   }
 
   leer(e: any) {
+
+    localStorage.setItem('net', e.network) 
+    localStorage.setItem('sta', e.station) 
+    localStorage.setItem('cha', e.channel) 
+
     this.loadingSpinnerGraph = true
+    this.ToggleGraph = false
+
     this.stationInfo = e
 
-    this.accel= {}
+    this.accel = {}
     this.vel = {}
     this.dsp = {}
 
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
     var dataString: string = localStorage.getItem('urlSearched')!
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
 
-    let dataToUse: string = dataFile !== null ? dataFile : dataString !== null ? dataString : "";
+    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
     this.obsApi.getTraceData(dataToUse, e.station, e.channel).subscribe({
       next: value => {
+
+        this.ToggleGraph = false
         this.plotedimages = value
 
         this.accel = {
@@ -300,17 +321,189 @@ export class VisorGraphComponent implements OnInit {
 
       },
       error: err => console.error('REQUEST API ERROR: ' + err.message),
-      complete: () => { this.loadingSpinnerGraph = false }
+      complete: () => {
+
+        this.loadingSpinnerGraph = false
+        this.ToggleGraph = true
+      }
     })
+  }
 
-    // this.obsApi.getPlotStation(dataToUse, e.station, e.channel).subscribe({
-    //   next: value => {
-    //     this.plotedimages = value
-    //   },
-    //   error: err => console.error('REQUEST API ERROR: ' + err.message),
-    //   complete: () => { }
-    // })
+  baseLineCorrecion(base : string){
+    this.loadingSpinnerGraph = true
+    this.ToggleGraph = false
 
+    console.log(base);
+
+    //this.stationInfo = e
+    let net = localStorage.getItem('net')!
+    let sta = localStorage.getItem('sta')!
+    let cha = localStorage.getItem('cha')!
+
+    this.accel = {}
+    this.vel = {}
+    this.dsp = {}
+
+    var dataString: string = localStorage.getItem('urlSearched')!
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
+
+    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+
+    this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base).subscribe({
+      next: value => {
+
+        this.ToggleGraph = false
+        this.plotedimages = value
+
+        this.accel = {
+          title: {
+            text: `Aceleracion - ${net}.${sta}.${cha}`,
+          },
+          tooltip: {
+            trigger: 'axis',
+          },
+          xAxis: {
+            data: value[0].tiempo_a,
+            name: "Tiempo [s]",
+            silent: false,
+            splitLine: {
+              show: false,
+            },
+          },
+          yAxis: {
+            name: "Aceleracion"
+          },
+          dataZoom: [
+            {
+              type: 'inside',
+              start: 0,
+              end: 100
+            },
+            {
+              start: 0,
+              end: 100,
+              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
+              handleSize: '100%',
+              handleStyle: {
+                color: '#ddd'
+              }
+            }
+          ],
+          series: [
+            {
+              name: 'Aceleracion (mk/s/s)',
+              type: 'line',
+              showSymbol: false,
+              data: value[0].traces_a,
+              animationDelay: (idx: number) => idx * 10,
+            },
+          ],
+          animationEasing: 'elasticOut',
+          animationDelayUpdate: (idx: number) => idx * 5,
+        };
+
+        this.vel = {
+          title: {
+            text: `Velocidad - ${net}.${sta}.${cha} `,
+          },
+          tooltip: {
+            trigger: 'axis',
+          },
+          xAxis: {
+            data: value[0].tiempo_a,
+            silent: false,
+            name: "Tiempo [s]",
+            splitLine: {
+              show: false,
+            },
+          },
+          yAxis: {
+            name: "Velocidad"
+          },
+          dataZoom: [
+            {
+              type: 'inside',
+              start: 0,
+              end: 100
+            },
+            {
+              start: 0,
+              end: 100,
+              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
+              handleSize: '100%',
+              handleStyle: {
+                color: '#ddd'
+              }
+            }
+          ],
+          series: [
+            {
+              name: 'Aceleracion (mk/s/s)',
+              type: 'line',
+              showSymbol: false,
+              data: value[0].traces_v,
+              animationDelay: (idx: number) => idx * 10,
+            },
+          ],
+          animationEasing: 'elasticOut',
+          animationDelayUpdate: (idx: number) => idx * 5,
+        };
+
+        this.dsp = {
+          title: {
+            text: `Desplazamiento - ${net}.${sta}.${cha} `,
+          },
+          tooltip: {
+            trigger: 'axis',
+          },
+          xAxis: {
+            data: value[0].tiempo_a,
+            silent: false,
+            name: "Tiempo [s]",
+            splitLine: {
+              show: false,
+            },
+          },
+          yAxis: {
+            name: "Desplazamiento"
+          },
+          dataZoom: [
+            {
+              type: 'inside',
+              start: 0,
+              end: 100
+            },
+            {
+              start: 0,
+              end: 100,
+              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
+              handleSize: '100%',
+              handleStyle: {
+                color: '#ddd'
+              }
+            }
+          ],
+          series: [
+            {
+              name: 'Aceleracion (mk/s/s)',
+              type: 'line',
+              showSymbol: false,
+              data: value[0].traces_d,
+              animationDelay: (idx: number) => idx * 10,
+            },
+          ],
+          animationEasing: 'elasticOut',
+          animationDelayUpdate: (idx: number) => idx * 5,
+        };
+
+      },
+      error: err => console.error('REQUEST API ERROR: ' + err.message),
+      complete: () => {
+
+        this.loadingSpinnerGraph = false
+        this.ToggleGraph = true
+      }
+    })
   }
 
   deleteFile() {

@@ -87,4 +87,25 @@ export class ObspyAPIService {
 
   }
 
+  getTraceDataBaseLine(data: string, station_selected : string, channel_selected: string, base_line : string) :Observable<any>{
+    const formData = new FormData();
+    const url = 'trace_baseline_data/'
+
+    if (typeof data === 'string') {
+      formData.append('data', data);
+      formData.append('station_selected', station_selected)
+      formData.append('channel_selected', channel_selected)
+      formData.append('base_line', base_line)
+    } else {
+      throw new Error('SREV-GET: Se espera un archivo datos para Lectura');
+    }
+
+    return this.http.post<any>(url, formData).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    ); 
+
+  }
+
 }

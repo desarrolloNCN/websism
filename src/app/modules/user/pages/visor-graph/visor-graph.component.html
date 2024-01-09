@@ -1,4 +1,4 @@
-<div *ngIf="hideStaPanel" class="winTitle">
+<div class="winTitle">
     <h2><b>Lector de Archivos Acelerográficos</b></h2>
     <h4>Puede cargar archivos de diferentes dispositivos acelerograficos para la leectura, edicion y exportacion de
         datos, o tambien puede ingresar una direccion valida</h4>
@@ -49,8 +49,7 @@
                     </div>
                 </div>
 
-                <input hidden (change)="onFileSelected($event)"  #fileInput type="file"
-                    id="file">
+                <input hidden (change)="onFileSelected($event)" #fileInput type="file" id="file">
             </div>
 
             <mat-divider class="separator" vertical="true"></mat-divider>
@@ -60,15 +59,18 @@
                 LEER DATOS
             </button>
 
-            <mat-progress-spinner *ngIf="loadingSpinner" mode="indeterminate" style="margin:0 auto;"
-                [diameter]="30"></mat-progress-spinner>
+            <div *ngIf="loadingSpinner" fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
+                <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
+                    [diameter]="30"></mat-progress-spinner>
+            </div>
 
         </form>
     </div>
 </div>
 
 <div style="padding-top: 10px;" fxLayout="row" fxLayoutGap="10">
-    <div *ngIf="hideStaPanel"  class="stInfo"  fxLayout="column" fxLayoutGap="10" fxFlex="23">
+
+    <div *ngIf="hideStaPanel"  [@enterAnimation] class="stInfo" fxLayout="column" fxLayoutGap="10" fxFlex="23">
         <div fxLayout="column" fxLayoutGap="5">
             <div style="padding-left: 10px;">
                 <h2><b>ESTACIONES ENCONTRADAS</b></h2>
@@ -187,20 +189,39 @@
             </div>
         </div>
     </div>
+
     <div class="stGraph" fxLayout="column" fxLayoutGap="10" fxFlex>
 
-        <div class="graphBar" fxLayout="row" >
+        <div class="graphBar" fxLayout="row">
             <div fxLayout="row" fxLayoutGap="5">
                 <button mat-icon-button type="button" (click)="togglePanel()">
-                    <mat-icon class="colorIconBar" title="Ocultar Paneles">hide_source</mat-icon>
+                    <mat-icon class="colorIconBar" title="Ocultar Paneles">visibility_off</mat-icon>
                 </button>
                 <mat-divider class="separator" vertical="true"></mat-divider>
             </div>
             <button mat-icon-button type="button">
                 <mat-icon class="colorIconBar" title="Buscar">search</mat-icon>
             </button>
-            <button mat-icon-button type="button">
-                <mat-icon class="colorIconBar">compare_arrows</mat-icon>
+            <button mat-icon-button type="button" [matMenuTriggerFor]="menuBaseLine">
+                <mat-icon class="colorIconBar" title="Correccion por Linea Base">monitor_heart</mat-icon>
+                <mat-menu #menuBaseLine>
+                    <button mat-menu-item (click)="baseLineCorrecion('constant')">
+                        <mat-icon>add_to_drive</mat-icon>
+                        Constante
+                    </button>
+                    <button mat-menu-item (click)="baseLineCorrecion('linear')">
+                        <mat-icon>add_to_drive</mat-icon>
+                        Linear
+                    </button>
+                    <button mat-menu-item (click)="baseLineCorrecion('demean')">
+                        <mat-icon>add_to_drive</mat-icon>
+                        Demean
+                    </button>
+                    <button mat-menu-item (click)="baseLineCorrecion('simple')">
+                        <mat-icon>add_to_drive</mat-icon>
+                        Simple
+                    </button>
+                </mat-menu>
             </button>
             <button mat-icon-button type="button">
                 <mat-icon class="colorIconBar">build</mat-icon>
@@ -213,17 +234,18 @@
             </button>
         </div>
 
-        <div style="padding: 5px; background-color: white; height: 100%;" fxLayout="column" fxLayoutAlign="center center">
+        <div style="padding: 5px; background-color: white; height: 100%;" fxLayout="column"
+            fxLayoutAlign="center center">
 
             <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
-                <mat-progress-spinner  mode="indeterminate" style="margin:0 auto;"
-                [diameter]="50"></mat-progress-spinner>
+                <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
+                    [diameter]="50"></mat-progress-spinner>
                 <h3> <b>Cargando Datos ....</b> </h3>
             </div>
 
-            <div echarts [options]="accel" style="padding: 8px; width: 900px;"></div>
-            <div echarts [options]="vel" style="padding: 8px; width: 900px;"></div>
-            <div echarts [options]="dsp" style="padding: 8px; width: 900px;"></div>
+            <div *ngIf="ToggleGraph" echarts [options]="accel" style="padding: 8px; width: 900px;"></div>
+            <div *ngIf="ToggleGraph" echarts [options]="vel" style="padding: 8px; width: 900px;"></div>
+            <div *ngIf="ToggleGraph" echarts [options]="dsp" style="padding: 8px; width: 900px;"></div>
 
         </div>
     </div>
