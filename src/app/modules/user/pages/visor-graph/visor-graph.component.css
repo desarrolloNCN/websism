@@ -132,7 +132,6 @@ h4 {
     background-color: rgb(255, 182, 73);
 }
 
-
 .stainfospan {
     padding-inline: 10px;
     padding-top: 3px;
@@ -147,4 +146,41 @@ h4 {
     width: 15px;
     font-size: 15px;
     color: #6b6b6b;
+}
+
+.divGraph {
+    padding: 8px;
+    width: 900px;
+}
+
+.graphContainer {
+    padding: 5px;
+    background-color: white;
+    height: 100%;
+    border-radius: 5px;
+}
+
+.filterContainer{
+    padding: 12px 10px 0px 10px;
+    background-color: white;
+    border-radius: 5px;
+}
+
+.trimContainer{
+    padding: 12px 10px 0px 10px;
+    background-color: white;
+    border-radius: 5px;
+}
+
+.colorIconSubBar {
+    color: #c5c5c5;
+}
+
+.separatorSubBar {
+    border-top-color: rgba(0, 0, 0, 0.12);
+    height: 60px;
+}
+
+.sendInfoSubBar {
+    width: 140px;
 }

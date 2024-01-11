@@ -14,11 +14,33 @@ import { ObspyAPIService } from 'src/app/service/obspy-api.service';
       'enterAnimation', [
       transition(':enter', [
         style({ transform: 'translateX(-100%)', opacity: 0 }),
-        animate('200ms', style({ transform: 'translateX(0)', opacity: 1 }))
+        animate('300ms', style({ transform: 'translateX(0)', opacity: 1 }))
       ]),
       transition(':leave', [
         style({ transform: 'translateX(0)', opacity: 1 }),
-        animate('200ms', style({ transform: 'translateX(-100%)', opacity: 0 }))
+        animate('300ms', style({ transform: 'translateX(-100%)', opacity: 0 }))
+      ])
+    ]),
+    trigger(
+      'enterAnimation2', [
+      transition(':enter', [
+        style({ transform: 'translateY(-100%)', opacity: 0 }),
+        animate('300ms', style({ transform: 'translateX(0)', opacity: 1 }))
+      ]),
+      transition(':leave', [
+        style({ transform: 'translateY(0)', opacity: 1 }),
+        animate('300ms', style({ transform: 'translateY(-100%)', opacity: 0 }))
+      ])
+    ]),
+    trigger(
+      'enterAnimation3', [
+      transition(':enter', [
+        style({ transform: 'translateX(100%)', opacity: 0 }),
+        animate('300ms', style({ transform: 'translateX(0)', opacity: 1 }))
+      ]),
+      transition(':leave', [
+        style({ transform: 'translateX(0)', opacity: 1 }),
+        animate('300ms', style({ transform: 'translateX(100%)', opacity: 0 }))
       ])
     ]),
   ],
@@ -33,6 +55,8 @@ export class VisorGraphComponent implements OnInit {
   dsp: EChartsOption | any;
 
   controlForm: FormGroup | any
+  FilterForm: FormGroup | any
+  TrimForm: FormGroup | any
 
   enproges = false
 
@@ -56,6 +80,9 @@ export class VisorGraphComponent implements OnInit {
 
   plotedimages: any = []
 
+  toogleTrim = false
+  toogleFilter = false
+
   constructor(
     private obsApi: ObspyAPIService,
     private snackBar: MatSnackBar
@@ -65,6 +92,18 @@ export class VisorGraphComponent implements OnInit {
     localStorage.clear()
     this.controlForm = new FormGroup({
       url: new FormControl(''),
+
+    })
+
+    this.FilterForm = new FormGroup({
+      type: new FormControl('', [Validators.required]),
+      freqmin: new FormControl('', [Validators.required]),
+      freqmax: new FormControl('', [Validators.required]),
+      order: new FormControl('',)
+    })
+
+    this.TrimForm = new FormGroup({
+      type: new FormControl(''),
 
     })
   }
@@ -154,9 +193,9 @@ export class VisorGraphComponent implements OnInit {
 
   leer(e: any) {
 
-    localStorage.setItem('net', e.network) 
-    localStorage.setItem('sta', e.station) 
-    localStorage.setItem('cha', e.channel) 
+    localStorage.setItem('net', e.network)
+    localStorage.setItem('sta', e.station)
+    localStorage.setItem('cha', e.channel)
 
     this.loadingSpinnerGraph = true
     this.ToggleGraph = false
@@ -329,11 +368,16 @@ export class VisorGraphComponent implements OnInit {
     })
   }
 
-  baseLineCorrecion(base : string){
+  baseLineCorrecion(base: string) {
+
+    localStorage.setItem('base', base)
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 3 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
     this.loadingSpinnerGraph = true
     this.ToggleGraph = false
-
-    console.log(base);
 
     //this.stationInfo = e
     let net = localStorage.getItem('net')!
@@ -348,6 +392,11 @@ export class VisorGraphComponent implements OnInit {
     var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+    // if(!net || !sta || !cha || !dataToUse){
+    //   this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+    //   this.loadingSpinnerGraph = false
+    //   return
+    // }
 
     this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base).subscribe({
       next: value => {
@@ -497,13 +546,224 @@ export class VisorGraphComponent implements OnInit {
         };
 
       },
-      error: err => console.error('REQUEST API ERROR: ' + err.message),
+      error: err => {
+        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+        this.loadingSpinnerGraph = false
+        console.error('REQUEST API ERROR: ' + err.message)
+      },
       complete: () => {
 
         this.loadingSpinnerGraph = false
         this.ToggleGraph = true
       }
     })
+  }
+
+  addFilter() {
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 3 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    let net = localStorage.getItem('net')!
+    let sta = localStorage.getItem('sta')!
+    let cha = localStorage.getItem('cha')!
+    let base = localStorage.getItem('base')!
+
+    let type = this.FilterForm.get('type').value
+    let fmin = this.FilterForm.get('freqmin').value
+    let fmax = this.FilterForm.get('freqmax').value
+
+    var dataString: string = localStorage.getItem('urlSearched')!
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
+
+    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+
+    if (this.FilterForm.invalid || !dataToUse) {
+      this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+      return
+    }
+
+    this.loadingSpinnerGraph = true
+    this.ToggleGraph = false
+
+    this.accel = {}
+    this.vel = {}
+    this.dsp = {}
+
+    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax).subscribe({
+      next: value => {
+
+        this.ToggleGraph = false
+        this.plotedimages = value
+
+        this.accel = {
+          title: {
+            text: `Aceleracion - ${net}.${sta}.${cha}`,
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'cross'
+            }
+          },
+          xAxis: {
+            data: value[0].tiempo_a,
+            axisTick: {
+              alignWithLabel: true
+            },
+            name: "Tiempo [s]",
+            silent: false,
+            splitLine: {
+              show: false,
+            },
+          },
+          yAxis: {
+            name: "Aceleracion"
+          },
+          dataZoom: [
+            {
+              type: 'inside',
+              start: 0,
+              end: 100
+            },
+            {
+              start: 0,
+              end: 100,
+              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
+              handleSize: '100%',
+              handleStyle: {
+                color: '#ddd'
+              }
+            }
+          ],
+          series: [
+            {
+              name: 'Aceleracion (mk/s/s)',
+              type: 'line',
+              showSymbol: false,
+              data: value[0].traces_a,
+              animationDelay: (idx: number) => idx * 10,
+            },
+          ],
+          animationEasing: 'elasticOut',
+          animationDelayUpdate: (idx: number) => idx * 5,
+        };
+
+        this.vel = {
+          title: {
+            text: `Velocidad - ${net}.${sta}.${cha} `,
+          },
+          tooltip: {
+            trigger: 'axis',
+          },
+          xAxis: {
+            data: value[0].tiempo_a,
+            silent: false,
+            name: "Tiempo [s]",
+            splitLine: {
+              show: false,
+            },
+          },
+          yAxis: {
+            name: "Velocidad"
+          },
+          dataZoom: [
+            {
+              type: 'inside',
+              start: 0,
+              end: 100
+            },
+            {
+              start: 0,
+              end: 100,
+              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
+              handleSize: '100%',
+              handleStyle: {
+                color: '#ddd'
+              }
+            }
+          ],
+          series: [
+            {
+              name: 'Aceleracion (mk/s/s)',
+              type: 'line',
+              showSymbol: false,
+              data: value[0].traces_v,
+              animationDelay: (idx: number) => idx * 10,
+            },
+          ],
+          animationEasing: 'elasticOut',
+          animationDelayUpdate: (idx: number) => idx * 5,
+        };
+
+        this.dsp = {
+          title: {
+            text: `Desplazamiento - ${net}.${sta}.${cha} `,
+          },
+          tooltip: {
+            trigger: 'axis',
+          },
+          xAxis: {
+            data: value[0].tiempo_a,
+            silent: false,
+            name: "Tiempo [s]",
+            splitLine: {
+              show: false,
+            },
+          },
+          yAxis: {
+            name: "Desplazamiento"
+          },
+          dataZoom: [
+            {
+              type: 'inside',
+              start: 0,
+              end: 100
+            },
+            {
+              start: 0,
+              end: 100,
+              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
+              handleSize: '100%',
+              handleStyle: {
+                color: '#ddd'
+              }
+            }
+          ],
+          series: [
+            {
+              name: 'Aceleracion (mk/s/s)',
+              type: 'line',
+              showSymbol: false,
+              data: value[0].traces_d,
+              animationDelay: (idx: number) => idx * 10,
+            },
+          ],
+          animationEasing: 'elasticOut',
+          animationDelayUpdate: (idx: number) => idx * 5,
+        };
+
+      },
+      error: err => {
+        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+        this.loadingSpinnerGraph = false
+        console.error('REQUEST API ERROR: ' + err.message)
+      },
+      complete: () => {
+
+        this.loadingSpinnerGraph = false
+        this.ToggleGraph = true
+      }
+    })
+  }
+
+  filterData() {
+    this.toogleFilter = !this.toogleFilter
+  }
+
+  trimData() {
+    this.toogleTrim = !this.toogleTrim
   }
 
   deleteFile() {
@@ -513,6 +773,9 @@ export class VisorGraphComponent implements OnInit {
     this.groupedData = {}
     this.arch = ''
     this.controlForm.get('url').enable()
+    this.accel = {}
+    this.vel = {}
+    this.dsp = {}
   }
 
   togglePanel() {

@@ -20,7 +20,7 @@ export class ObspyAPIService {
     } else if (typeof data === 'string') {
       formData.append('string_data', data);
     } else {
-      throw new Error('SREV-POST: Se espera un archivo (File) o una cadena (string).');
+      throw new Error('SREV-POST-99: Se espera un archivo (File) o una cadena (string).');
     }
 
     return this.http.post<any>(url, formData).pipe(
@@ -37,7 +37,7 @@ export class ObspyAPIService {
     if (typeof data === 'string') {
       formData.append('data', data);
     } else {
-      throw new Error('SREV-GET: Se espera un archivo datos para Lectura');
+      throw new Error('SREV-GET-00: Se espera un archivo datos para Lectura');
     }
 
     return this.http.post<any>(url, formData).pipe(
@@ -56,7 +56,7 @@ export class ObspyAPIService {
       formData.append('station_selected', station_selected)
       formData.append('channel_selected', channel_selected)
     } else {
-      throw new Error('SREV-GET: Se espera un archivo datos para Lectura');
+      throw new Error('SREV-GET-01: Se espera un archivo datos para Lectura');
     }
 
     return this.http.post<any>(url, formData).pipe(
@@ -76,7 +76,7 @@ export class ObspyAPIService {
       formData.append('station_selected', station_selected)
       formData.append('channel_selected', channel_selected)
     } else {
-      throw new Error('SREV-GET: Se espera un archivo datos para Lectura');
+      throw new Error('SREV-GET-02: Se espera un archivo datos para Lectura');
     }
 
     return this.http.post<any>(url, formData).pipe(
@@ -97,7 +97,31 @@ export class ObspyAPIService {
       formData.append('channel_selected', channel_selected)
       formData.append('base_line', base_line)
     } else {
-      throw new Error('SREV-GET: Se espera un archivo datos para Lectura');
+      throw new Error('SREV-GET-03: Se espera un archivo datos para Lectura');
+    }
+
+    return this.http.post<any>(url, formData).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    ); 
+
+  }
+
+  getTraceDataFilter(data: string, station_selected : string, channel_selected: string, base_line : string, filter: string, freqmin: string, freqmax : string) :Observable<any>{
+    const formData = new FormData();
+    const url = 'trace_filter_data/'
+
+    if (typeof data === 'string') {
+      formData.append('data', data);
+      formData.append('station_selected', station_selected)
+      formData.append('channel_selected', channel_selected)
+      formData.append('base_line', base_line)
+      formData.append('filter_type', filter)
+      formData.append('freq_min', freqmin)
+      formData.append('freq_max', freqmax)
+    } else {
+      throw new Error('SREV-GET-04: Se espera un archivo datos para Lectura');
     }
 
     return this.http.post<any>(url, formData).pipe(
