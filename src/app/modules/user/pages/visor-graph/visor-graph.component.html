@@ -240,9 +240,14 @@
                 <mat-icon class="colorIconBar" title="Filtro">filter_alt</mat-icon>
             </button>
 
-            <button mat-icon-button type="button">
-                <mat-icon class="colorIconBar">donut_large</mat-icon>
-            </button>
+            <div class="spacer"></div>
+
+            <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
+                <mat-divider class="separator" vertical="true"></mat-divider>
+                <button mat-icon-button type="button" (click)="leerArchivo()">
+                    <mat-icon class="colorIconBar" title="Reestablecer Datos">refresh</mat-icon>
+                </button>
+            </div>
 
         </div>
 
@@ -273,7 +278,8 @@
         </div>
 
         <div *ngIf="toogleFilter" class="filterContainer">
-            <form [formGroup]="FilterForm" fxLayout="row" fxLayoutGap="10" fxLayoutAlign="center center" (submit)="addFilter()">
+            <form [formGroup]="FilterForm" fxLayout="row" fxLayoutGap="10" fxLayoutAlign="center center"
+                (submit)="addFilter()">
 
                 <h4 style="padding-bottom: 13px ; padding-left: 10px;"><b>Tipo de Filtro ButterWorth:</b></h4>
 
@@ -295,7 +301,7 @@
                     <mat-icon class="colorIconSubBar" matPrefix>show_chart</mat-icon>
                     <input matInput type="number" formControlName="freqmin">
                     <mat-error *ngIf="FilterForm.get('freqmin')?.hasError('required')"> Ingrese <strong>
-                        Freq. Min. </strong> </mat-error>
+                            Freq. Min. </strong> </mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
@@ -303,13 +309,15 @@
                     <mat-icon class="colorIconSubBar" matPrefix>stacked_line_chart</mat-icon>
                     <input matInput type="number" formControlName="freqmax">
                     <mat-error *ngIf="FilterForm.get('freqmax')?.hasError('required')"> Ingrese <strong>
-                        Freq. Max. </strong> </mat-error>
+                            Freq. Max. </strong> </mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
-                    <mat-label>Order</mat-label>
+                    <mat-label>Corner</mat-label>
                     <mat-icon class="colorIconSubBar" matPrefix>stacked_line_chart</mat-icon>
                     <input matInput type="number" formControlName="order">
+                    <mat-error *ngIf="FilterForm.get('order')?.hasError('required')"> Ingrese <strong>
+                        Corner </strong> </mat-error>
                 </mat-form-field>
 
                 <div style="padding-bottom: 16px; padding-left: 15px;">
