@@ -15,10 +15,11 @@ import { NgxEchartsModule } from 'ngx-echarts';
 
 
 
+
 @NgModule({
   declarations: [
     AppComponent,
-    UserPanelComponent
+    UserPanelComponent,
   ],
   imports: [
     BrowserModule,

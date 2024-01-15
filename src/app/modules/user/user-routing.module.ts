@@ -7,9 +7,9 @@ const routes: Routes = [
   {
     path: '',
     children: [
-      {path: 'home' , component: HomeComponent},
+      {path: 'dashboard' , component: HomeComponent},
       {path: 'visor' , component: VisorGraphComponent},
-      {path: '**' , redirectTo: 'home'}
+      {path: '**' , redirectTo: 'dashboard'}
     ]
   }
 ];

@@ -9,6 +9,10 @@ const routes: Routes = [
     loadChildren: () => import('./modules/user/user.module').then(m => m.UserModule),
   },
   {
+    path: '',
+    loadChildren: () => import('./modules/uext/uext.module').then(m => m.UextModule),
+  },
+  {
     path: '**',
     redirectTo: 'user'
   }

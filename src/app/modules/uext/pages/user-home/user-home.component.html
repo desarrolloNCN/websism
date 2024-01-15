@@ -1,0 +1,66 @@
+<div class="home" fxLayout="column">
+
+    <div class="banner" fxLayout="row" fxLayoutAlign="space-between center">
+        <h1>NCN</h1>
+        <h1>TEST</h1>
+        <h1>TEST</h1>
+    </div>
+
+    <div class="bodyHome">
+
+        <div class="winTitle">
+            <h2><b>Lector de Archivos Acelerográficos</b></h2>
+            <h4>Puede cargar archivos de diferentes dispositivos acelerograficos para la leectura, edicion y exportacion
+                de
+                datos, o tambien puede ingresar una direccion valida</h4>
+        </div>
+
+        <div class="dndZoneContainer">
+            <div cdkDropList (cdkDropListDropped)="drop($event)" class="dndZone" fxLayout="column"
+                fxLayoutAlign="center center">
+                <form [formGroup]="controlForm" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10"
+                    (submit)="leerArchivo()">
+
+                    <div class="inputUrl" fxLayout="row" fxLayoutGap="5">
+                        <mat-icon class="colorIcon">link</mat-icon>
+                        <input matInput type="text"
+                            placeholder="Ejm: http://examples.obspy.org/RJOB_061005_072159.ehz.new">
+                    </div>
+
+                    <p>O</p>
+
+                    <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="5">
+                        <div class="uploadbtn" fxLayout="row" fxLayoutAlign="center center">
+                            <button type="button" mat-button (click)="redirecToVisor()">
+                                SUBIR UN ARCHIVO
+                            </button>
+
+                            <button mat-icon-button [matMenuTriggerFor]="menuFile">
+                                <mat-icon inline="true">expand_more</mat-icon>
+                            </button>
+                            <mat-menu #menuFile>
+                                <button mat-menu-item>
+                                    <mat-icon>add_to_drive</mat-icon>
+                                    Google Drive
+                                </button>
+                                <button mat-menu-item>
+                                    <mat-icon>add_to_drive</mat-icon>
+                                    Google Drive
+                                </button>
+                            </mat-menu>
+                        </div>
+                        <p>o arraste su archivo aqui</p>
+
+                        <input hidden (change)="redirecToVisor()" formControlName="archivo" #fileInput type="file"
+                            id="file">
+                    </div>
+
+                    <!-- <button type="submit" class="sendInfo" mat-raised-button color="primary"> Leer Datos </button> -->
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+</div>
