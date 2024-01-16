@@ -2,8 +2,11 @@ import { trigger, transition, style, animate, state } from '@angular/animations'
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
+import { MatTabChangeEvent } from '@angular/material/tabs';
 import { EChartsOption } from 'echarts';
+import { ChartDataService } from 'src/app/service/chart-data.service';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
+import { DatePipe } from '@angular/common';
 
 export interface StationInfo {
   network?: string,
@@ -100,7 +103,9 @@ export class VisorGraphComponent implements OnInit {
 
   constructor(
     private obsApi: ObspyAPIService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private chartGen: ChartDataService,
+    private datePipe : DatePipe
   ) { }
 
   ngOnInit(): void {
@@ -114,7 +119,7 @@ export class VisorGraphComponent implements OnInit {
       type: new FormControl('', [Validators.required]),
       freqmin: new FormControl('', [Validators.required]),
       freqmax: new FormControl('', [Validators.required]),
-      order: new FormControl('',)
+      order: new FormControl('', [Validators.required])
     })
 
     this.TrimForm = new FormGroup({
@@ -206,6 +211,9 @@ export class VisorGraphComponent implements OnInit {
     }
   }
 
+  tabs: any = []
+  tabIndex = 0
+
   leer(e: any) {
 
     localStorage.setItem('net', e.network)
@@ -232,209 +240,13 @@ export class VisorGraphComponent implements OnInit {
         this.ToggleGraph = false
         this.plotedimages = value
 
-        this.accel = {
-          title: {
-            text: `Aceleracion - ${e.network}.${e.station}.${e.channel}`,
-            subtext: `${e.starttime} | ${e.endtime}`,
-          },
-          tooltip: {
-            trigger: 'axis',
-          },
-          toolbox: {
-            show: true,
-            feature: {
-              dataZoom: {
-                yAxisIndex: 'none'
-              },
-              dataView: { readOnly: true },
-              restore: {},
-              saveAsImage: {}
-            }
-          },
-          grid: {
-            top: 80,
-          },
-          xAxis: {
-            data: value[0].tiempo_a,
-            name: "Tiempo [s]",
-            silent: false,
-            splitLine: {
-              show: false,
-            },
-            axisLabel: {
-              hideOverlap: true
-            }
-          },
-          yAxis: {
-            name: "Aceleracion (cm/s^2)",
-            nameRotate: 90,
-            nameLocation: 'middle',
-            nameGap: 40
-          },
-          dataZoom: [
-            {
-              type: 'inside',
-              start: 0,
-              end: 100
-            },
-            {
-              start: 0,
-              end: 100,
-              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
-              handleSize: '100%',
-              handleStyle: {
-                color: '#ddd'
-              }
-            }
-          ],
-          series: [
-            {
-              name: 'Aceleracion (cm/s^2)',
-              type: 'line',
-              showSymbol: false,
-              data: value[0].traces_a,
-              animationDelay: (idx: number) => idx * 10,
-            },
-          ],
-          animationEasing: 'elasticOut',
-          animationDelayUpdate: (idx: number) => idx * 5,
-        };
-
-        this.vel = {
-          title: {
-            text: `Velocidad - ${e.network}.${e.station}.${e.channel}`,
-            subtext: `${e.starttime} | ${e.endtime}`,
-          },
-          tooltip: {
-            trigger: 'axis',
-          },
-          toolbox: {
-            show: true,
-            feature: {
-              dataZoom: {
-                yAxisIndex: 'none'
-              },
-              dataView: { readOnly: true },
-              restore: {},
-              saveAsImage: {}
-            }
-          },
-          grid: {
-            top: 80,
-          },
-          xAxis: {
-            data: value[0].tiempo_a,
-            silent: false,
-            name: "Tiempo [s]",
-            splitLine: {
-              show: false,
-            },
-            axisLabel: {
-              hideOverlap: true
-            }
-          },
-          yAxis: {
-            name: "Velocidad (cm/s)",
-            nameRotate: 90,
-            nameLocation: 'middle',
-            nameGap: 40
-          },
-          dataZoom: [
-            {
-              type: 'inside',
-              start: 0,
-              end: 100
-            },
-            {
-              start: 0,
-              end: 100,
-              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
-              handleSize: '100%',
-              handleStyle: {
-                color: '#ddd'
-              }
-            }
-          ],
-          series: [
-            {
-              name: 'Aceleracion (mk/s/s)',
-              type: 'line',
-              showSymbol: false,
-              data: value[0].traces_v,
-              animationDelay: (idx: number) => idx * 10,
-            },
-          ],
-          animationEasing: 'elasticOut',
-          animationDelayUpdate: (idx: number) => idx * 5,
-        };
-
-        this.dsp = {
-          title: {
-            text: `Desplazamiento - ${e.network}.${e.station}.${e.channel}`,
-            subtext: `${e.starttime} | ${e.endtime}`,
-          },
-          tooltip: {
-            trigger: 'axis',
-          },
-          toolbox: {
-            show: true,
-            feature: {
-              dataZoom: {
-                yAxisIndex: 'none'
-              },
-              dataView: { readOnly: true },
-              restore: {},
-              saveAsImage: {}
-            }
-          },
-          grid: {
-            top: 80,
-          },
-          xAxis: {
-            data: value[0].tiempo_a,
-            silent: false,
-            name: "Tiempo [s]",
-            splitLine: {
-              show: false,
-            },
-            axisLabel: {
-              hideOverlap: true
-            }
-          },
-          yAxis: {
-            name: "Desplazamiento (cm) ",
-            nameRotate: 90,
-            nameLocation: 'middle',
-            nameGap: 40
-          },
-          dataZoom: [
-            {
-              type: 'inside',
-              start: 0,
-              end: 100
-            },
-            {
-              start: 0,
-              end: 100,
-              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
-              handleSize: '100%',
-              handleStyle: {
-                color: '#ddd'
-              }
-            }
-          ],
-          series: [
-            {
-              name: 'Aceleracion (mk/s/s)',
-              type: 'line',
-              showSymbol: false,
-              data: value[0].traces_d,
-              animationDelay: (idx: number) => idx * 10,
-            },
-          ],
-          animationEasing: 'elasticOut',
-          animationDelayUpdate: (idx: number) => idx * 5,
-        };
+        const graph = this.graphGenerator(e, value, '(RAWDATA)')
+        this.tabs.push(
+          {
+            label: `${e.station}.${e.channel}`,
+            graph,
+            index: this.tabIndex++
+          })
 
       },
       error: err => console.error('REQUEST API ERROR: ' + err.message),
@@ -446,16 +258,24 @@ export class VisorGraphComponent implements OnInit {
     })
   }
 
+  getTabLabel(tab: any): string {
+    return tab.label;
+  }
+
+  onCloseTab(index: number) {
+    this.tabs.splice(index, 1);
+  }
+
   baseLineCorrecion(base: string) {
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
-    // if (Object.keys(this.selectedStationInfo).length === 0) {
-    //   this.snackBar.open('Debe elegir una Estacion', 'cerrar', snackBar)
-    //   return
-    // }
+    if (Object.keys(this.stationInfo).length === 0) {
+      this.snackBar.open('Debe elegir una Estacion', 'cerrar', snackBar)
+      return
+    }
     // let e = this.selectedStationInfo
 
     localStorage.setItem('base', base)
@@ -476,11 +296,7 @@ export class VisorGraphComponent implements OnInit {
     var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
-    // if(!net || !sta || !cha || !dataToUse){
-    //   this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-    //   this.loadingSpinnerGraph = false
-    //   return
-    // }
+
 
     this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base).subscribe({
       next: value => {
@@ -488,184 +304,8 @@ export class VisorGraphComponent implements OnInit {
         this.ToggleGraph = false
         this.plotedimages = value
 
-        this.accel = {
-          title: {
-            text: `Aceleracion - - ${net}.${sta}.${cha}`,
-          },
-          tooltip: {
-            trigger: 'axis',
-          },
-          toolbox: {
-            show: true,
-            feature: {
-              dataZoom: {
-                yAxisIndex: 'none'
-              },
-              dataView: { readOnly: true },
-              restore: {},
-              saveAsImage: {}
-            }
-          },
-          grid: {
-            top: 80,
-          },
-          xAxis: {
-            data: value[0].tiempo_a,
-            name: "Tiempo [s]",
-            silent: false,
-            splitLine: {
-              show: false,
-            },
-            axisLabel: {
-              hideOverlap: true
-            }
-          },
-          yAxis: {
-            name: "Aceleracion"
-          },
-          dataZoom: [
-            {
-              type: 'inside',
-              start: 0,
-              end: 100
-            },
-            {
-              start: 0,
-              end: 100,
-              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
-              handleSize: '100%',
-              handleStyle: {
-                color: '#ddd'
-              }
-            }
-          ],
-          series: [
-            {
-              name: 'Aceleracion (cm/s^2)',
-              type: 'line',
-              showSymbol: false,
-              data: value[0].traces_a,
-              animationDelay: (idx: number) => idx * 10,
-            },
-          ],
-          animationEasing: 'elasticOut',
-          animationDelayUpdate: (idx: number) => idx * 5,
-        };
+        this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
 
-        this.vel = {
-          title: {
-            text: `Velocidad - - ${net}.${sta}.${cha}`,
-           
-          },
-          tooltip: {
-            trigger: 'axis',
-          },
-          toolbox: {
-            show: true,
-            feature: {
-              dataZoom: {
-                yAxisIndex: 'none'
-              },
-              dataView: { readOnly: true },
-              restore: {},
-              saveAsImage: {}
-            }
-          },
-          grid: {
-            top: 80,
-          },
-          xAxis: {
-            data: value[0].tiempo_a,
-            name: "Tiempo [s]",
-            silent: false,
-            splitLine: {
-              show: false,
-            },
-            axisLabel: {
-              hideOverlap: true
-            }
-          },
-          yAxis: {
-            name: "Velocidad"
-          },
-          dataZoom: [
-            {
-              type: 'inside',
-              start: 0,
-              end: 100
-            },
-            {
-              start: 0,
-              end: 100,
-              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
-              handleSize: '100%',
-              handleStyle: {
-                color: '#ddd'
-              }
-            }
-          ],
-          series: [
-            {
-              name: 'Aceleracion (cm/s)',
-              type: 'line',
-              showSymbol: false,
-              data: value[0].traces_v,
-              animationDelay: (idx: number) => idx * 10,
-            },
-          ],
-          animationEasing: 'elasticOut',
-          animationDelayUpdate: (idx: number) => idx * 5,
-        };
-
-        this.dsp = {
-          title: {
-            text: `Desplazamiento - ${net}.${sta}.${cha} `,
-          },
-          tooltip: {
-            trigger: 'axis',
-          },
-          xAxis: {
-            data: value[0].tiempo_a,
-            silent: false,
-            name: "Tiempo [s]",
-            splitLine: {
-              show: false,
-            },
-            axisLabel: {
-              hideOverlap: true
-            }
-          },
-          yAxis: {
-            name: "Desplazamiento"
-          },
-          dataZoom: [
-            {
-              type: 'inside',
-              start: 0,
-              end: 100
-            },
-            {
-              start: 0,
-              end: 100,
-              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
-              handleSize: '100%',
-              handleStyle: {
-                color: '#ddd'
-              }
-            }
-          ],
-          series: [
-            {
-              name: 'Aceleracion (cm)',
-              type: 'line',
-              showSymbol: false,
-              data: value[0].traces_d,
-              animationDelay: (idx: number) => idx * 10,
-            },
-          ],
-          animationEasing: 'elasticOut',
-          animationDelayUpdate: (idx: number) => idx * 5,
-        };
 
       },
       error: err => {
@@ -720,152 +360,7 @@ export class VisorGraphComponent implements OnInit {
         this.ToggleGraph = false
         this.plotedimages = value
 
-        this.accel = {
-          title: {
-            text: `Aceleracion - ${net}.${sta}.${cha}`,
-          },
-          tooltip: {
-            trigger: 'axis',
-            axisPointer: {
-              type: 'cross'
-            }
-          },
-          xAxis: {
-            data: value[0].tiempo_a,
-            axisTick: {
-              alignWithLabel: true
-            },
-            name: "Tiempo [s]",
-            silent: false,
-            splitLine: {
-              show: false,
-            },
-          },
-          yAxis: {
-            name: "Aceleracion"
-          },
-          dataZoom: [
-            {
-              type: 'inside',
-              start: 0,
-              end: 100
-            },
-            {
-              start: 0,
-              end: 100,
-              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
-              handleSize: '100%',
-              handleStyle: {
-                color: '#ddd'
-              }
-            }
-          ],
-          series: [
-            {
-              name: 'Aceleracion (mk/s/s)',
-              type: 'line',
-              showSymbol: false,
-              data: value[0].traces_a,
-              animationDelay: (idx: number) => idx * 10,
-            },
-          ],
-          animationEasing: 'elasticOut',
-          animationDelayUpdate: (idx: number) => idx * 5,
-        };
-
-        this.vel = {
-          title: {
-            text: `Velocidad - ${net}.${sta}.${cha} `,
-          },
-          tooltip: {
-            trigger: 'axis',
-          },
-          xAxis: {
-            data: value[0].tiempo_a,
-            silent: false,
-            name: "Tiempo [s]",
-            splitLine: {
-              show: false,
-            },
-          },
-          yAxis: {
-            name: "Velocidad"
-          },
-          dataZoom: [
-            {
-              type: 'inside',
-              start: 0,
-              end: 100
-            },
-            {
-              start: 0,
-              end: 100,
-              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
-              handleSize: '100%',
-              handleStyle: {
-                color: '#ddd'
-              }
-            }
-          ],
-          series: [
-            {
-              name: 'Aceleracion (mk/s/s)',
-              type: 'line',
-              showSymbol: false,
-              data: value[0].traces_v,
-              animationDelay: (idx: number) => idx * 10,
-            },
-          ],
-          animationEasing: 'elasticOut',
-          animationDelayUpdate: (idx: number) => idx * 5,
-        };
-
-        this.dsp = {
-          title: {
-            text: `Desplazamiento - ${net}.${sta}.${cha} `,
-          },
-          tooltip: {
-            trigger: 'axis',
-          },
-          xAxis: {
-            data: value[0].tiempo_a,
-            silent: false,
-            name: "Tiempo [s]",
-            splitLine: {
-              show: false,
-            },
-          },
-          yAxis: {
-            name: "Desplazamiento"
-          },
-          dataZoom: [
-            {
-              type: 'inside',
-              start: 0,
-              end: 100
-            },
-            {
-              start: 0,
-              end: 100,
-              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
-              handleSize: '100%',
-              handleStyle: {
-                color: '#ddd'
-              }
-            }
-          ],
-          series: [
-            {
-              name: 'Aceleracion (mk/s/s)',
-              type: 'line',
-              showSymbol: false,
-              data: value[0].traces_d,
-              animationDelay: (idx: number) => idx * 10,
-            },
-          ],
-          animationEasing: 'elasticOut',
-          animationDelayUpdate: (idx: number) => idx * 5,
-        };
+        this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
 
       },
       error: err => {
@@ -932,12 +427,24 @@ export class VisorGraphComponent implements OnInit {
     return Object.values(group.value);
   }
 
-  graphGenerator(e: StationInfo, value: any) {
+  onTabChange(event: MatTabChangeEvent) {
+  }
 
+  graphGenerator(e: any, value: any, dataformat: any) {
+
+    const st = new Date(e.starttime).getTime()
+    const et = new Date(e.endtime).getTime()
+    console.log(st +'||||'+ et);
+    
+    const diff =  et - st;
+    const h = Math.floor(diff / (1000 * 60 * 60));
+    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((diff % (1000 * 60)) / 1000);
+    const ms = diff % 1000;
     this.accel = {
       title: {
-        text: `Aceleracion - ${e.network}.${e.station}.${e.channel}`,
-        subtext: `${e.start_time} | ${e.end_time}`,
+        text: `${dataformat} - Aceleracion | ${e.network}.${e.station}.${e.channel}`,
+        subtext: `Inicio: ${e.starttime} || Fin: ${e.endtime} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
       },
       tooltip: {
         trigger: 'axis',
@@ -954,7 +461,7 @@ export class VisorGraphComponent implements OnInit {
         }
       },
       grid: {
-        top: 80,
+        top: 100,
       },
       xAxis: {
         data: value[0].tiempo_a,
@@ -963,9 +470,12 @@ export class VisorGraphComponent implements OnInit {
         splitLine: {
           show: false,
         },
+        axisLabel: {
+          hideOverlap: true
+        }
       },
       yAxis: {
-        name: "Aceleracion"
+        name: "Aceleracion (cm/s^2)",
       },
       dataZoom: [
         {
@@ -985,7 +495,7 @@ export class VisorGraphComponent implements OnInit {
       ],
       series: [
         {
-          name: 'Aceleracion (mk/s/s)',
+          name: 'Aceleracion (cm/s^2)',
           type: 'line',
           showSymbol: false,
           data: value[0].traces_a,
@@ -998,8 +508,8 @@ export class VisorGraphComponent implements OnInit {
 
     this.vel = {
       title: {
-        text: `Velocidad - ${e.network}.${e.station}.${e.channel}`,
-        subtext: `${e.start_time} | ${e.end_time}`,
+        text: `${dataformat} - Velocidad | ${e.network}.${e.station}.${e.channel}`,
+        subtext: `Inicio: ${e.starttime} || Fin: ${e.endtime} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
       },
       tooltip: {
         trigger: 'axis',
@@ -1016,10 +526,21 @@ export class VisorGraphComponent implements OnInit {
         }
       },
       grid: {
-        top: 80,
+        top: 100,
+      },
+      xAxis: {
+        data: value[0].tiempo_a,
+        silent: false,
+        name: "Tiempo [s]",
+        splitLine: {
+          show: false,
+        },
+        axisLabel: {
+          hideOverlap: true
+        }
       },
       yAxis: {
-        name: "Velocidad"
+        name: "Velocidad (cm/s)",
       },
       dataZoom: [
         {
@@ -1052,8 +573,8 @@ export class VisorGraphComponent implements OnInit {
 
     this.dsp = {
       title: {
-        text: `Desplazamiento - ${e.network}.${e.station}.${e.channel}`,
-        subtext: `${e.start_time} | ${e.end_time}`,
+        text: `${dataformat} - Desplazamiento | ${e.network}.${e.station}.${e.channel}`,
+        subtext: `Inicio: ${e.starttime} || Fin: ${e.endtime} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
       },
       tooltip: {
         trigger: 'axis',
@@ -1070,7 +591,7 @@ export class VisorGraphComponent implements OnInit {
         }
       },
       grid: {
-        top: 80,
+        top: 100,
       },
       xAxis: {
         data: value[0].tiempo_a,
@@ -1079,9 +600,12 @@ export class VisorGraphComponent implements OnInit {
         splitLine: {
           show: false,
         },
+        axisLabel: {
+          hideOverlap: true
+        }
       },
       yAxis: {
-        name: "Desplazamiento"
+        name: "Desplazamiento (cm) ",
       },
       dataZoom: [
         {
@@ -1111,6 +635,21 @@ export class VisorGraphComponent implements OnInit {
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx: number) => idx * 5,
     };
+  }
+
+  setColorStationChannel(value: string): any {
+
+    const lastLetter = value.charAt(value.length - 1)
+
+    if (lastLetter === 'e' || lastLetter === 'E') {
+      return { 'background-color': 'blue' }
+    } else if (lastLetter === 'n' || lastLetter === 'N') {
+      return { 'background-color': 'green' }
+    } else if (lastLetter === 'z' || lastLetter === 'Z') {
+      return { 'background-color': 'red' }
+    } else {
+      return { 'background-color': 'black' }
+    }
   }
 
 }

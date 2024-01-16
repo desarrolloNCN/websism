@@ -153,6 +153,7 @@ h4 {
     width: 900px;
 }
 
+
 .graphContainer {
     padding: 5px;
     background-color: white;
@@ -160,13 +161,13 @@ h4 {
     border-radius: 5px;
 }
 
-.filterContainer{
+.filterContainer {
     padding: 12px 10px 0px 10px;
     background-color: white;
     border-radius: 5px;
 }
 
-.trimContainer{
+.trimContainer {
     padding: 12px 10px 0px 10px;
     background-color: white;
     border-radius: 5px;

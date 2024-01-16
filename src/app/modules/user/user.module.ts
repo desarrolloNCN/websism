@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 
 import { UserRoutingModule } from './user-routing.module';
 import { HomeComponent } from './pages/home/home.component';
@@ -24,6 +24,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     ReactiveFormsModule,
     FormsModule,
     NgxEchartsModule.forChild(),
-  ]
+  ],
+  providers: [
+    DatePipe,
+  ],
 })
 export class UserModule { }
