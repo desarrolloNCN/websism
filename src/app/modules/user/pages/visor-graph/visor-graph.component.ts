@@ -81,6 +81,7 @@ export class VisorGraphComponent implements OnInit {
   loadingSpinner = false
   loadingSpinnerGraph = false
   ToggleGraph = false
+  toggleTabs = false
 
   btnShow = false
   btnCancel = true
@@ -99,13 +100,14 @@ export class VisorGraphComponent implements OnInit {
   selectedStationInfo: StationInfo = {}
   baseLineOptions = ['constant', 'linear', 'demean', 'simple']
 
+  tabs: any = []
+  tabIndex = 0
 
+  actApli: any = []
 
   constructor(
     private obsApi: ObspyAPIService,
     private snackBar: MatSnackBar,
-    private chartGen: ChartDataService,
-    private datePipe : DatePipe
   ) { }
 
   ngOnInit(): void {
@@ -149,14 +151,14 @@ export class VisorGraphComponent implements OnInit {
 
   leerArchivo() {
 
+    this.clearData()
+
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
     let textoValue = this.controlForm.get('url').value;
     let archivoValue = this.arch;
-
-    this.groupedData = {}
 
     let valorNoVacio: string | File | undefined;
 
@@ -192,6 +194,7 @@ export class VisorGraphComponent implements OnInit {
           } else if (this.stringdata == null) {
             this.obsApi.getData(this.urlFile).subscribe({
               next: value => {
+                this.toggleTabs = true
                 this.groupedData = this.groupByNetworkAndStation(value.data)
               },
               error: err => console.error('REQUEST API ERROR: ' + err.message),
@@ -205,16 +208,23 @@ export class VisorGraphComponent implements OnInit {
 
         }
       })
+
     } else {
       this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
       this.loadingSpinner = false
     }
   }
 
-  tabs: any = []
-  tabIndex = 0
+
 
   leer(e: any) {
+
+    for (const elem of this.tabs) {
+      if (elem.label == `${e.station}.${e.channel}`) {
+        alert('Ya hay una pestaña con esa estacion')
+        return
+      }
+    }
 
     localStorage.setItem('net', e.network)
     localStorage.setItem('sta', e.station)
@@ -224,10 +234,6 @@ export class VisorGraphComponent implements OnInit {
     this.ToggleGraph = false
 
     this.stationInfo = e
-
-    this.accel = {}
-    this.vel = {}
-    this.dsp = {}
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
@@ -314,7 +320,7 @@ export class VisorGraphComponent implements OnInit {
         console.error('REQUEST API ERROR: ' + err.message)
       },
       complete: () => {
-
+        this.actApli.push(`Linea Base: ${base}`)
         this.loadingSpinnerGraph = false
         this.ToggleGraph = true
       }
@@ -376,14 +382,6 @@ export class VisorGraphComponent implements OnInit {
     })
   }
 
-  filterData() {
-    this.toogleFilter = !this.toogleFilter
-  }
-
-  trimData() {
-    this.toogleTrim = !this.toogleTrim
-  }
-
   deleteFile() {
     this.btnShow = false;
     this.btnCancel = true;
@@ -398,6 +396,14 @@ export class VisorGraphComponent implements OnInit {
 
   togglePanel() {
     this.hideStaPanel = !this.hideStaPanel
+  }
+
+  filterData() {
+    this.toogleFilter = !this.toogleFilter
+  }
+
+  trimData() {
+    this.toogleTrim = !this.toogleTrim
   }
 
   groupedData: { [key: string]: any[] } = {};
@@ -434,9 +440,9 @@ export class VisorGraphComponent implements OnInit {
 
     const st = new Date(e.starttime).getTime()
     const et = new Date(e.endtime).getTime()
-    console.log(st +'||||'+ et);
-    
-    const diff =  et - st;
+
+
+    const diff = et - st;
     const h = Math.floor(diff / (1000 * 60 * 60));
     const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const s = Math.floor((diff % (1000 * 60)) / 1000);
@@ -650,6 +656,18 @@ export class VisorGraphComponent implements OnInit {
     } else {
       return { 'background-color': 'black' }
     }
+  }
+
+  clearData() {
+    localStorage.clear
+    this.tabs = []
+    this.accel = {}
+    this.vel = {}
+    this.dsp = {}
+
+    this.groupedData = {}
+
+
   }
 
 }

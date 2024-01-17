@@ -100,6 +100,12 @@ h4 {
     width: auto;
 }
 
+.listAct {
+    border-radius: 5px;
+    padding: 5px;
+    background-color: rgb(248, 248, 248);
+}
+
 .stGraph {
     padding: 5px;
     background-color: rgb(243, 243, 243);
@@ -149,10 +155,18 @@ h4 {
 }
 
 .divGraph {
-    padding: 8px;
+    padding: 4px 0 4px 0;
     width: 900px;
+    height: 500px;
 }
 
+
+.spinnerContainer {
+    padding: 5px;
+    background-color: white;
+    height: 100%;
+    border-radius: 5px;
+}
 
 .graphContainer {
     padding: 5px;

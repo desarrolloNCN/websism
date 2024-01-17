@@ -110,7 +110,8 @@
                 <h4>Datos relevantes de la estacion seleccionada</h4>
             </div>
             <div class="listSt" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
-                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
                     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> NETWORK:</p>
@@ -126,7 +127,7 @@
                     <P><b>{{stationInfo.station}} </b></P>
                 </div>
 
-                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
                     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> LOCATION:</p>
@@ -142,7 +143,7 @@
                     <P><b>{{stationInfo.channel}} </b></P>
                 </div>
 
-                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
                     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> SAMPLING RATE:</p>
@@ -150,7 +151,7 @@
                     <P><b>{{stationInfo.sampling_rate}} </b></P>
                 </div>
 
-                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
                     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> START TIME:</p>
@@ -158,7 +159,7 @@
                     <P><b>{{stationInfo.starttime | date: 'short'}} </b></P>
                 </div>
 
-                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
                     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> END TIME:</p>
@@ -174,7 +175,7 @@
                     <P><b>{{stationInfo.delta}} </b></P>
                 </div>
 
-                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
                     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> NPTS</p>
@@ -189,6 +190,30 @@
                     </div>
                     <P><b>{{stationInfo.calib}} </b></P>
                 </div>
+
+            </div>
+        </div>
+        <div fxLayout="column" fxLayoutGap="5">
+            <div style="padding-left: 10px;">
+                <h2><b>ACTIVIDADES APLICADAS</b></h2>
+                <h4>Lista de actividades aplicada a los datos</h4>
+            </div>
+            <div class="listAct" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
+
+                <div *ngFor="let item of actApli; let i = index" style="width: 100%;">
+
+                    <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                        <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                            <mat-icon class="iconstainfo">commit</mat-icon>
+                            <p> ACTIVIDAD {{i+1}}: </p>
+                        </div>
+                        <div>
+                            <P><b>{{item}}</b></P>
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
         </div>
     </div>
@@ -349,22 +374,23 @@
             </form>
         </div>
 
-
-
-        <div class="graphContainer">
-
-            <!-- <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+        <!-- <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
                 <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                     [diameter]="50"></mat-progress-spinner>
                 <h3> <b>Cargando Datos ....</b> </h3>
             </div> -->
 
-            <!-- <div *ngIf="ToggleGraph" echarts [options]="accel" class="divGraph"></div>
+        <!-- <div *ngIf="ToggleGraph" echarts [options]="accel" class="divGraph"></div>
             <div *ngIf="ToggleGraph" echarts [options]="vel" class="divGraph"></div>
             <div *ngIf="ToggleGraph" echarts [options]="dsp" class="divGraph"></div> -->
-
+        <div class="graphContainer" fxLayout="column" fxLayoutAlign="center center">
+            <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+                <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
+                    [diameter]="50"></mat-progress-spinner>
+                <h3> <b>Cargando Datos ....</b> </h3>
+            </div>
             <mat-tab-group (selectedTabChange)="onTabChange($event)">
-                <mat-tab *ngFor="let tab of tabs; let i = index" [label]="getTabLabel(tab)" >
+                <mat-tab *ngFor="let tab of tabs; let i = index" [label]="getTabLabel(tab)">
 
                     <ng-template mat-tab-label>
                         {{ getTabLabel(tab) }}
@@ -372,12 +398,6 @@
                             <mat-icon aria-label="Cerrar pestaña">close</mat-icon>
                         </button>
                     </ng-template>
-
-                    <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
-                        <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
-                            [diameter]="50"></mat-progress-spinner>
-                        <h3> <b>Cargando Datos ....</b> </h3>
-                    </div>
 
                     <div *ngIf="tab">
                         <div *ngIf="ToggleGraph" echarts [options]="accel" class="divGraph"></div>
