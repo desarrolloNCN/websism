@@ -17,6 +17,7 @@ h4 {
 }
 
 .winTitle {
+    padding-top: 10px;
     padding-bottom: 10px;
 }
 
@@ -113,6 +114,7 @@ h4 {
 }
 
 .graphBar {
+    width: 100%;
     padding: 3px;
     border-radius: 5px;
     background-color: white;
@@ -156,6 +158,8 @@ h4 {
 
 .divGraph {
     padding: 4px 0 4px 0;
+    min-width: 100%;
+    max-width: 100%;
     width: 900px;
     height: 500px;
 }
@@ -173,6 +177,7 @@ h4 {
     background-color: white;
     height: 100%;
     border-radius: 5px;
+    width: 100%;
 }
 
 .filterContainer {

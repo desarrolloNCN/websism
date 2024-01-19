@@ -6,9 +6,10 @@ import {
   HttpRequest,
   HttpHandler,
   HttpEvent,
-  HttpHeaders
+  HttpHeaders,
+  HttpResponse
 } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 
 @Injectable()
 export class HttpHeadersInterceptor implements HttpInterceptor {
@@ -17,6 +18,7 @@ export class HttpHeadersInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     console.log('Interceptor Iniciado')
+
     if (!req.headers.has('Authorization')) {
       const authHeader = 'Basic ' + btoa(`${this.user}:${this.pass}`);
       req = req.clone({
@@ -25,11 +27,13 @@ export class HttpHeadersInterceptor implements HttpInterceptor {
           
         },
         // url: `http://pedro.ncn.pe:8000/${req.url}`
-        url: `http://localhost:8000/${req.url}`
+        url: `https://apiqs.ncn.pe/${req.url}`
+        // url: `http://localhost:8000/${req.url}`
       });
     }
 
     // Continúa con la solicitud modificada
     return next.handle(req);
   }
+  
 }

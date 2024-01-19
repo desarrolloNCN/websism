@@ -8,13 +8,12 @@ import { MaterialModule } from 'src/app/material/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { VisorGraphComponent } from './pages/visor-graph/visor-graph.component';
 import { NgxEchartsModule } from 'ngx-echarts';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 
 @NgModule({
   declarations: [
     HomeComponent,
-    VisorGraphComponent
+    VisorGraphComponent,
   ],
   imports: [
     CommonModule,
