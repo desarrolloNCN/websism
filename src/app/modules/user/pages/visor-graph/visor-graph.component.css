@@ -17,6 +17,7 @@ h4 {
 }
 
 .winTitle {
+    padding-top: 10px;
     padding-bottom: 10px;
 }
 
@@ -100,6 +101,12 @@ h4 {
     width: auto;
 }
 
+.listAct {
+    border-radius: 5px;
+    padding: 5px;
+    background-color: rgb(248, 248, 248);
+}
+
 .stGraph {
     padding: 5px;
     background-color: rgb(243, 243, 243);
@@ -107,6 +114,7 @@ h4 {
 }
 
 .graphBar {
+    width: 100%;
     padding: 3px;
     border-radius: 5px;
     background-color: white;
@@ -149,16 +157,27 @@ h4 {
 }
 
 .divGraph {
-    padding: 8px;
+    padding: 4px 0 4px 0;
+    min-width: 100%;
+    max-width: 100%;
     width: 900px;
+    height: 500px;
 }
 
+
+.spinnerContainer {
+    padding: 5px;
+    background-color: white;
+    height: 100%;
+    border-radius: 5px;
+}
 
 .graphContainer {
     padding: 5px;
     background-color: white;
     height: 100%;
     border-radius: 5px;
+    width: 100%;
 }
 
 .filterContainer {

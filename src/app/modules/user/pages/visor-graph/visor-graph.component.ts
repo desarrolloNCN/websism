@@ -2,24 +2,9 @@ import { trigger, transition, style, animate, state } from '@angular/animations'
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
-import { MatTabChangeEvent } from '@angular/material/tabs';
-import { EChartsOption } from 'echarts';
-import { ChartDataService } from 'src/app/service/chart-data.service';
+import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
+import { ECharts, EChartsCoreOption, EChartsOption } from 'echarts';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
-import { DatePipe } from '@angular/common';
-
-export interface StationInfo {
-  network?: string,
-  station?: string,
-  location?: string,
-  channel?: string,
-  sampling_rate?: string,
-  start_time?: string,
-  end_time?: string,
-  delta?: string
-  npts?: string
-  calib?: string
-}
 
 @Component({
   selector: 'app-visor-graph',
@@ -80,7 +65,10 @@ export class VisorGraphComponent implements OnInit {
 
   loadingSpinner = false
   loadingSpinnerGraph = false
+  loadingSpinnerData = false
+
   ToggleGraph = false
+  toggleTabs = false
 
   btnShow = false
   btnCancel = true
@@ -96,20 +84,23 @@ export class VisorGraphComponent implements OnInit {
   toogleTrim = false
   toogleFilter = false
 
-  selectedStationInfo: StationInfo = {}
   baseLineOptions = ['constant', 'linear', 'demean', 'simple']
 
+  tabs: any = []
+  matTabs: MatTab[] = []
+  tabIndex = 0
 
+  actApli: any = []
 
   constructor(
     private obsApi: ObspyAPIService,
     private snackBar: MatSnackBar,
-    private chartGen: ChartDataService,
-    private datePipe : DatePipe
+
   ) { }
 
   ngOnInit(): void {
     localStorage.clear()
+
     this.controlForm = new FormGroup({
       url: new FormControl(''),
 
@@ -149,14 +140,14 @@ export class VisorGraphComponent implements OnInit {
 
   leerArchivo() {
 
+    this.clearData()
+
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
     let textoValue = this.controlForm.get('url').value;
     let archivoValue = this.arch;
-
-    this.groupedData = {}
 
     let valorNoVacio: string | File | undefined;
 
@@ -183,7 +174,11 @@ export class VisorGraphComponent implements OnInit {
               next: value => {
                 this.groupedData = this.groupByNetworkAndStation(value.data)
               },
-              error: err => console.error('REQUEST API ERROR: ' + err.message),
+              error: err => {
+                this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                this.loadingSpinner = false
+
+              },
               complete: () => {
                 this.loadingSpinner = false
               }
@@ -192,9 +187,14 @@ export class VisorGraphComponent implements OnInit {
           } else if (this.stringdata == null) {
             this.obsApi.getData(this.urlFile).subscribe({
               next: value => {
+
+                this.toggleTabs = true
                 this.groupedData = this.groupByNetworkAndStation(value.data)
               },
-              error: err => console.error('REQUEST API ERROR: ' + err.message),
+              error: err => {
+                this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                this.loadingSpinner = false
+              },
               complete: () => {
                 this.loadingSpinner = false
               }
@@ -205,16 +205,21 @@ export class VisorGraphComponent implements OnInit {
 
         }
       })
+
     } else {
       this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
       this.loadingSpinner = false
     }
   }
 
-  tabs: any = []
-  tabIndex = 0
-
   leer(e: any) {
+
+    for (const elem of this.tabs) {
+      if (elem.label == `${e.station}.${e.channel}`) {
+        alert('Ya hay una pestaña con esa estacion')
+        return
+      }
+    }
 
     localStorage.setItem('net', e.network)
     localStorage.setItem('sta', e.station)
@@ -222,12 +227,9 @@ export class VisorGraphComponent implements OnInit {
 
     this.loadingSpinnerGraph = true
     this.ToggleGraph = false
+    this.toggleTabs = false
 
     this.stationInfo = e
-
-    this.accel = {}
-    this.vel = {}
-    this.dsp = {}
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
@@ -241,6 +243,7 @@ export class VisorGraphComponent implements OnInit {
         this.plotedimages = value
 
         const graph = this.graphGenerator(e, value, '(RAWDATA)')
+        this.toggleTabs = true
         this.tabs.push(
           {
             label: `${e.station}.${e.channel}`,
@@ -263,10 +266,16 @@ export class VisorGraphComponent implements OnInit {
   }
 
   onCloseTab(index: number) {
+    // if(this.tabs.length < 0){
+    //   this.toggleTabs = false
+    // }
     this.tabs.splice(index, 1);
   }
 
-  baseLineCorrecion(base: string) {
+  baseLineCorrecion(base: string, index: number) {
+
+    console.log('tab index'+ index);
+    
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
@@ -280,7 +289,6 @@ export class VisorGraphComponent implements OnInit {
 
     localStorage.setItem('base', base)
 
-    this.loadingSpinnerGraph = true
     this.ToggleGraph = false
 
     //this.stationInfo = e
@@ -302,10 +310,22 @@ export class VisorGraphComponent implements OnInit {
       next: value => {
 
         this.ToggleGraph = false
-        this.plotedimages = value
 
-        this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+        const indx = this.tabs[index].index
+        
+        if(indx !== -1){
+          
+          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
 
+          const updGraph = { ...this.tabs[indx], graph: graph };
+
+          this.tabs = [
+            ...this.tabs.slice(0, indx),
+            updGraph,
+            ...this.tabs.slice(indx + 1),
+          ]
+        }
+       
 
       },
       error: err => {
@@ -314,14 +334,14 @@ export class VisorGraphComponent implements OnInit {
         console.error('REQUEST API ERROR: ' + err.message)
       },
       complete: () => {
-
-        this.loadingSpinnerGraph = false
+        this.actApli.push(`Linea Base: ${base}`)
+        this.loadingSpinnerData = false
         this.ToggleGraph = true
       }
     })
   }
 
-  addFilter() {
+  addFilter(index: number) {
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
@@ -358,9 +378,22 @@ export class VisorGraphComponent implements OnInit {
       next: value => {
 
         this.ToggleGraph = false
-        this.plotedimages = value
+        this.loadingSpinnerData = true
 
-        this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+        const indx = this.tabs[index].index
+        
+        if(indx !== -1){
+          
+          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+
+          const updGraph = { ...this.tabs[indx], graph: graph };
+
+          this.tabs = [
+            ...this.tabs.slice(0, indx),
+            updGraph,
+            ...this.tabs.slice(indx + 1),
+          ]
+        }
 
       },
       error: err => {
@@ -369,19 +402,11 @@ export class VisorGraphComponent implements OnInit {
         console.error('REQUEST API ERROR: ' + err.message)
       },
       complete: () => {
-
+        this.loadingSpinnerData = false
         this.loadingSpinnerGraph = false
         this.ToggleGraph = true
       }
     })
-  }
-
-  filterData() {
-    this.toogleFilter = !this.toogleFilter
-  }
-
-  trimData() {
-    this.toogleTrim = !this.toogleTrim
   }
 
   deleteFile() {
@@ -398,6 +423,14 @@ export class VisorGraphComponent implements OnInit {
 
   togglePanel() {
     this.hideStaPanel = !this.hideStaPanel
+  }
+
+  filterData() {
+    this.toogleFilter = !this.toogleFilter
+  }
+
+  trimData() {
+    this.toogleTrim = !this.toogleTrim
   }
 
   groupedData: { [key: string]: any[] } = {};
@@ -428,26 +461,34 @@ export class VisorGraphComponent implements OnInit {
   }
 
   onTabChange(event: MatTabChangeEvent) {
+
   }
 
   graphGenerator(e: any, value: any, dataformat: any) {
 
     const st = new Date(e.starttime).getTime()
     const et = new Date(e.endtime).getTime()
-    console.log(st +'||||'+ et);
-    
-    const diff =  et - st;
+
+
+    const diff = et - st;
     const h = Math.floor(diff / (1000 * 60 * 60));
     const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const s = Math.floor((diff % (1000 * 60)) / 1000);
     const ms = diff % 1000;
-    this.accel = {
+
+    const graphArr: any = []
+
+    const accel = {
+      animationDuration: 5000,
       title: {
         text: `${dataformat} - Aceleracion | ${e.network}.${e.station}.${e.channel}`,
         subtext: `Inicio: ${e.starttime} || Fin: ${e.endtime} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
       },
       tooltip: {
         trigger: 'axis',
+        axisPointer: {
+          type: 'cross'
+        }
       },
       toolbox: {
         show: true,
@@ -506,7 +547,8 @@ export class VisorGraphComponent implements OnInit {
       animationDelayUpdate: (idx: number) => idx * 5,
     };
 
-    this.vel = {
+    const vel = {
+      animationDuration: 5000,
       title: {
         text: `${dataformat} - Velocidad | ${e.network}.${e.station}.${e.channel}`,
         subtext: `Inicio: ${e.starttime} || Fin: ${e.endtime} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
@@ -571,13 +613,17 @@ export class VisorGraphComponent implements OnInit {
       animationDelayUpdate: (idx: number) => idx * 5,
     };
 
-    this.dsp = {
+    const dsp = {
+      animationDuration: 5000,
       title: {
         text: `${dataformat} - Desplazamiento | ${e.network}.${e.station}.${e.channel}`,
         subtext: `Inicio: ${e.starttime} || Fin: ${e.endtime} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
       },
       tooltip: {
         trigger: 'axis',
+        axisPointer: {
+          type: 'cross'
+        }
       },
       toolbox: {
         show: true,
@@ -635,6 +681,13 @@ export class VisorGraphComponent implements OnInit {
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx: number) => idx * 5,
     };
+
+    graphArr.push(accel)
+    graphArr.push(vel)
+    graphArr.push(dsp)
+
+    return graphArr
+
   }
 
   setColorStationChannel(value: string): any {
@@ -652,4 +705,27 @@ export class VisorGraphComponent implements OnInit {
     }
   }
 
+  showtabs(bol: any): any {
+    if (bol == true) {
+      return { 'display': 'block' }
+    } else {
+      return { 'display': 'none' }
+    }
+  }
+
+  clearData() {
+    localStorage.clear
+    this.tabs = []
+    this.actApli = []
+
+    this.accel = {}
+    this.vel = {}
+    this.dsp = {}
+
+    this.groupedData = {}
+  }
+
+  f() {
+
+  }
 }

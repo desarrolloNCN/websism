@@ -110,7 +110,8 @@
                 <h4>Datos relevantes de la estacion seleccionada</h4>
             </div>
             <div class="listSt" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
-                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
                     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> NETWORK:</p>
@@ -126,7 +127,7 @@
                     <P><b>{{stationInfo.station}} </b></P>
                 </div>
 
-                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
                     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> LOCATION:</p>
@@ -142,7 +143,7 @@
                     <P><b>{{stationInfo.channel}} </b></P>
                 </div>
 
-                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
                     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> SAMPLING RATE:</p>
@@ -150,7 +151,7 @@
                     <P><b>{{stationInfo.sampling_rate}} </b></P>
                 </div>
 
-                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
                     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> START TIME:</p>
@@ -158,7 +159,7 @@
                     <P><b>{{stationInfo.starttime | date: 'short'}} </b></P>
                 </div>
 
-                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
                     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> END TIME:</p>
@@ -174,7 +175,7 @@
                     <P><b>{{stationInfo.delta}} </b></P>
                 </div>
 
-                <div class="stainfospan" fxLayout="row" fxLayoutGap="30" fxLayoutAlign="space-between">
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
                     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> NPTS</p>
@@ -189,13 +190,37 @@
                     </div>
                     <P><b>{{stationInfo.calib}} </b></P>
                 </div>
+
+            </div>
+        </div>
+        <div fxLayout="column" fxLayoutGap="5">
+            <div style="padding-left: 10px;">
+                <h2><b>ACTIVIDADES APLICADAS</b></h2>
+                <h4>Lista de actividades aplicada a los datos</h4>
+            </div>
+            <div class="listAct" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
+
+                <div *ngFor="let item of actApli; let i = index" style="width: 100%;">
+
+                    <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                        <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                            <mat-icon class="iconstainfo">commit</mat-icon>
+                            <p> ACTIVIDAD {{i+1}}: </p>
+                        </div>
+                        <div>
+                            <P><b>{{item}}</b></P>
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
         </div>
     </div>
 
     <div [@enterAnimation3] class="stGraph" fxLayout="column" fxLayoutGap="10" fxFlex>
 
-        <div class="graphBar" fxLayout="row">
+        <!-- <div class="graphBar" fxLayout="row">
 
             <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                 <button mat-icon-button type="button" (click)="togglePanel()">
@@ -347,24 +372,21 @@
                 </div>
 
             </form>
-        </div>
+        </div> -->
 
 
+        <div class="graphContainer" fxLayout="column" fxLayoutAlign="start center">
 
-        <div class="graphContainer">
-
-            <!-- <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+            <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
                 <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                     [diameter]="50"></mat-progress-spinner>
                 <h3> <b>Cargando Datos ....</b> </h3>
-            </div> -->
+            </div>
 
-            <!-- <div *ngIf="ToggleGraph" echarts [options]="accel" class="divGraph"></div>
-            <div *ngIf="ToggleGraph" echarts [options]="vel" class="divGraph"></div>
-            <div *ngIf="ToggleGraph" echarts [options]="dsp" class="divGraph"></div> -->
+            <mat-tab-group (selectedTabChange)="onTabChange($event)" #tabGroup style="width: 100%;"
+                [ngStyle]="showtabs(toggleTabs)">
 
-            <mat-tab-group (selectedTabChange)="onTabChange($event)">
-                <mat-tab *ngFor="let tab of tabs; let i = index" [label]="getTabLabel(tab)" >
+                <mat-tab *ngFor="let tab of tabs; let i = index" [label]="getTabLabel(tab)">
 
                     <ng-template mat-tab-label>
                         {{ getTabLabel(tab) }}
@@ -373,21 +395,201 @@
                         </button>
                     </ng-template>
 
-                    <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
-                        <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
-                            [diameter]="50"></mat-progress-spinner>
-                        <h3> <b>Cargando Datos ....</b> </h3>
+                    <div fxLayout="column" fxLayoutGap="20">
+
+                        <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10" style="width: 100%; padding: 5px; background-color: rgb(250, 250, 250);">
+
+                            <div class="graphBar" fxLayout="row">
+    
+                                <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
+                                    <button mat-icon-button type="button" (click)="togglePanel()">
+                                        <mat-icon class="colorIconBar" title="Ocultar Paneles">visibility_off</mat-icon>
+                                    </button>
+                                    <mat-divider class="separator" vertical="true"></mat-divider>
+                                </div>
+    
+                                <div fxLayout="row" fxLayoutGap="1" fxLayoutAlign="center center">
+                                    <button mat-icon-button type="button" [matMenuTriggerFor]="cambioUnidad">
+                                        <mat-icon class="colorIconBar" title="Calibrar Trazas">gavel</mat-icon>
+                                        <mat-menu #cambioUnidad>
+                                            <button mat-menu-item>
+                                                <mat-icon>add_to_drive</mat-icon>
+                                                cm/s^2
+                                            </button>
+                                            <button mat-menu-item>
+                                                <mat-icon>add_to_drive</mat-icon>
+                                                m/s^2
+                                            </button>
+                                            <button mat-menu-item>
+                                                <mat-icon>add_to_drive</mat-icon>
+                                                G
+                                            </button>
+                                            <button mat-menu-item>
+                                                <mat-icon>add_to_drive</mat-icon>
+                                                Unk
+                                            </button>
+                                        </mat-menu>
+                                    </button>
+                                    <mat-divider class="separator" vertical="true"></mat-divider>
+                                </div>
+    
+                                <button mat-icon-button type="button" [matMenuTriggerFor]="menuBaseLine">
+                                    <mat-icon class="colorIconBar"
+                                        title="Correccion por Linea Base">monitor_heart</mat-icon>
+                                    <mat-menu #menuBaseLine>
+                                        <button mat-menu-item (click)="baseLineCorrecion('constant', i)">
+                                            <mat-icon>add_to_drive</mat-icon>
+                                            Constante
+                                        </button>
+                                        <button mat-menu-item (click)="baseLineCorrecion('linear', i)">
+                                            <mat-icon>add_to_drive</mat-icon>
+                                            Linear
+                                        </button>
+                                        <button mat-menu-item (click)="baseLineCorrecion('demean', i)">
+                                            <mat-icon>add_to_drive</mat-icon>
+                                            Demean
+                                        </button>
+                                        <button mat-menu-item (click)="baseLineCorrecion('simple', i)">
+                                            <mat-icon>add_to_drive</mat-icon>
+                                            Simple
+                                        </button>
+                                    </mat-menu>
+                                </button>
+    
+                                <button mat-icon-button type="button" (click)="trimData()">
+                                    <mat-icon class="colorIconBar" title="Trim (Recorte de Traza)">content_cut</mat-icon>
+                                </button>
+    
+                                <button mat-icon-button type="button" (click)="filterData()">
+                                    <mat-icon class="colorIconBar" title="Filtro">filter_alt</mat-icon>
+                                </button>
+    
+                                <div class="spacer"></div>
+    
+                                <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
+                                    <mat-divider class="separator" vertical="true"></mat-divider>
+                                    <button mat-icon-button type="button" (click)="leerArchivo()">
+                                        <mat-icon class="colorIconBar" title="Reestablecer Datos">refresh</mat-icon>
+                                    </button>
+                                </div>
+    
+                            </div>
+    
+                            <div *ngIf="toogleTrim" class="trimContainer">
+                                <form [formGroup]="TrimForm" fxLayout="row" fxLayoutGap="10" fxLayoutAlign="center center">
+    
+                                    <h4 style="padding-bottom: 13px ; padding-left: 10px;"><b>Indicar Inicio y Fin: </b>
+                                    </h4>
+    
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Tiempo de Inicio (seg.)</mat-label>
+                                        <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
+                                        <input matInput>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Tiempo de Fin (seg.)</mat-label>
+                                        <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
+                                        <input matInput>
+                                    </mat-form-field>
+    
+                                    <div style="padding-bottom: 16px; padding-left: 15px;">
+                                        <button type="submit" class="sendInfoSubBar" mat-raised-button color="primary">
+                                            <mat-icon>query_stats</mat-icon>
+                                            APLICAR
+                                        </button>
+                                    </div>
+    
+                                </form>
+                            </div>
+    
+                            <div *ngIf="toogleFilter" class="filterContainer">
+                                <form [formGroup]="FilterForm" fxLayout="row" fxLayoutGap="10" fxLayoutAlign="center center"
+                                    (submit)="addFilter(i)">
+    
+                                    <h4 style="padding-bottom: 13px ; padding-left: 10px;"><b>Tipo de Filtro
+                                            ButterWorth:</b></h4>
+    
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Tipo de Filtro</mat-label>
+                                        <mat-icon class="colorIconSubBar" matPrefix>query_stats</mat-icon>
+                                        <mat-select formControlName="type">
+                                            <mat-option value="bandpass">BandPass</mat-option>
+                                            <mat-option value="bandstop">BandStop</mat-option>
+                                            <mat-option value="lowpass">LowPass</mat-option>
+                                            <mat-option value="highpass">HighPass</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+    
+                                    <mat-divider class="separatorSubBar" vertical="true"></mat-divider>
+    
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Frecuencia Min</mat-label>
+                                        <mat-icon class="colorIconSubBar" matPrefix>show_chart</mat-icon>
+                                        <input matInput type="number" formControlName="freqmin">
+                                        <mat-error *ngIf="FilterForm.get('freqmin')?.hasError('required')"> Ingrese <strong>
+                                                Freq. Min. </strong> </mat-error>
+                                    </mat-form-field>
+    
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Frecuencia Max</mat-label>
+                                        <mat-icon class="colorIconSubBar" matPrefix>stacked_line_chart</mat-icon>
+                                        <input matInput type="number" formControlName="freqmax">
+                                        <mat-error *ngIf="FilterForm.get('freqmax')?.hasError('required')"> Ingrese <strong>
+                                                Freq. Max. </strong> </mat-error>
+                                    </mat-form-field>
+    
+                                    <mat-form-field appearance="outline">
+                                        <mat-label>Corner</mat-label>
+                                        <mat-icon class="colorIconSubBar" matPrefix>stacked_line_chart</mat-icon>
+                                        <input matInput type="number" formControlName="order">
+                                        <mat-error *ngIf="FilterForm.get('order')?.hasError('required')"> Ingrese <strong>
+                                                Corner </strong> </mat-error>
+                                    </mat-form-field>
+    
+                                    <div style="padding-bottom: 16px; padding-left: 15px;">
+                                        <button type="submit" class="sendInfoSubBar" mat-raised-button color="primary">
+                                            <mat-icon>query_stats</mat-icon>
+                                            APLICAR
+                                        </button>
+                                    </div>
+    
+                                </form>
+                            </div>
+
+                        </div>
+    
+                        <div *ngIf="loadingSpinnerData" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+                            <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
+                                [diameter]="50"></mat-progress-spinner>
+                            <h3> <b>Cargando Datos ....</b> </h3>
+                        </div>
+    
+                        <div fxLayout="column" fxLayoutGap="10">
+                            <div *ngIf="ToggleGraph" echarts [options]="tab.graph[0]" class="divGraph"></div>
+                            <div *ngIf="ToggleGraph" echarts [options]="tab.graph[1]" class="divGraph"></div>
+                            <div *ngIf="ToggleGraph" echarts [options]="tab.graph[2]" class="divGraph"></div>
+                        </div>
                     </div>
 
-                    <div *ngIf="tab">
-                        <div *ngIf="ToggleGraph" echarts [options]="accel" class="divGraph"></div>
-                        <div *ngIf="ToggleGraph" echarts [options]="vel" class="divGraph"></div>
-                        <div *ngIf="ToggleGraph" echarts [options]="dsp" class="divGraph"></div>
-                    </div>
+                    
 
                 </mat-tab>
             </mat-tab-group>
 
         </div>
+
     </div>
 </div>
+
+
+
+
+<!-- <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+                <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
+                    [diameter]="50"></mat-progress-spinner>
+                <h3> <b>Cargando Datos ....</b> </h3>
+            </div> -->
+
+<!-- <div *ngIf="ToggleGraph" echarts [options]="accel" class="divGraph"></div>
+            <div *ngIf="ToggleGraph" echarts [options]="vel" class="divGraph"></div>
+            <div *ngIf="ToggleGraph" echarts [options]="dsp" class="divGraph"></div> -->

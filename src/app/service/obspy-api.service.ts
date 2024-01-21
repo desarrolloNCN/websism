@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http'
+import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { Observable, catchError, of, throwError } from 'rxjs';
 
 @Injectable({
@@ -42,7 +42,7 @@ export class ObspyAPIService {
 
     return this.http.post<any>(url, formData).pipe(
       catchError(error => {
-        return of(error)
+        return throwError(() => error);
       })
     );
   }
