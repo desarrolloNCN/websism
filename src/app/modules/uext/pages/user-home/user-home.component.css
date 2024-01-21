@@ -1,19 +1,3 @@
-.home{
-    background-color: rgb(219, 218, 218);
-    height: 100%;
-}
-
-.banner{
-    height: 70px;
-    background-color: #31456D;
-    padding: 0px 20px 0 20px;
-    position: sticky;
-}
-
-.bodyHome{
-    padding: 20px;
-}
-
 p,
 h2,
 h4 {
@@ -32,11 +16,63 @@ h4 {
     color: #747474
 }
 
+.home {
+    background-color: rgb(219, 218, 218);
+    height: 100%;
+}
+
+.banner {
+    height: 70px;
+    background-color: #18294d;
+    padding: 0px 20px 0 20px;
+    position: sticky;
+}
+
+.logoQs {
+    height: 45px;
+    width: 45px;
+    object-fit: contain;
+}
+
+.separator {
+    border: solid #ffffff5d 1px;
+    
+    height: 40px;
+}
+
+.qs {
+    margin: 0;
+    color: white;
+    font-weight: bold;
+}
+
+.subqs {
+    margin-top: -6px;
+    color: rgba(238, 238, 238, 0.904);
+}
+
+.registerBtn {
+    border-radius: 5px;
+    padding: 5px;
+    background-color: rgb(241, 174, 72);
+    color: white;
+    box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
+}
+
+.bodyHome {
+    background-color: #18294d;
+    padding: 20px;
+}
+
+
+
 .winTitle {
     padding-bottom: 20px;
+    text-align: center;
 }
 
 .dndZoneContainer {
+    width: 60%;
     background-color: whitesmoke;
     padding: 5px;
     border-radius: 10px;
@@ -74,7 +110,7 @@ h4 {
     box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
 }
 
-.infoDiv{
+.infoDiv {
     border-radius: 5px;
     background-color: #31456D;
     padding: 10px;
@@ -82,18 +118,19 @@ h4 {
     padding-bottom: 40px;
 }
 
-.infoDiv mat-icon{
-   height: 50px;
-   width: 50px;
-   font-size: 50px;
+.infoDiv mat-icon {
+    height: 50px;
+    width: 50px;
+    font-size: 50px;
 }
 
-.infoDiv, .infoDiv p{
+.infoDiv,
+.infoDiv p {
     text-align: center;
     color: #DEDEDE;
     width: 230px;
 }
 
-.infoIconDiv{
+.infoIconDiv {
     color: #F8BD79;
 }
