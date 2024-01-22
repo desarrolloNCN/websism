@@ -1,6 +1,7 @@
 <div class="home" fxLayout="column">
 
     <div class="banner" fxLayout="row" fxLayoutAlign="space-between center">
+
         <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
             <img class="logoQs" src="/assets/qsv1.png">
             <mat-divider class="separator" vertical="true"></mat-divider>
@@ -10,7 +11,25 @@
             </div>
         </div>
 
-        
+        <div fxLayout="row" fxLayoutGap="30" fxLayoutAlign="center center" class="navBar">
+            <a>INICIO</a>
+            <a>LECTOR</a>
+            <a>ACERCA DE</a>
+            <a>CONTACTO</a>
+        </div>
+
+        <div>
+
+            <button mat-button style="color: white;">
+                Identificarse
+            </button>
+
+            <button mat-flat-button class="registerBtn">
+                Registro
+            </button>
+
+        </div>
+
     </div>
 
     <div class="bodyHome" fxLayout="column" fxLayoutAlign="center center">
@@ -68,6 +87,87 @@
             </div>
         </div>
 
+    </div>
+
+</div>
+
+<div class="userfooter" fxLayout="column">
+
+    <div style="height: 80px; overflow: hidden; margin-top: -110px;">
+        <svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;">
+            <path d="M-1.41,65.63 C204.00,13.33 298.81,111.03 500.00,49.98 L500.00,150.00 L0.00,150.00 Z"
+                style="stroke: none; fill: rgba(53, 69, 104, 0.788);">
+            </path>
+        </svg>
+    </div>
+
+    <div style="height: 150px; overflow: hidden; margin-top: -100px;">
+        <svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;">
+            <path d="M0.00,49.98 C153.78,161.36 342.83,-32.05 500.00,49.98 L500.00,150.00 L0.00,150.00 Z"
+                style="stroke: none; fill: #18294d;">
+            </path>
+        </svg>
+    </div>
+
+    <div class="footerContent" fxLayout="column" fxLayoutGap="20">
+
+        <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
+            <img class="logoQs" src="/assets/qsv1.png">
+            <mat-divider class="separator" vertical="true"></mat-divider>
+            <div fxLayout="column" fxLayoutAlign="center start">
+                <h1 class="qs">QuakeSense</h1>
+                <h4 class="subqs">Nuevo Control</h4>
+            </div>
+        </div>
+
+        <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="space-between">
+
+            <div fxLayout="column">
+                <h4><b>SITIO</b></h4>
+                <br>
+                <h5>Inicio</h5>
+                <h5>Visor</h5>
+                <h5>Sobre Nosotros</h5>
+                <h5>Contacto</h5>
+            </div>
+
+            <div fxLayout="column">
+                <h4><b>PRODUCTO</b></h4>
+                <br>
+                <h5>Precios</h5>
+                <h5>Clientes</h5>
+                <h5>Feedback</h5>
+            </div>
+
+            <div fxLayout="column">
+                <h4><b>AYUDA</b></h4>
+                <br>
+                <h5>Primeros Pasos</h5>
+                <h5>Estado del Visor</h5>
+                <h5>FAQ</h5>
+            </div>
+
+            <div fxLayout="column" fxLayoutGap="5">
+                <h4><b>SITIO</b></h4>
+                <div fxLayout="row" fxLayoutGap="5">
+                    <input class="inputFooterEmail" placeholder="Ingresa tu Correo">
+                    <button mat-flat-button color="warn"> Enviar</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="space-between center" style="padding-bottom: 10px;">
+            <div>
+                <h4>© 2024 Derechos Resevados</h4>
+                <a href="http://ncn.pe">NCN Nuevo Control EIRL</a>
+            </div>
+            <div>
+                <h4>Jr. Percy Faith Mz Z Lt 5 Of:301 Urb. Santa Leonor 3era Etapa – Chorrillos</h4>
+                <a>+51 945 962 848</a>
+            </div>
+
+        </div>
     </div>
 
 </div>

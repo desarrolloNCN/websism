@@ -17,7 +17,6 @@ export class HttpHeadersInterceptor implements HttpInterceptor {
   private pass = 'admin'
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    console.log('Interceptor Iniciado')
 
     if (!req.headers.has('Authorization')) {
       const authHeader = 'Basic ' + btoa(`${this.user}:${this.pass}`);
