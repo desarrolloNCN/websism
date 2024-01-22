@@ -6,11 +6,18 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { MaterialModule } from 'src/app/material/material.module';
 import { UserHomeComponent } from './pages/user-home/user-home.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { LectorDemoComponent } from './pages/lector-demo/lector-demo.component';
+import { NavBarComponent } from './componentes/nav-bar/nav-bar.component';
+import { FooterBarComponent } from './componentes/footer-bar/footer-bar.component';
+import { NgxEchartsModule } from 'ngx-echarts';
 
 
 @NgModule({
   declarations: [
-    UserHomeComponent
+    UserHomeComponent,
+    LectorDemoComponent,
+    NavBarComponent,
+    FooterBarComponent
   ],
   imports: [
     CommonModule,
@@ -19,6 +26,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
     MaterialModule,
     ReactiveFormsModule,
     FormsModule,
+    NgxEchartsModule.forChild(),
   ]
 })
 export class UextModule { }

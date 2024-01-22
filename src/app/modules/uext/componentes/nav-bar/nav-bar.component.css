@@ -1,0 +1,63 @@
+p,
+h2,
+h4 {
+    margin: 0;
+}
+
+p {
+    color: #707070;
+}
+
+h2 {
+    color: #e6e6e6
+}
+
+h4 {
+    color: #cacaca
+}
+
+.banner {
+    height: 70px;
+    background-color: #18294d;
+    padding: 10px 20px 10px 20px;
+    position: sticky;
+}
+
+.logoQs {
+    height: 45px;
+    width: 45px;
+    object-fit: contain;
+}
+
+.separator {
+    border: solid #ffffff5d 1px;
+
+    height: 40px;
+}
+
+.qs {
+    margin: 0;
+    color: white;
+    font-weight: bold;
+}
+
+.subqs {
+    margin-top: -6px;
+    color: rgba(238, 238, 238, 0.904);
+}
+
+.navBar,
+a {
+    color: white;
+    font-weight: 700;
+    font-size: medium;
+    text-decoration: none;
+}
+
+.registerBtn {
+    background-color: rgb(241, 174, 72);
+    color: black;
+    box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
+}
+
+

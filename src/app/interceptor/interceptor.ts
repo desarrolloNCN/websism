@@ -26,8 +26,8 @@ export class HttpHeadersInterceptor implements HttpInterceptor {
           
         },
         // url: `http://pedro.ncn.pe:8000/${req.url}`
-        url: `https://apiqs.ncn.pe/${req.url}`
-        // url: `http://localhost:8000/${req.url}`
+        // url: `https://apiqs.ncn.pe/${req.url}`
+        url: `http://localhost:8000/${req.url}`
       });
     }
 

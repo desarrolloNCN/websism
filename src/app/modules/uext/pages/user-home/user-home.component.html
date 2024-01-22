@@ -1,173 +1,39 @@
 <div class="home" fxLayout="column">
 
-    <div class="banner" fxLayout="row" fxLayoutAlign="space-between center">
+    <app-nav-bar></app-nav-bar>
 
-        <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
-            <img class="logoQs" src="/assets/qsv1.png">
-            <mat-divider class="separator" vertical="true"></mat-divider>
-            <div fxLayout="column" fxLayoutAlign="center start">
-                <h1 class="qs">QuakeSense</h1>
-                <h4 class="subqs">Nuevo Control</h4>
+    <div style="height: 600px ;">
+
+        <img src="/assets/mine.jpg" class="topImage">
+
+        <div style="position: absolute; top: 300px; padding-inline: 80px;" fxLayout="row" fxLayoutAlign="space-around">
+
+            <div fxLayout="column" fxLayoutGap="15">
+                <p style="color: white; font-size: 35px;"><strong>Lorem, ipsum dolor sit amet</strong> </p>
+                <p style="color: rgb(207, 207, 207); font-size: 20px; width: 350px;">Lorem, ipsum dolor sit amet
+                    consectetur adipisicing elit. Ex sapiente voluptate, perspiciatis ut enim</p>
+                <div class="demoLector" fxLayout="row" fxLayoutAlign="center center">
+                    <mat-icon>call_made</mat-icon>
+                    <button mat-button>Version Demo</button>
+                </div>
+                
             </div>
-        </div>
 
-        <div fxLayout="row" fxLayoutGap="30" fxLayoutAlign="center center" class="navBar">
-            <a>INICIO</a>
-            <a>LECTOR</a>
-            <a>ACERCA DE</a>
-            <a>CONTACTO</a>
-        </div>
-
-        <div>
-
-            <button mat-button style="color: white;">
-                Identificarse
-            </button>
-
-            <button mat-flat-button class="registerBtn">
-                Registro
-            </button>
+            <img  >
 
         </div>
 
     </div>
 
     <div class="bodyHome" fxLayout="column" fxLayoutAlign="center center">
-
-        <div class="winTitle">
-            <h2><b>Lector de Archivos Acelerográficos</b></h2>
-            <h4>Puede cargar archivos de diferentes dispositivos acelerograficos para la leectura, edicion y exportacion
-                de
-                datos, o tambien puede ingresar una direccion valida</h4>
-        </div>
-
-        <div class="dndZoneContainer">
-            <div cdkDropList (cdkDropListDropped)="drop($event)" class="dndZone" fxLayout="column"
-                fxLayoutAlign="center center">
-                <form [formGroup]="controlForm" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10"
-                    (submit)="leerArchivo()">
-
-                    <div class="inputUrl" fxLayout="row" fxLayoutGap="5">
-                        <mat-icon class="colorIcon">link</mat-icon>
-                        <input matInput type="text"
-                            placeholder="Ejm: http://examples.obspy.org/RJOB_061005_072159.ehz.new">
-                    </div>
-
-                    <p>O</p>
-
-                    <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="5">
-                        <div class="uploadbtn" fxLayout="row" fxLayoutAlign="center center">
-                            <button type="button" mat-button (click)="redirecToVisor()">
-                                SUBIR UN ARCHIVO
-                            </button>
-
-                            <button mat-icon-button [matMenuTriggerFor]="menuFile">
-                                <mat-icon inline="true">expand_more</mat-icon>
-                            </button>
-                            <mat-menu #menuFile>
-                                <button mat-menu-item>
-                                    <mat-icon>add_to_drive</mat-icon>
-                                    Google Drive
-                                </button>
-                                <button mat-menu-item>
-                                    <mat-icon>add_to_drive</mat-icon>
-                                    Google Drive
-                                </button>
-                            </mat-menu>
-                        </div>
-                        <p>o arraste su archivo aqui</p>
-
-                        <input hidden (change)="redirecToVisor()" formControlName="archivo" #fileInput type="file"
-                            id="file">
-                    </div>
-
-                    <!-- <button type="submit" class="sendInfo" mat-raised-button color="primary"> Leer Datos </button> -->
-
-                </form>
-            </div>
-        </div>
-
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
     </div>
 
-</div>
-
-<div class="userfooter" fxLayout="column">
-
-    <div style="height: 80px; overflow: hidden; margin-top: -110px;">
-        <svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;">
-            <path d="M-1.41,65.63 C204.00,13.33 298.81,111.03 500.00,49.98 L500.00,150.00 L0.00,150.00 Z"
-                style="stroke: none; fill: rgba(53, 69, 104, 0.788);">
-            </path>
-        </svg>
-    </div>
-
-    <div style="height: 150px; overflow: hidden; margin-top: -100px;">
-        <svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;">
-            <path d="M0.00,49.98 C153.78,161.36 342.83,-32.05 500.00,49.98 L500.00,150.00 L0.00,150.00 Z"
-                style="stroke: none; fill: #18294d;">
-            </path>
-        </svg>
-    </div>
-
-    <div class="footerContent" fxLayout="column" fxLayoutGap="20">
-
-        <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
-            <img class="logoQs" src="/assets/qsv1.png">
-            <mat-divider class="separator" vertical="true"></mat-divider>
-            <div fxLayout="column" fxLayoutAlign="center start">
-                <h1 class="qs">QuakeSense</h1>
-                <h4 class="subqs">Nuevo Control</h4>
-            </div>
-        </div>
-
-        <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="space-between">
-
-            <div fxLayout="column">
-                <h4><b>SITIO</b></h4>
-                <br>
-                <h5>Inicio</h5>
-                <h5>Visor</h5>
-                <h5>Sobre Nosotros</h5>
-                <h5>Contacto</h5>
-            </div>
-
-            <div fxLayout="column">
-                <h4><b>PRODUCTO</b></h4>
-                <br>
-                <h5>Precios</h5>
-                <h5>Clientes</h5>
-                <h5>Feedback</h5>
-            </div>
-
-            <div fxLayout="column">
-                <h4><b>AYUDA</b></h4>
-                <br>
-                <h5>Primeros Pasos</h5>
-                <h5>Estado del Visor</h5>
-                <h5>FAQ</h5>
-            </div>
-
-            <div fxLayout="column" fxLayoutGap="5">
-                <h4><b>SITIO</b></h4>
-                <div fxLayout="row" fxLayoutGap="5">
-                    <input class="inputFooterEmail" placeholder="Ingresa tu Correo">
-                    <button mat-flat-button color="warn"> Enviar</button>
-                </div>
-            </div>
-
-        </div>
-
-        <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="space-between center" style="padding-bottom: 10px;">
-            <div>
-                <h4>© 2024 Derechos Resevados</h4>
-                <a href="http://ncn.pe">NCN Nuevo Control EIRL</a>
-            </div>
-            <div>
-                <h4>Jr. Percy Faith Mz Z Lt 5 Of:301 Urb. Santa Leonor 3era Etapa – Chorrillos</h4>
-                <a>+51 945 962 848</a>
-            </div>
-
-        </div>
-    </div>
+    <app-footer-bar></app-footer-bar>
 
 </div>

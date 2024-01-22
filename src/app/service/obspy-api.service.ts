@@ -133,4 +133,26 @@ export class ObspyAPIService {
 
   }
 
+  getTraceDataTrim(data: string, station_selected : string, channel_selected: string, t_min: string, t_max: string) :Observable<any>{
+    const formData = new FormData();
+    const url = 'trace_trim_data/'
+
+    if (typeof data === 'string') {
+      formData.append('data', data);
+      formData.append('station_selected', station_selected)
+      formData.append('channel_selected', channel_selected)
+      formData.append('t_min', t_min)
+      formData.append('t_max', t_max)
+    } else {
+      throw new Error('SREV-GET-05: Se espera un archivo datos para Lectura');
+    }
+
+    return this.http.post<any>(url, formData).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    ); 
+
+  }
+
 }

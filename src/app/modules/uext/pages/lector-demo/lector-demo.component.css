@@ -1,0 +1,206 @@
+p,
+h2,
+h4 {
+    margin: 0;
+}
+
+p {
+    color: #707070;
+}
+
+h2 {
+    color: #444444
+}
+
+h4 {
+    color: #747474
+}
+
+.winTitle {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.dndZoneContainer {
+    background-color: whitesmoke;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.dndZone {
+    background-color: rgba(231, 231, 231, 0.438);
+    padding: 10px;
+    border-radius: 10px;
+    border: 0.5px dashed #B6B6B6;
+}
+
+.colorIcon {
+    color: #606060;
+}
+
+.sendInfo {
+    width: 140px;
+}
+
+.inputUrl {
+    width: 450px;
+    padding: 8px;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
+}
+
+.uploadbtn {
+    width: 220px;
+    border-radius: 5px;
+    background-color: rgb(241, 174, 72);
+    color: white;
+    box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
+}
+
+.uploadbtnComplete {
+    padding-inline: 5px;
+    border-radius: 5px;
+    background-color: rgb(68, 129, 59);
+    color: white;
+    box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
+}
+
+.separator {
+    border-top-color: rgba(0, 0, 0, 0.12);
+    height: 40px;
+}
+
+.stInfo {
+    padding: 5px;
+    background-color: rgb(243, 243, 243);
+    border-radius: 5px;
+}
+
+.listSt {
+    border-radius: 5px;
+    padding: 5px;
+    background-color: rgb(248, 248, 248);
+    height: 275px;
+}
+
+.scrlSta {
+    overflow: scroll;
+    border-radius: 5px;
+}
+
+.scrlSta *>p {
+    color: white;
+}
+
+.scrlSta::-webkit-scrollbar {
+    display: none;
+}
+
+.listSt>.inputUrl {
+    width: auto;
+}
+
+.listAct {
+    border-radius: 5px;
+    padding: 5px;
+    background-color: rgb(248, 248, 248);
+}
+
+.stGraph {
+    padding: 5px;
+    background-color: rgb(243, 243, 243);
+    border-radius: 5px;
+}
+
+.graphBar {
+    width: 100%;
+    padding: 3px;
+    border-radius: 5px;
+    background-color: white;
+    box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
+}
+
+.colorIconBar {
+    height: 30px;
+    width: 30px;
+    color: #969696;
+    font-size: 30px;
+}
+
+.selected-group {
+    background-color: rgba(173, 216, 230, 0);
+}
+
+.color-par {
+    background-color: rgb(77, 115, 196);
+}
+
+.color-impar {
+    background-color: rgb(255, 182, 73);
+}
+
+.stainfospan {
+    padding-inline: 10px;
+    padding-top: 3px;
+    padding-top: 3px;
+    width: 100%;
+    border-radius: 3px;
+    background-color: #eeeeee;
+}
+
+.iconstainfo {
+    height: 16px;
+    width: 15px;
+    font-size: 15px;
+    color: #6b6b6b;
+}
+
+.divGraph {
+    padding: 4px 0 4px 0;
+    min-width: 100%;
+    max-width: 100%;
+    width: 900px;
+    height: 500px;
+}
+
+
+.spinnerContainer {
+    padding: 5px;
+    background-color: white;
+    height: 100%;
+    border-radius: 5px;
+}
+
+.graphContainer {
+    padding: 5px;
+    background-color: white;
+    height: 100%;
+    border-radius: 5px;
+    width: 100%;
+}
+
+.filterContainer {
+    padding: 12px 10px 0px 10px;
+    background-color: white;
+    border-radius: 5px;
+}
+
+.trimContainer {
+    padding: 12px 10px 0px 10px;
+    background-color: white;
+    border-radius: 5px;
+}
+
+.colorIconSubBar {
+    color: #c5c5c5;
+}
+
+.separatorSubBar {
+    border-top-color: rgba(0, 0, 0, 0.12);
+    height: 60px;
+}
+
+.sendInfoSubBar {
+    width: 140px;
+}
