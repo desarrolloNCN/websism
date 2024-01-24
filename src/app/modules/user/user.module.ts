@@ -8,6 +8,7 @@ import { MaterialModule } from 'src/app/material/material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { VisorGraphComponent } from './pages/visor-graph/visor-graph.component';
 import { NgxEchartsModule } from 'ngx-echarts';
+import { MatTabsModule } from '@angular/material/tabs';
 
 
 @NgModule({

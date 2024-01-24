@@ -47,7 +47,7 @@ export class ObspyAPIService {
     );
   }
 
-  getPlotStation(data: string, station_selected : string, channel_selected: string) :Observable<any>{
+  getPlotStation(data: string, station_selected: string, channel_selected: string): Observable<any> {
     const formData = new FormData();
     const url = 'plot/'
 
@@ -63,11 +63,11 @@ export class ObspyAPIService {
       catchError(error => {
         return of(error)
       })
-    ); 
+    );
 
   }
 
-  getTraceData(data: string, station_selected : string, channel_selected: string) :Observable<any>{
+  getTraceData(data: string, station_selected: string, channel_selected: string): Observable<any> {
     const formData = new FormData();
     const url = 'trace_data/'
 
@@ -83,11 +83,21 @@ export class ObspyAPIService {
       catchError(error => {
         return of(error)
       })
-    ); 
+    );
 
   }
 
-  getTraceDataBaseLine(data: string, station_selected : string, channel_selected: string, base_line : string) :Observable<any>{
+  getTraceDataBaseLine(
+    data: string, 
+    station_selected: string, 
+    channel_selected: string, 
+    base_line: string, 
+    filter: string, 
+    freqmin: string, 
+    freqmax: string, 
+    corner: string, 
+    t_min: string, 
+    t_max: string): Observable<any> {
     const formData = new FormData();
     const url = 'trace_baseline_data/'
 
@@ -96,6 +106,12 @@ export class ObspyAPIService {
       formData.append('station_selected', station_selected)
       formData.append('channel_selected', channel_selected)
       formData.append('base_line', base_line)
+      formData.append('filter_type', filter)
+      formData.append('freq_min', freqmin)
+      formData.append('freq_max', freqmax)
+      formData.append('corner', corner)
+      formData.append('t_min', t_min)
+      formData.append('t_max', t_max)
     } else {
       throw new Error('SREV-GET-03: Se espera un archivo datos para Lectura');
     }
@@ -104,11 +120,21 @@ export class ObspyAPIService {
       catchError(error => {
         return of(error)
       })
-    ); 
+    );
 
   }
 
-  getTraceDataFilter(data: string, station_selected : string, channel_selected: string, base_line : string, filter: string, freqmin: string, freqmax : string, corner: string) :Observable<any>{
+  getTraceDataFilter( 
+    data: string, 
+    station_selected: string, 
+    channel_selected: string, 
+    base_line: string, 
+    filter: string, 
+    freqmin: string, 
+    freqmax: string, 
+    corner: string, 
+    t_min: string, 
+    t_max: string): Observable<any> {
     const formData = new FormData();
     const url = 'trace_filter_data/'
 
@@ -121,6 +147,8 @@ export class ObspyAPIService {
       formData.append('freq_min', freqmin)
       formData.append('freq_max', freqmax)
       formData.append('corner', corner)
+      formData.append('t_min', t_min)
+      formData.append('t_max', t_max)
     } else {
       throw new Error('SREV-GET-04: Se espera un archivo datos para Lectura');
     }
@@ -129,11 +157,21 @@ export class ObspyAPIService {
       catchError(error => {
         return of(error)
       })
-    ); 
+    );
 
   }
 
-  getTraceDataTrim(data: string, station_selected : string, channel_selected: string, t_min: string, t_max: string) :Observable<any>{
+  getTraceDataTrim(
+    data: string, 
+    station_selected: string, 
+    channel_selected: string, 
+    base_line: string, 
+    filter: string, 
+    freqmin: string, 
+    freqmax: string, 
+    corner: string, 
+    t_min: string, 
+    t_max: string): Observable<any> {
     const formData = new FormData();
     const url = 'trace_trim_data/'
 
@@ -141,6 +179,11 @@ export class ObspyAPIService {
       formData.append('data', data);
       formData.append('station_selected', station_selected)
       formData.append('channel_selected', channel_selected)
+      formData.append('base_line', base_line)
+      formData.append('filter_type', filter)
+      formData.append('freq_min', freqmin)
+      formData.append('freq_max', freqmax)
+      formData.append('corner', corner)
       formData.append('t_min', t_min)
       formData.append('t_max', t_max)
     } else {
@@ -151,7 +194,7 @@ export class ObspyAPIService {
       catchError(error => {
         return of(error)
       })
-    ); 
+    );
 
   }
 

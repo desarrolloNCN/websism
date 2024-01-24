@@ -1,10 +1,8 @@
 import { trigger, transition, style, animate } from '@angular/animations';
-import { moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
-import { MatTab, MatTabChangeEvent } from '@angular/material/tabs';
-import { Router } from '@angular/router';
+import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
 import { EChartsOption } from 'echarts';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 
@@ -97,7 +95,7 @@ export class LectorDemoComponent implements OnInit {
   constructor(
     private obsApi: ObspyAPIService,
     private snackBar: MatSnackBar,
-
+    private cdRef: ChangeDetectorRef,
   ) { }
 
   ngOnInit(): void {
@@ -214,6 +212,26 @@ export class LectorDemoComponent implements OnInit {
     }
   }
 
+  createTab(e: any, value: any): void {
+    this.ToggleGraph = false;
+    this.plotedimages = value;
+
+    const graph = this.graphGenerator(e, value, '(RAWDATA)');
+
+    this.toggleTabs = true;
+
+    this.tabs.push({
+      label: `${e.station}.${e.channel}`,
+      datae : e,
+      sttime: e.starttime,
+      entime: e.endtime,
+      graph,
+      index: this.tabIndex++
+    });
+
+    this.ToggleGraph = true;
+  }
+
   leer(e: any) {
 
     for (const elem of this.tabs) {
@@ -223,9 +241,9 @@ export class LectorDemoComponent implements OnInit {
       }
     }
 
-    localStorage.setItem('net', e.network)
-    localStorage.setItem('sta', e.station)
-    localStorage.setItem('cha', e.channel)
+    // localStorage.setItem('net', e.network)
+    // localStorage.setItem('sta', e.station)
+    // localStorage.setItem('cha', e.channel)
 
     this.loadingSpinnerGraph = true
     this.ToggleGraph = false
@@ -239,47 +257,17 @@ export class LectorDemoComponent implements OnInit {
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
     this.obsApi.getTraceData(dataToUse, e.station, e.channel).subscribe({
-      next: value => {
-
-        this.ToggleGraph = false
-        this.plotedimages = value
-
-        const graph = this.graphGenerator(e, value, '(RAWDATA)')
-        this.toggleTabs = true
-        this.tabs.push(
-          {
-            label: `${e.station}.${e.channel}`,
-            sttime: e.starttime,
-            entime: e.endtime,
-            graph,
-            index: this.tabIndex++
-          })
-
-      },
+      next: value => { this.createTab(e, value) },
       error: err => console.error('REQUEST API ERROR: ' + err.message),
       complete: () => {
-
         this.loadingSpinnerGraph = false
         this.ToggleGraph = true
       }
     })
   }
 
-  getTabLabel(tab: any): string {
-    return tab.label;
-  }
 
-  onCloseTab(index: number) {
-    // if(this.tabs.length < 0){
-    //   this.toggleTabs = false
-    // }
-    this.tabs.splice(index, 1);
-  }
-
-  baseLineCorrecion(base: string, index: number) {
-
-    console.log('tab index' + index);
-
+  baseLineCorrecion(menuIndex: number, index: number) {
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
@@ -289,45 +277,67 @@ export class LectorDemoComponent implements OnInit {
       this.snackBar.open('Debe elegir una Estacion', 'cerrar', snackBar)
       return
     }
-    // let e = this.selectedStationInfo
 
-    localStorage.setItem('base', base)
-
-    this.ToggleGraph = false
-
-    //this.stationInfo = e
-    let net = localStorage.getItem('net')!
-    let sta = localStorage.getItem('sta')!
-    let cha = localStorage.getItem('cha')!
-
-    this.accel = {}
-    this.vel = {}
-    this.dsp = {}
+    let base = this.baseLineOptions[menuIndex]
+    // localStorage.setItem('base', base)
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
+    // let net = localStorage.getItem('net')!
+    // let sta = localStorage.getItem('sta')!
+    // let cha = localStorage.getItem('cha')!
 
-    this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base).subscribe({
+    let sta = this.tabs[index].datae.station
+    let cha = this.tabs[index].datae.channel
+
+    let type = this.FilterForm.get('type').value || ''
+    let fmin = this.FilterForm.get('freqmin').value || ''
+    let fmax = this.FilterForm.get('freqmax').value || ''
+    let corn = this.FilterForm.get('order').value || ''
+
+    const t_min = parseFloat(this.TrimForm.get('t_min').value);
+    const t_max = parseFloat(this.TrimForm.get('t_max').value);
+
+    let utc_min: any
+    let utc_max: any
+
+    let min = ''
+    let max = ''
+
+    if (isNaN(t_min) && isNaN(t_max)) {
+      min = ''
+      max = ''
+    } else {
+      utc_min = new Date(this.tabs[index].sttime);
+      utc_max = new Date(this.tabs[index].sttime);
+
+      utc_min.setUTCSeconds(utc_min.getUTCSeconds() + t_min);
+      utc_max.setUTCSeconds(utc_max.getUTCSeconds() + t_max);
+
+      min = utc_min.toISOString()
+      max = utc_max.toISOString()
+    }
+
+    this.ToggleGraph = false
+
+    this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
       next: value => {
 
         this.ToggleGraph = false
 
-        const indx = this.tabs[index].index
+        const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
 
         if (indx !== -1) {
 
           const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
 
-          const updGraph = { ...this.tabs[indx], graph: graph };
+          this.tabs[indx].graph = graph;
 
-          this.tabs = [
-            ...this.tabs.slice(0, indx),
-            updGraph,
-            ...this.tabs.slice(indx + 1),
-          ]
+          // Manualmente activar la detección de cambios para la pestaña actualizada
+          this.cdRef.detectChanges();
         }
 
 
@@ -351,6 +361,11 @@ export class LectorDemoComponent implements OnInit {
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
+    var dataString: string = localStorage.getItem('urlSearched')!
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
+
+    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+
     let net = localStorage.getItem('net')!
     let sta = localStorage.getItem('sta')!
     let cha = localStorage.getItem('cha')!
@@ -361,42 +376,39 @@ export class LectorDemoComponent implements OnInit {
     let fmax = this.FilterForm.get('freqmax').value
     let corn = this.FilterForm.get('order').value
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
-
-    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
-
     if (this.FilterForm.invalid || !dataToUse) {
       this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
       return
     }
 
+    let t_min = this.TrimForm.get('t_min').value
+    let t_max = this.TrimForm.get('t_max').value
+
     this.loadingSpinnerGraph = true
     this.ToggleGraph = false
 
-    this.accel = {}
-    this.vel = {}
-    this.dsp = {}
+    let utc_min = new Date(this.tabs[index].sttime)
+    let utc_max = new Date(this.tabs[index].sttime)
 
-    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn).subscribe({
+    utc_min.setUTCSeconds(utc_min.getUTCSeconds() + parseFloat(t_min))
+    utc_max.setUTCSeconds(utc_max.getUTCSeconds() + parseFloat(t_max))
+
+    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, utc_min.toISOString(), utc_max.toISOString()).subscribe({
       next: value => {
 
         this.ToggleGraph = false
         this.loadingSpinnerData = true
 
-        const indx = this.tabs[index].index
+        const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
 
         if (indx !== -1) {
 
           const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
 
-          const updGraph = { ...this.tabs[indx], graph: graph };
+          this.tabs[indx].graph = graph;
 
-          this.tabs = [
-            ...this.tabs.slice(0, indx),
-            updGraph,
-            ...this.tabs.slice(indx + 1),
-          ]
+          // Manualmente activar la detección de cambios para la pestaña actualizada
+          this.cdRef.detectChanges();
         }
 
       },
@@ -419,38 +431,33 @@ export class LectorDemoComponent implements OnInit {
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
-    let net = localStorage.getItem('net')!
-    let sta = localStorage.getItem('sta')!
-    let cha = localStorage.getItem('cha')!
-    let base = localStorage.getItem('base')!
-
-    let t_min = this.TrimForm.get('t_min').value
-    let t_max = this.TrimForm.get('t_max').value
-
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+
+    let net = localStorage.getItem('net')!
+    let sta = localStorage.getItem('sta')!
+    let cha = localStorage.getItem('cha')!
+    let base = localStorage.getItem('base') || ''
+
+    let t_min = this.TrimForm.get('t_min').value
+    let t_max = this.TrimForm.get('t_max').value
+
+    let type = this.FilterForm.get('type').value
+    let fmin = this.FilterForm.get('freqmin').value
+    let fmax = this.FilterForm.get('freqmax').value
+    let corn = this.FilterForm.get('order').value
 
     if (this.TrimForm.invalid || !dataToUse) {
       this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
       return
     }
 
-    console.log(t_min +' - ' + t_max);
-    
-
     if (parseFloat(t_max) < parseFloat(t_min)) {
       this.snackBar.open('Verificar los Tiempos de Inicio y Fin', 'cerrar', snackBar)
       return
     }
-
-    this.loadingSpinnerGraph = true
-    this.ToggleGraph = false
-
-    this.accel = {}
-    this.vel = {}
-    this.dsp = {}
 
     let utc_min = new Date(this.tabs[index].sttime)
     let utc_max = new Date(this.tabs[index].sttime)
@@ -458,28 +465,28 @@ export class LectorDemoComponent implements OnInit {
     utc_min.setUTCSeconds(utc_min.getUTCSeconds() + parseFloat(t_min))
     utc_max.setUTCSeconds(utc_max.getUTCSeconds() + parseFloat(t_max))
 
-    console.log(utc_min.toISOString());
-    console.log(utc_max.toISOString());
+    let min = utc_min.toISOString()
+    let max = utc_max.toISOString()
 
-    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, utc_min.toISOString(), utc_max.toISOString()).subscribe({
+    this.loadingSpinnerGraph = true
+    this.ToggleGraph = false
+
+    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
       next: value => {
 
         this.ToggleGraph = false
         this.loadingSpinnerData = true
 
-        const indx = this.tabs[index].index
+        const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
 
         if (indx !== -1) {
 
           const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
 
-          const updGraph = { ...this.tabs[indx], graph: graph };
+          this.tabs[indx].graph = graph;
 
-          this.tabs = [
-            ...this.tabs.slice(0, indx),
-            updGraph,
-            ...this.tabs.slice(indx + 1),
-          ]
+          // Manualmente activar la detección de cambios para la pestaña actualizada
+          this.cdRef.detectChanges();
         }
 
       },
@@ -494,6 +501,14 @@ export class LectorDemoComponent implements OnInit {
         this.ToggleGraph = true
       }
     })
+  }
+
+  getTabLabel(tab: any): string {
+    return tab.label;
+  }
+
+  onCloseTab(index: number) {
+    this.tabs.splice(index, 1);
   }
 
   deleteFile() {

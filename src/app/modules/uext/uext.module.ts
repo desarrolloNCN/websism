@@ -10,6 +10,7 @@ import { LectorDemoComponent } from './pages/lector-demo/lector-demo.component';
 import { NavBarComponent } from './componentes/nav-bar/nav-bar.component';
 import { FooterBarComponent } from './componentes/footer-bar/footer-bar.component';
 import { NgxEchartsModule } from 'ngx-echarts';
+import { MatTabsModule } from '@angular/material/tabs';
 
 
 @NgModule({

@@ -445,8 +445,11 @@
                                         <button mat-icon-button type="button" [matMenuTriggerFor]="menuBaseLine">
                                             <mat-icon class="colorIconBar"
                                                 title="Correccion por Linea Base">monitor_heart</mat-icon>
-                                            <mat-menu #menuBaseLine>
-                                                <button mat-menu-item (click)="baseLineCorrecion('constant', i)">
+                                            <mat-menu #menuBaseLine="matMenu" >
+                                               <button mat-menu-item *ngFor="let item of baseLineOptions; let btni = index" (click)="baseLineCorrecion(btni, i)">
+                                                    {{item}}
+                                               </button>
+                                                <!-- <button mat-menu-item (click)="baseLineCorrecion('constant', i)">
                                                     <mat-icon>add_to_drive</mat-icon>
                                                     Constante
                                                 </button>
@@ -461,7 +464,7 @@
                                                 <button mat-menu-item (click)="baseLineCorrecion('simple', i)">
                                                     <mat-icon>add_to_drive</mat-icon>
                                                     Simple
-                                                </button>
+                                                </button> -->
                                             </mat-menu>
                                         </button>
 

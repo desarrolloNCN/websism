@@ -306,39 +306,39 @@ export class VisorGraphComponent implements OnInit {
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
 
-    this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base).subscribe({
-      next: value => {
+    // this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base).subscribe({
+    //   next: value => {
 
-        this.ToggleGraph = false
+    //     this.ToggleGraph = false
 
-        const indx = this.tabs[index].index
+    //     const indx = this.tabs[index].index
         
-        if(indx !== -1){
+    //     if(indx !== -1){
           
-          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+    //       const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
 
-          const updGraph = { ...this.tabs[indx], graph: graph };
+    //       const updGraph = { ...this.tabs[indx], graph: graph };
 
-          this.tabs = [
-            ...this.tabs.slice(0, indx),
-            updGraph,
-            ...this.tabs.slice(indx + 1),
-          ]
-        }
+    //       this.tabs = [
+    //         ...this.tabs.slice(0, indx),
+    //         updGraph,
+    //         ...this.tabs.slice(indx + 1),
+    //       ]
+    //     }
        
 
-      },
-      error: err => {
-        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-        this.loadingSpinnerGraph = false
-        console.error('REQUEST API ERROR: ' + err.message)
-      },
-      complete: () => {
-        this.actApli.push(`Linea Base: ${base}`)
-        this.loadingSpinnerData = false
-        this.ToggleGraph = true
-      }
-    })
+    //   },
+    //   error: err => {
+    //     this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+    //     this.loadingSpinnerGraph = false
+    //     console.error('REQUEST API ERROR: ' + err.message)
+    //   },
+    //   complete: () => {
+    //     this.actApli.push(`Linea Base: ${base}`)
+    //     this.loadingSpinnerData = false
+    //     this.ToggleGraph = true
+    //   }
+    // })
   }
 
   addFilter(index: number) {
@@ -374,39 +374,39 @@ export class VisorGraphComponent implements OnInit {
     this.vel = {}
     this.dsp = {}
 
-    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn).subscribe({
-      next: value => {
+    // this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn).subscribe({
+    //   next: value => {
 
-        this.ToggleGraph = false
-        this.loadingSpinnerData = true
+    //     this.ToggleGraph = false
+    //     this.loadingSpinnerData = true
 
-        const indx = this.tabs[index].index
+    //     const indx = this.tabs[index].index
         
-        if(indx !== -1){
+    //     if(indx !== -1){
           
-          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+    //       const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
 
-          const updGraph = { ...this.tabs[indx], graph: graph };
+    //       const updGraph = { ...this.tabs[indx], graph: graph };
 
-          this.tabs = [
-            ...this.tabs.slice(0, indx),
-            updGraph,
-            ...this.tabs.slice(indx + 1),
-          ]
-        }
+    //       this.tabs = [
+    //         ...this.tabs.slice(0, indx),
+    //         updGraph,
+    //         ...this.tabs.slice(indx + 1),
+    //       ]
+    //     }
 
-      },
-      error: err => {
-        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-        this.loadingSpinnerGraph = false
-        console.error('REQUEST API ERROR: ' + err.message)
-      },
-      complete: () => {
-        this.loadingSpinnerData = false
-        this.loadingSpinnerGraph = false
-        this.ToggleGraph = true
-      }
-    })
+    //   },
+    //   error: err => {
+    //     this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+    //     this.loadingSpinnerGraph = false
+    //     console.error('REQUEST API ERROR: ' + err.message)
+    //   },
+    //   complete: () => {
+    //     this.loadingSpinnerData = false
+    //     this.loadingSpinnerGraph = false
+    //     this.ToggleGraph = true
+    //   }
+    // })
   }
 
   deleteFile() {
