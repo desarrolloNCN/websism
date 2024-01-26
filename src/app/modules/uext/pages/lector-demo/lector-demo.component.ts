@@ -92,11 +92,27 @@ export class LectorDemoComponent implements OnInit {
 
   actApli: any = []
 
+  formGroups: FormGroup[] = [];
+
   constructor(
     private obsApi: ObspyAPIService,
     private snackBar: MatSnackBar,
     private cdRef: ChangeDetectorRef,
-  ) { }
+  ) {
+
+    // this.FilterForm = new FormGroup({
+    //   type: new FormControl('', [Validators.required]),
+    //   freqmin: new FormControl('', [Validators.required]),
+    //   freqmax: new FormControl('', [Validators.required]),
+    //   order: new FormControl('', [Validators.required])
+    // });
+
+    // this.TrimForm = new FormGroup({
+    //   t_min: new FormControl('', [Validators.required]),
+    //   t_max: new FormControl('', [Validators.required])
+    // });
+
+  }
 
   ngOnInit(): void {
     localStorage.clear()
@@ -117,6 +133,7 @@ export class LectorDemoComponent implements OnInit {
       t_min: new FormControl('', [Validators.required]),
       t_max: new FormControl('', [Validators.required]),
     })
+
   }
 
   onFileSelected(event: any) {
@@ -162,9 +179,10 @@ export class LectorDemoComponent implements OnInit {
           this.idFile = value.id
           this.urlFile = value.file
           this.stringdata = value.string_data
-          localStorage.setItem('idSesion', value.id)
+
           localStorage.setItem('urlFileUpload', value.file)
           localStorage.setItem('urlSearched', value.string_data)
+
         },
         error: err => console.error('REQUEST API ERROR: ' + err.message),
         complete: () => {
@@ -222,15 +240,38 @@ export class LectorDemoComponent implements OnInit {
 
     this.tabs.push({
       label: `${e.station}.${e.channel}`,
-      datae : e,
+      dataEst: e,
       sttime: e.starttime,
       entime: e.endtime,
       graph,
-      index: this.tabIndex++
     });
 
+    // this.inicializarFormularios()
+
     this.ToggleGraph = true;
+
   }
+
+  // inicializarFormularios(): void {
+  //   this.tabs.forEach(() => {
+
+  //     const FilterForm = new FormGroup({
+  //       type: new FormControl('', [Validators.required]),
+  //       freqmin: new FormControl('', [Validators.required]),
+  //       freqmax: new FormControl('', [Validators.required]),
+  //       order: new FormControl('', [Validators.required])
+  //     })
+
+  //     this.formGroups.push(FilterForm);
+
+  //     const TrimForm = new FormGroup({
+  //       t_min: new FormControl('', [Validators.required]),
+  //       t_max: new FormControl('', [Validators.required]),
+  //     })
+
+  //     this.formGroups.push(TrimForm);
+  //   });
+  // }
 
   leer(e: any) {
 
@@ -266,8 +307,7 @@ export class LectorDemoComponent implements OnInit {
     })
   }
 
-
-  baseLineCorrecion(menuIndex: number, index: number) {
+  baseLine(menuIndex: number, index: number) {
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
@@ -290,13 +330,13 @@ export class LectorDemoComponent implements OnInit {
     // let sta = localStorage.getItem('sta')!
     // let cha = localStorage.getItem('cha')!
 
-    let sta = this.tabs[index].datae.station
-    let cha = this.tabs[index].datae.channel
+    let sta = this.tabs[index].dataEst.station
+    let cha = this.tabs[index].dataEst.channel
 
-    let type = this.FilterForm.get('type').value || ''
-    let fmin = this.FilterForm.get('freqmin').value || ''
-    let fmax = this.FilterForm.get('freqmax').value || ''
-    let corn = this.FilterForm.get('order').value || ''
+    let type = this.FilterForm.get('type').value
+    let fmin = this.FilterForm.get('freqmin').value
+    let fmax = this.FilterForm.get('freqmax').value
+    let corn = this.FilterForm.get('order').value
 
     const t_min = parseFloat(this.TrimForm.get('t_min').value);
     const t_max = parseFloat(this.TrimForm.get('t_max').value);
@@ -328,7 +368,7 @@ export class LectorDemoComponent implements OnInit {
 
         this.ToggleGraph = false
 
-        const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
+        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
 
         if (indx !== -1) {
 
@@ -355,7 +395,7 @@ export class LectorDemoComponent implements OnInit {
     })
   }
 
-  addFilter(index: number) {
+  filter(index: number) {
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
@@ -366,10 +406,14 @@ export class LectorDemoComponent implements OnInit {
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
-    let net = localStorage.getItem('net')!
-    let sta = localStorage.getItem('sta')!
-    let cha = localStorage.getItem('cha')!
-    let base = localStorage.getItem('base')!
+    // let net = localStorage.getItem('net')!
+    // let sta = localStorage.getItem('sta')!
+    // let cha = localStorage.getItem('cha')!
+    let base = localStorage.getItem('base') || ''
+
+
+    let sta = this.tabs[index].dataEst.station
+    let cha = this.tabs[index].dataEst.channel
 
     let type = this.FilterForm.get('type').value
     let fmin = this.FilterForm.get('freqmin').value
@@ -381,25 +425,36 @@ export class LectorDemoComponent implements OnInit {
       return
     }
 
-    let t_min = this.TrimForm.get('t_min').value
-    let t_max = this.TrimForm.get('t_max').value
+    const t_min = parseFloat(this.TrimForm.get('t_min').value);
+    const t_max = parseFloat(this.TrimForm.get('t_max').value);
 
-    this.loadingSpinnerGraph = true
-    this.ToggleGraph = false
+    let utc_min: any
+    let utc_max: any
 
-    let utc_min = new Date(this.tabs[index].sttime)
-    let utc_max = new Date(this.tabs[index].sttime)
+    let min = ''
+    let max = ''
 
-    utc_min.setUTCSeconds(utc_min.getUTCSeconds() + parseFloat(t_min))
-    utc_max.setUTCSeconds(utc_max.getUTCSeconds() + parseFloat(t_max))
+    if (isNaN(t_min) && isNaN(t_max)) {
+      min = ''
+      max = ''
+    } else {
+      utc_min = new Date(this.tabs[index].sttime);
+      utc_max = new Date(this.tabs[index].sttime);
 
-    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, utc_min.toISOString(), utc_max.toISOString()).subscribe({
+      utc_min.setUTCSeconds(utc_min.getUTCSeconds() + t_min);
+      utc_max.setUTCSeconds(utc_max.getUTCSeconds() + t_max);
+
+      min = utc_min.toISOString()
+      max = utc_max.toISOString()
+    }
+
+    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
       next: value => {
 
         this.ToggleGraph = false
         this.loadingSpinnerData = true
 
-        const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
+        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
 
         if (indx !== -1) {
 
@@ -425,7 +480,7 @@ export class LectorDemoComponent implements OnInit {
     })
   }
 
-  trimData(index: number) {
+  trim(index: number) {
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
@@ -436,10 +491,13 @@ export class LectorDemoComponent implements OnInit {
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
-    let net = localStorage.getItem('net')!
-    let sta = localStorage.getItem('sta')!
-    let cha = localStorage.getItem('cha')!
+    // let net = localStorage.getItem('net')!
+    // let sta = localStorage.getItem('sta')!
+    // let cha = localStorage.getItem('cha')!
     let base = localStorage.getItem('base') || ''
+
+    let sta = this.tabs[index].dataEst.station
+    let cha = this.tabs[index].dataEst.channel
 
     let t_min = this.TrimForm.get('t_min').value
     let t_max = this.TrimForm.get('t_max').value
@@ -477,7 +535,8 @@ export class LectorDemoComponent implements OnInit {
         this.ToggleGraph = false
         this.loadingSpinnerData = true
 
-        const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
+        // const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
+        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
 
         if (indx !== -1) {
 
@@ -489,6 +548,8 @@ export class LectorDemoComponent implements OnInit {
           this.cdRef.detectChanges();
         }
 
+        console.log(this.tabs);
+
       },
       error: err => {
         this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
@@ -496,6 +557,8 @@ export class LectorDemoComponent implements OnInit {
         console.error('REQUEST API ERROR: ' + err.message)
       },
       complete: () => {
+        console.log(this.TrimForm.value);
+        console.log(this.FilterForm.value);
         this.loadingSpinnerData = false
         this.loadingSpinnerGraph = false
         this.ToggleGraph = true
@@ -503,21 +566,19 @@ export class LectorDemoComponent implements OnInit {
     })
   }
 
-  getTabLabel(tab: any): string {
-    return tab.label;
-  }
-
-  onCloseTab(index: number) {
-    this.tabs.splice(index, 1);
-  }
-
   deleteFile() {
+
+    this.tabs = []
+
     this.btnShow = false;
     this.btnCancel = true;
+
     this.fileInput.nativeElement.value = ''
+
     this.groupedData = {}
     this.arch = ''
     this.controlForm.get('url').enable()
+
     this.accel = {}
     this.vel = {}
     this.dsp = {}
@@ -528,10 +589,16 @@ export class LectorDemoComponent implements OnInit {
   }
 
   filterData() {
+    if (this.toogleTrim === true) {
+      this.toogleTrim = false
+    }
     this.toogleFilter = !this.toogleFilter
   }
 
   toggleData() {
+    if (this.toogleFilter === true) {
+      this.toogleFilter = false
+    }
     this.toogleTrim = !this.toogleTrim
   }
 
@@ -563,7 +630,19 @@ export class LectorDemoComponent implements OnInit {
   }
 
   onTabChange(event: MatTabChangeEvent) {
+    if (!this.tabs[event.index].dataEst) {
+      return
+    } else {
+      this.stationInfo = this.tabs[event.index].dataEst
+    }
+  }
 
+  getTabLabel(tab: any): string {
+    return tab.label;
+  }
+
+  onCloseTab(index: number) {
+    this.tabs.splice(index, 1);
   }
 
   graphGenerator(e: any, value: any, dataformat: any) {
@@ -833,7 +912,4 @@ export class LectorDemoComponent implements OnInit {
     this.groupedData = {}
   }
 
-  f() {
-
-  }
 }

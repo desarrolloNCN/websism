@@ -384,11 +384,11 @@
 
                 <div class="graphContainer" fxLayout="column" fxLayoutAlign="start center">
 
-                    <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+                    <!-- <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
                         <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                             [diameter]="50"></mat-progress-spinner>
                         <h3> <b>Cargando Datos ....</b> </h3>
-                    </div>
+                    </div> -->
 
                     <mat-tab-group (selectedTabChange)="onTabChange($event)" #tabGroup style="width: 100%;"
                         [ngStyle]="showtabs(toggleTabs)">
@@ -445,10 +445,12 @@
                                         <button mat-icon-button type="button" [matMenuTriggerFor]="menuBaseLine">
                                             <mat-icon class="colorIconBar"
                                                 title="Correccion por Linea Base">monitor_heart</mat-icon>
-                                            <mat-menu #menuBaseLine="matMenu" >
-                                               <button mat-menu-item *ngFor="let item of baseLineOptions; let btni = index" (click)="baseLineCorrecion(btni, i)">
+                                            <mat-menu #menuBaseLine="matMenu">
+                                                <button mat-menu-item
+                                                    *ngFor="let item of baseLineOptions; let btni = index"
+                                                    (click)="baseLine(btni, i)">
                                                     {{item}}
-                                               </button>
+                                                </button>
                                                 <!-- <button mat-menu-item (click)="baseLineCorrecion('constant', i)">
                                                     <mat-icon>add_to_drive</mat-icon>
                                                     Constante
@@ -491,7 +493,7 @@
 
                                     <div *ngIf="toogleTrim" class="trimContainer">
                                         <form [formGroup]="TrimForm" fxLayout="row" fxLayoutGap="10"
-                                            fxLayoutAlign="center center" (submit)="trimData(i)">
+                                            fxLayoutAlign="center center" (submit)="trim(i)">
 
                                             <h4 style="padding-bottom: 13px ; padding-left: 10px;"><b>Indicar Inicio y
                                                     Fin: </b>
@@ -501,7 +503,7 @@
                                                 <mat-label>Tiempo de Inicio (seg.)</mat-label>
                                                 <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
                                                 <input matInput formControlName="t_min">
-                                                <mat-error *ngIf="FilterForm.get('t_min')?.hasError('required')">
+                                                <mat-error *ngIf="TrimForm.get('t_min')?.hasError('required')">
                                                     Ingrese <strong>Tiempo Min. </strong> </mat-error>
                                             </mat-form-field>
 
@@ -509,7 +511,7 @@
                                                 <mat-label>Tiempo de Fin (seg.)</mat-label>
                                                 <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
                                                 <input matInput formControlName="t_max">
-                                                <mat-error *ngIf="FilterForm.get('t_max')?.hasError('required')">
+                                                <mat-error *ngIf="TrimForm.get('t_max')?.hasError('required')">
                                                     Ingrese <strong>Tiempo Max. </strong> </mat-error>
                                             </mat-form-field>
 
@@ -526,7 +528,7 @@
 
                                     <div *ngIf="toogleFilter" class="filterContainer">
                                         <form [formGroup]="FilterForm" fxLayout="row" fxLayoutGap="10"
-                                            fxLayoutAlign="center center" (submit)="addFilter(i)">
+                                            fxLayoutAlign="center center" (submit)="filter(i)">
 
                                             <h4 style="padding-bottom: 13px ; padding-left: 10px;"><b>Tipo de Filtro
                                                     ButterWorth:</b></h4>
@@ -535,6 +537,7 @@
                                                 <mat-label>Tipo de Filtro</mat-label>
                                                 <mat-icon class="colorIconSubBar" matPrefix>query_stats</mat-icon>
                                                 <mat-select formControlName="type">
+                                                    <mat-option value="">Sin Filtro</mat-option>
                                                     <mat-option value="bandpass">BandPass</mat-option>
                                                     <mat-option value="bandstop">BandStop</mat-option>
                                                     <mat-option value="lowpass">LowPass</mat-option>
@@ -586,23 +589,22 @@
 
                                 </div>
 
-                                <div *ngIf="loadingSpinnerData" fxLayout="column" fxLayoutGap="10"
+                                <!-- <div *ngIf="loadingSpinnerData" fxLayout="column" fxLayoutGap="10"
                                     fxLayoutAlign="center center">
                                     <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                                         [diameter]="50"></mat-progress-spinner>
                                     <h3> <b>Cargando Datos ....</b> </h3>
-                                </div>
+                                </div> -->
 
                                 <div fxLayout="column" fxLayoutGap="10">
-                                    <div *ngIf="ToggleGraph" echarts [options]="tab.graph[0]" class="divGraph"></div>
-                                    <div *ngIf="ToggleGraph" echarts [options]="tab.graph[1]" class="divGraph"></div>
-                                    <div *ngIf="ToggleGraph" echarts [options]="tab.graph[2]" class="divGraph"></div>
+                                    <div  echarts [options]="tab.graph[0]" class="divGraph"></div>
+                                    <div  echarts [options]="tab.graph[1]" class="divGraph"></div>
+                                    <div  echarts [options]="tab.graph[2]" class="divGraph"></div>
                                 </div>
                             </div>
 
-
-
                         </mat-tab>
+
                     </mat-tab-group>
 
                 </div>
