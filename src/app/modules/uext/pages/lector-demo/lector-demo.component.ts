@@ -66,6 +66,7 @@ export class LectorDemoComponent implements OnInit {
   loadingSpinner = false
   loadingSpinnerGraph = false
   loadingSpinnerData = false
+  isLoading = false
 
   ToggleGraph = false
   toggleTabs = false
@@ -100,17 +101,17 @@ export class LectorDemoComponent implements OnInit {
     private cdRef: ChangeDetectorRef,
   ) {
 
-    // this.FilterForm = new FormGroup({
-    //   type: new FormControl('', [Validators.required]),
-    //   freqmin: new FormControl('', [Validators.required]),
-    //   freqmax: new FormControl('', [Validators.required]),
-    //   order: new FormControl('', [Validators.required])
-    // });
+    this.FilterForm = new FormGroup({
+      type: new FormControl('', [Validators.required]),
+      freqmin: new FormControl('', [Validators.required]),
+      freqmax: new FormControl('', [Validators.required]),
+      order: new FormControl('', [Validators.required])
+    });
 
-    // this.TrimForm = new FormGroup({
-    //   t_min: new FormControl('', [Validators.required]),
-    //   t_max: new FormControl('', [Validators.required])
-    // });
+    this.TrimForm = new FormGroup({
+      t_min: new FormControl('', [Validators.required]),
+      t_max: new FormControl('', [Validators.required])
+    });
 
   }
 
@@ -122,17 +123,17 @@ export class LectorDemoComponent implements OnInit {
 
     })
 
-    this.FilterForm = new FormGroup({
-      type: new FormControl('', [Validators.required]),
-      freqmin: new FormControl('', [Validators.required]),
-      freqmax: new FormControl('', [Validators.required]),
-      order: new FormControl('', [Validators.required])
-    })
+    // this.FilterForm = new FormGroup({
+    //   type: new FormControl('', [Validators.required]),
+    //   freqmin: new FormControl('', [Validators.required]),
+    //   freqmax: new FormControl('', [Validators.required]),
+    //   order: new FormControl('', [Validators.required])
+    // })
 
-    this.TrimForm = new FormGroup({
-      t_min: new FormControl('', [Validators.required]),
-      t_max: new FormControl('', [Validators.required]),
-    })
+    // this.TrimForm = new FormGroup({
+    //   t_min: new FormControl('', [Validators.required]),
+    //   t_max: new FormControl('', [Validators.required]),
+    // })
 
   }
 
@@ -232,46 +233,61 @@ export class LectorDemoComponent implements OnInit {
 
   createTab(e: any, value: any): void {
     this.ToggleGraph = false;
-    this.plotedimages = value;
 
     const graph = this.graphGenerator(e, value, '(RAWDATA)');
 
     this.toggleTabs = true;
+
+    const FilterForm = new FormGroup({
+      type: new FormControl('', [Validators.required]),
+      freqmin: new FormControl('', [Validators.required]),
+      freqmax: new FormControl('', [Validators.required]),
+      order: new FormControl('', [Validators.required])
+    })
+
+    const TrimForm = new FormGroup({
+      t_min: new FormControl('', [Validators.required]),
+      t_max: new FormControl('', [Validators.required]),
+    })
 
     this.tabs.push({
       label: `${e.station}.${e.channel}`,
       dataEst: e,
       sttime: e.starttime,
       entime: e.endtime,
+      FilterForm,
+      TrimForm,
       graph,
     });
 
-    // this.inicializarFormularios()
+    //this.inicializarFormularios()
 
     this.ToggleGraph = true;
 
   }
 
-  // inicializarFormularios(): void {
-  //   this.tabs.forEach(() => {
+  inicializarFormularios(): void {
+    this.tabs.forEach(() => {
 
-  //     const FilterForm = new FormGroup({
-  //       type: new FormControl('', [Validators.required]),
-  //       freqmin: new FormControl('', [Validators.required]),
-  //       freqmax: new FormControl('', [Validators.required]),
-  //       order: new FormControl('', [Validators.required])
-  //     })
+      const FilterForm = new FormGroup({
+        type: new FormControl('', [Validators.required]),
+        freqmin: new FormControl('', [Validators.required]),
+        freqmax: new FormControl('', [Validators.required]),
+        order: new FormControl('', [Validators.required])
+      })
 
-  //     this.formGroups.push(FilterForm);
+      this.formGroups.push(FilterForm);
 
-  //     const TrimForm = new FormGroup({
-  //       t_min: new FormControl('', [Validators.required]),
-  //       t_max: new FormControl('', [Validators.required]),
-  //     })
+      const TrimForm = new FormGroup({
+        t_min: new FormControl('', [Validators.required]),
+        t_max: new FormControl('', [Validators.required]),
+      })
 
-  //     this.formGroups.push(TrimForm);
-  //   });
-  // }
+      this.formGroups.push(TrimForm);
+    });
+    console.log(this.formGroups);
+    
+  }
 
   leer(e: any) {
 
@@ -307,6 +323,8 @@ export class LectorDemoComponent implements OnInit {
     })
   }
 
+
+
   baseLine(menuIndex: number, index: number) {
 
     const snackBar = new MatSnackBarConfig();
@@ -333,13 +351,13 @@ export class LectorDemoComponent implements OnInit {
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
 
-    let type = this.FilterForm.get('type').value
-    let fmin = this.FilterForm.get('freqmin').value
-    let fmax = this.FilterForm.get('freqmax').value
-    let corn = this.FilterForm.get('order').value
+    let type = this.tabs[index].FilterForm.get('type').value
+    let fmin = this.tabs[index].FilterForm.get('freqmin').value
+    let fmax = this.tabs[index].FilterForm.get('freqmax').value
+    let corn = this.tabs[index].FilterForm.get('order').value
 
-    const t_min = parseFloat(this.TrimForm.get('t_min').value);
-    const t_max = parseFloat(this.TrimForm.get('t_max').value);
+    const t_min = parseFloat(this.tabs[index].TrimForm.get('t_min').value);
+    const t_max = parseFloat(this.tabs[index].TrimForm.get('t_max').value);
 
     let utc_min: any
     let utc_max: any
@@ -362,11 +380,13 @@ export class LectorDemoComponent implements OnInit {
     }
 
     this.ToggleGraph = false
+    this.isLoading = true
 
     this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
       next: value => {
 
         this.ToggleGraph = false
+       
 
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
 
@@ -388,9 +408,11 @@ export class LectorDemoComponent implements OnInit {
         console.error('REQUEST API ERROR: ' + err.message)
       },
       complete: () => {
-        this.actApli.push(`Linea Base: ${base}`)
+        this.actApli.push(`Linea Base: ${base} a ${sta}.${cha}`)
         this.loadingSpinnerData = false
+
         this.ToggleGraph = true
+        this.isLoading = false
       }
     })
   }
@@ -415,18 +437,18 @@ export class LectorDemoComponent implements OnInit {
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
 
-    let type = this.FilterForm.get('type').value
-    let fmin = this.FilterForm.get('freqmin').value
-    let fmax = this.FilterForm.get('freqmax').value
-    let corn = this.FilterForm.get('order').value
+    let type = this.tabs[index].FilterForm.get('type').value
+    let fmin = this.tabs[index].FilterForm.get('freqmin').value
+    let fmax = this.tabs[index].FilterForm.get('freqmax').value
+    let corn = this.tabs[index].FilterForm.get('order').value
 
     if (this.FilterForm.invalid || !dataToUse) {
       this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
       return
     }
 
-    const t_min = parseFloat(this.TrimForm.get('t_min').value);
-    const t_max = parseFloat(this.TrimForm.get('t_max').value);
+    const t_min = parseFloat(this.tabs[index].TrimForm.get('t_min').value);
+    const t_max = parseFloat(this.tabs[index].TrimForm.get('t_max').value);
 
     let utc_min: any
     let utc_max: any
@@ -448,11 +470,13 @@ export class LectorDemoComponent implements OnInit {
       max = utc_max.toISOString()
     }
 
+    this.isLoading = true
+
     this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
       next: value => {
 
         this.ToggleGraph = false
-        this.loadingSpinnerData = true
+        this.loadingSpinnerData = true       
 
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
 
@@ -473,9 +497,12 @@ export class LectorDemoComponent implements OnInit {
         console.error('REQUEST API ERROR: ' + err.message)
       },
       complete: () => {
+        this.actApli.push(`Filtro: ${type} a ${sta}.${cha}`)
+
         this.loadingSpinnerData = false
-        this.loadingSpinnerGraph = false
         this.ToggleGraph = true
+
+        this.isLoading = false
       }
     })
   }
@@ -499,20 +526,20 @@ export class LectorDemoComponent implements OnInit {
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
 
-    let t_min = this.TrimForm.get('t_min').value
-    let t_max = this.TrimForm.get('t_max').value
+    const t_min = parseFloat(this.tabs[index].TrimForm.get('t_min').value);
+    const t_max = parseFloat(this.tabs[index].TrimForm.get('t_max').value);
 
-    let type = this.FilterForm.get('type').value
-    let fmin = this.FilterForm.get('freqmin').value
-    let fmax = this.FilterForm.get('freqmax').value
-    let corn = this.FilterForm.get('order').value
+    let type = this.tabs[index].FilterForm.get('type').value
+    let fmin = this.tabs[index].FilterForm.get('freqmin').value
+    let fmax = this.tabs[index].FilterForm.get('freqmax').value
+    let corn = this.tabs[index].FilterForm.get('order').value
 
-    if (this.TrimForm.invalid || !dataToUse) {
+    if (this.tabs[index].TrimForm.invalid || !dataToUse) {
       this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
       return
     }
 
-    if (parseFloat(t_max) < parseFloat(t_min)) {
+    if (t_max < t_min) {
       this.snackBar.open('Verificar los Tiempos de Inicio y Fin', 'cerrar', snackBar)
       return
     }
@@ -520,21 +547,22 @@ export class LectorDemoComponent implements OnInit {
     let utc_min = new Date(this.tabs[index].sttime)
     let utc_max = new Date(this.tabs[index].sttime)
 
-    utc_min.setUTCSeconds(utc_min.getUTCSeconds() + parseFloat(t_min))
-    utc_max.setUTCSeconds(utc_max.getUTCSeconds() + parseFloat(t_max))
+    utc_min.setUTCSeconds(utc_min.getUTCSeconds() + t_min)
+    utc_max.setUTCSeconds(utc_max.getUTCSeconds() + t_max)
 
     let min = utc_min.toISOString()
     let max = utc_max.toISOString()
 
-    this.loadingSpinnerGraph = true
     this.ToggleGraph = false
+
+    this.isLoading = true
 
     this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
       next: value => {
 
         this.ToggleGraph = false
         this.loadingSpinnerData = true
-
+      
         // const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
 
@@ -557,18 +585,23 @@ export class LectorDemoComponent implements OnInit {
         console.error('REQUEST API ERROR: ' + err.message)
       },
       complete: () => {
-        console.log(this.TrimForm.value);
-        console.log(this.FilterForm.value);
+        this.actApli.push(`Trim: ${t_max-t_min}seg a ${sta}.${cha}`)
+
         this.loadingSpinnerData = false
-        this.loadingSpinnerGraph = false
+
         this.ToggleGraph = true
+
+        this.isLoading = false
       }
     })
   }
 
+
+
   deleteFile() {
 
     this.tabs = []
+    this.actApli = []
 
     this.btnShow = false;
     this.btnCancel = true;
@@ -787,7 +820,7 @@ export class LectorDemoComponent implements OnInit {
       ],
       series: [
         {
-          name: 'Aceleracion (cm/s/s)',
+          name: 'Velocidad (cm/s)',
           type: 'line',
           showSymbol: false,
           data: value[0].traces_v,
@@ -858,7 +891,7 @@ export class LectorDemoComponent implements OnInit {
       ],
       series: [
         {
-          name: 'Aceleracion (mk/s/s)',
+          name: 'Desplazamiento (cm)',
           type: 'line',
           showSymbol: false,
           data: value[0].traces_d,

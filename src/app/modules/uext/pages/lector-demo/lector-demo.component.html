@@ -382,18 +382,18 @@
                 </div> -->
 
 
-                <div class="graphContainer" fxLayout="column" fxLayoutAlign="start center">
+                <div class="graphContainer" fxLayout="column" fxLayoutAlign="center center">
 
-                    <!-- <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+                    <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
                         <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                             [diameter]="50"></mat-progress-spinner>
                         <h3> <b>Cargando Datos ....</b> </h3>
-                    </div> -->
+                    </div>
 
                     <mat-tab-group (selectedTabChange)="onTabChange($event)" #tabGroup style="width: 100%;"
                         [ngStyle]="showtabs(toggleTabs)">
 
-                        <mat-tab *ngFor="let tab of tabs; let i = index" [label]="getTabLabel(tab)">
+                        <mat-tab *ngFor="let tab of tabs; let i = index" [label]="getTabLabel(tab)"  >
 
                             <ng-template mat-tab-label>
                                 {{ getTabLabel(tab) }}
@@ -492,27 +492,27 @@
                                     </div>
 
                                     <div *ngIf="toogleTrim" class="trimContainer">
-                                        <form [formGroup]="TrimForm" fxLayout="row" fxLayoutGap="10"
+                                        <form [formGroup]="tab.TrimForm" fxLayout="row" fxLayoutGap="10"
                                             fxLayoutAlign="center center" (submit)="trim(i)">
 
-                                            <h4 style="padding-bottom: 13px ; padding-left: 10px;"><b>Indicar Inicio y
-                                                    Fin: </b>
+                                            <h4 style="padding-bottom: 13px ; padding-left: 10px;">
+                                                <b>Indicar Inicio y Fin: </b>
                                             </h4>
 
                                             <mat-form-field appearance="outline">
                                                 <mat-label>Tiempo de Inicio (seg.)</mat-label>
                                                 <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
                                                 <input matInput formControlName="t_min">
-                                                <mat-error *ngIf="TrimForm.get('t_min')?.hasError('required')">
-                                                    Ingrese <strong>Tiempo Min. </strong> </mat-error>
+                                                <!-- <mat-error *ngIf="TrimForm.get('t_min')?.hasError('required')">
+                                                    Ingrese <strong>Tiempo Min. </strong> </mat-error> -->
                                             </mat-form-field>
 
                                             <mat-form-field appearance="outline">
                                                 <mat-label>Tiempo de Fin (seg.)</mat-label>
                                                 <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
                                                 <input matInput formControlName="t_max">
-                                                <mat-error *ngIf="TrimForm.get('t_max')?.hasError('required')">
-                                                    Ingrese <strong>Tiempo Max. </strong> </mat-error>
+                                                <!-- <mat-error *ngIf="TrimForm.get('t_max')?.hasError('required')">
+                                                    Ingrese <strong>Tiempo Max. </strong> </mat-error> -->
                                             </mat-form-field>
 
                                             <div style="padding-bottom: 16px; padding-left: 15px;">
@@ -527,7 +527,7 @@
                                     </div>
 
                                     <div *ngIf="toogleFilter" class="filterContainer">
-                                        <form [formGroup]="FilterForm" fxLayout="row" fxLayoutGap="10"
+                                        <form [formGroup]="tab.FilterForm" fxLayout="row" fxLayoutGap="10"
                                             fxLayoutAlign="center center" (submit)="filter(i)">
 
                                             <h4 style="padding-bottom: 13px ; padding-left: 10px;"><b>Tipo de Filtro
@@ -597,9 +597,9 @@
                                 </div> -->
 
                                 <div fxLayout="column" fxLayoutGap="10">
-                                    <div  echarts [options]="tab.graph[0]" class="divGraph"></div>
-                                    <div  echarts [options]="tab.graph[1]" class="divGraph"></div>
-                                    <div  echarts [options]="tab.graph[2]" class="divGraph"></div>
+                                    <div echarts [options]="tab.graph[0]" [loading]="isLoading" class="divGraph"></div>
+                                    <div echarts [options]="tab.graph[1]" [loading]="isLoading" class="divGraph"></div>
+                                    <div echarts [options]="tab.graph[2]" [loading]="isLoading" class="divGraph"></div>
                                 </div>
                             </div>
 
