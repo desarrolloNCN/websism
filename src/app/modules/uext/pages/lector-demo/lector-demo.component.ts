@@ -583,8 +583,6 @@ export class LectorDemoComponent implements OnInit {
           this.cdRef.detectChanges();
         }
 
-        console.log(this.tabs);
-
       },
       error: err => {
         this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
