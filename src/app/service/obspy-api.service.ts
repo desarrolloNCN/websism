@@ -25,7 +25,7 @@ export class ObspyAPIService {
 
     return this.http.post<any>(url, formData).pipe(
       catchError(error => {
-        return of(error)
+        return throwError(() => error);
       })
     );
   }

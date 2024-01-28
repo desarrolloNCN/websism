@@ -75,6 +75,7 @@ export class LectorDemoComponent implements OnInit {
   btnCancel = true
 
   hideStaPanel = true
+  showResponsivebar = false
 
   urlFile = ''
   idFile = ''
@@ -185,7 +186,11 @@ export class LectorDemoComponent implements OnInit {
           localStorage.setItem('urlSearched', value.string_data)
 
         },
-        error: err => console.error('REQUEST API ERROR: ' + err.message),
+        error: err => {
+          this.loadingSpinner = false
+          // console.error('REQUEST API ERROR: ' + err.message)
+          this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
+        },
         complete: () => {
 
           if (this.urlFile == null) {
@@ -221,6 +226,8 @@ export class LectorDemoComponent implements OnInit {
           } else {
             this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
           }
+
+          this.loadingSpinner = false
 
         }
       })
@@ -442,7 +449,7 @@ export class LectorDemoComponent implements OnInit {
     let fmax = this.tabs[index].FilterForm.get('freqmax').value
     let corn = this.tabs[index].FilterForm.get('order').value
 
-    if (this.FilterForm.invalid || !dataToUse) {
+    if (this.tabs[index].FilterForm.invalid || !dataToUse) {
       this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
       return
     }
@@ -633,6 +640,10 @@ export class LectorDemoComponent implements OnInit {
       this.toogleFilter = false
     }
     this.toogleTrim = !this.toogleTrim
+  }
+
+  toggleStaResponsive() {
+    this.showResponsivebar = !this.showResponsivebar;
   }
 
   groupedData: { [key: string]: any[] } = {};

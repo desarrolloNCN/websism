@@ -1,4 +1,4 @@
-<div class="userfooter" fxLayout="column">
+<div class="userfooter">
 
     <div class="footerContent" fxLayout="column" fxLayoutGap="20">
 
@@ -22,7 +22,7 @@
 
         </div>
 
-        <div class="footerNav" fxLayout="column" fxLayoutGap="10">
+        <div class="footerNav" fxLayout="column" fxLayoutGap="15">
 
             <div class="footerLogo" fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                 <img class="logoQs" src="/assets/ncnLogo.png">
@@ -33,36 +33,39 @@
                 </div>
             </div>
 
-            <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="space-between">
+            <div fxLayout="row" fxLayout.lt-md="column" fxLayoutAlign.lt-md="center center" fxLayoutGap.lt-md="5"
+                fxLayoutGap="5" fxLayoutAlign="space-around">
 
-                <div fxLayout="column">
-                    <h4><b>SITIO</b></h4>
-                    <br>
-                    <h5>Inicio</h5>
-                    <h5>Visor</h5>
-                    <h5>Sobre Nosotros</h5>
-                    <h5>Contacto</h5>
+                <div fxLayout="row" fxLayoutAlign="space-around" fxLayoutGap.lt-md="20" fxLayoutGap="5" fxFlex="70">
+                    <div fxLayout="column">
+                        <h4><b>SITIO</b></h4>
+                        <br>
+                        <h5>Inicio</h5>
+                        <h5>Visor</h5>
+                        <h5>Sobre Nosotros</h5>
+                        <h5>Contacto</h5>
+                    </div>
+
+                    <div fxLayout="column">
+                        <h4><b>PRODUCTO</b></h4>
+                        <br>
+                        <h5>Precios</h5>
+                        <h5>Clientes</h5>
+                        <h5>Feedback</h5>
+                    </div>
+
+                    <div fxLayout="column">
+                        <h4><b>AYUDA</b></h4>
+                        <br>
+                        <h5>Primeros Pasos</h5>
+                        <h5>Estado del Visor</h5>
+                        <h5>FAQ</h5>
+                    </div>
                 </div>
 
-                <div fxLayout="column">
-                    <h4><b>PRODUCTO</b></h4>
-                    <br>
-                    <h5>Precios</h5>
-                    <h5>Clientes</h5>
-                    <h5>Feedback</h5>
-                </div>
-
-                <div fxLayout="column">
-                    <h4><b>AYUDA</b></h4>
-                    <br>
-                    <h5>Primeros Pasos</h5>
-                    <h5>Estado del Visor</h5>
-                    <h5>FAQ</h5>
-                </div>
-
-                <div fxLayout="column" fxLayoutGap="5">
+                <div fxLayout="column" fxLayoutGap="5" fxFlex="30">
                     <h4><b>ENVIO</b></h4>
-                    <div fxLayout="row" fxLayoutGap="5">
+                    <div fxLayout="row" fxLayoutGap="5" fxLayout.lt-sm="column">
                         <input class="inputFooterEmail" placeholder="Ingresa tu Correo">
                         <button mat-flat-button color="warn"> Enviar</button>
                     </div>
@@ -70,12 +73,13 @@
 
             </div>
 
-            <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="space-between center" style="padding-bottom: 10px;">
-                <div>
+            <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap.lt-md="10" fxLayoutGap="5" fxLayoutAlign="space-between center"
+                style="padding-bottom: 10px;">
+                <div [ngStyle.lt-md]="{'text-align': 'center'}">
                     <h4>© 2024 Derechos Resevados</h4>
                     <a href="http://ncn.pe">NCN Nuevo Control EIRL</a>
                 </div>
-                <div>
+                <div [ngStyle.lt-md]="{'text-align': 'center'}">
                     <h4>Jr. Percy Faith Mz Z Lt 5 Of:301 Urb. Santa Leonor 3era Etapa – Chorrillos</h4>
                     <a>+51 945 962 848</a>
                 </div>
@@ -83,7 +87,6 @@
             </div>
 
         </div>
-
 
     </div>
 
