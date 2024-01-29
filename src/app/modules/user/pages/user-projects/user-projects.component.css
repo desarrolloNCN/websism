@@ -1,0 +1,43 @@
+h1,
+h2 {
+    margin: 0;
+}
+
+h2 {
+    color: #444444
+}
+
+h4 {
+    color: #747474
+}
+
+.winTitle {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.newProject {
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #d3d3d3;
+    height: 100px;
+    width: 150px;
+    cursor: pointer;
+}
+
+.newProjectBtn {
+    height: 100px;
+    width: 150px;
+    background-color: #d3d3d3;
+}
+
+.colorIcon {
+    height: 30px;
+    width: 30px;
+    font-size: 30px;
+    color: #a1a1a1;
+}
+
+.projectContainer{
+    padding-top: 20px;
+}

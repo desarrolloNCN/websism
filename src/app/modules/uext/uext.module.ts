@@ -11,6 +11,7 @@ import { NavBarComponent } from './componentes/nav-bar/nav-bar.component';
 import { FooterBarComponent } from './componentes/footer-bar/footer-bar.component';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { MatTabsModule } from '@angular/material/tabs';
+import { UserLoginComponent } from './pages/user-login/user-login.component';
 
 
 @NgModule({
@@ -18,7 +19,8 @@ import { MatTabsModule } from '@angular/material/tabs';
     UserHomeComponent,
     LectorDemoComponent,
     NavBarComponent,
-    FooterBarComponent
+    FooterBarComponent,
+    UserLoginComponent
   ],
   imports: [
     CommonModule,

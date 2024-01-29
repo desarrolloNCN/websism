@@ -19,8 +19,6 @@
                 
             </div>
 
-            <img  >
-
         </div>
 
     </div>
@@ -29,6 +27,10 @@
         <br>
         <br>
         <br>
+        <button mat-button (click)="getJsonResponse()">Probar Token</button>
+        <p> {{IniResp}} </p>
+        <p> {{errorNot}} </p>
+        <pre> {{resp | json}} </pre>
         <br>
         <br>
         <br>

@@ -16,25 +16,25 @@
         <a>CONTACTO</a>
     </div>
 
-    <div fxHide.lt-md class="actionBtn">
+    <div *ngIf="hideCommonAuth" fxHide.lt-md class="actionBtn">
 
-        <button mat-button style="color: white;">
+        <button mat-button style="color: white;" (click)="redirect()">
             Identificarse
         </button>
-
-        <button mat-flat-button class="registerBtn">
+        
+        <button mat-flat-button class="registerBtn" (click)="redirectRegister()"> 
             Registro
         </button>
 
     </div>
 
-    <div fxShow="false" fxShow.lt-md>
+    <div *ngIf="hideCommonAuth" fxShow="false" fxShow.lt-md>
 
-        <button fxHide.lt-sm mat-icon-button >
+        <button fxHide.lt-sm mat-icon-button (click)="redirect()" >
             <mat-icon class="coloIconTop">login</mat-icon>
         </button>
 
-        <button fxHide.lt-sm mat-icon-button >
+        <button fxHide.lt-sm mat-icon-button (click)="redirectRegister()">
             <mat-icon class="coloIconTop2">person</mat-icon>
         </button>
 
@@ -42,6 +42,14 @@
             <mat-icon class="coloIconTop">menu</mat-icon>
         </button>
         <mat-menu #menu="matMenu">
+            <button mat-menu-item  fxShow="false" fxShow.lt-sm (click)="redirect()">
+                <mat-icon>login</mat-icon>
+                <span>Login</span>
+            </button>
+            <button mat-menu-item  fxShow="false" fxShow.lt-sm>
+                <mat-icon>person_add</mat-icon>
+                <span>Registro</span>
+            </button>
             <button mat-menu-item routerLink="/home">
                 <mat-icon>home</mat-icon>
                 <span>INICIO</span>
@@ -60,6 +68,32 @@
             </button>
         </mat-menu>
 
+    </div>
+
+    <div *ngIf="showUserNav" fxLayout="row" fxLayoutGap="10" fxLayoutAlign="center center">
+        <img class="avatar"   >
+        <span class="username" > {{apiAuth.name || 'Waiting User'}} </span>
+        <button mat-icon-button [matMenuTriggerFor]="menuUser" aria-label="Example icon-button with a menu">
+            <mat-icon class="coloIconTop">more_vert</mat-icon>
+        </button>
+        <mat-menu #menuUser="matMenu">
+            <button mat-menu-item  fxShow="false" fxShow.lt-sm (click)="redirect()">
+                <mat-icon>login</mat-icon>
+                <span>Login</span>
+            </button>
+            <button mat-menu-item routerLink="/user/lectorDemo">
+                <mat-icon>person_add</mat-icon>
+                <span>Perfil</span>
+            </button>
+            <button mat-menu-item routerLink="/user/lectorDemo">
+                <mat-icon>person_add</mat-icon>
+                <span>Lector Acel.</span>
+            </button>
+            <button mat-menu-item (click)="redirect()">
+                <mat-icon>logout</mat-icon>
+                <span>Cerrar Sesion</span>
+            </button>
+        </mat-menu>
     </div>
 
 </div>

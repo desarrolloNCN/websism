@@ -1,5 +1,5 @@
 import { trigger, transition, style, animate, state } from '@angular/animations';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
@@ -66,6 +66,7 @@ export class VisorGraphComponent implements OnInit {
   loadingSpinner = false
   loadingSpinnerGraph = false
   loadingSpinnerData = false
+  isLoading = false
 
   ToggleGraph = false
   toggleTabs = false
@@ -74,6 +75,7 @@ export class VisorGraphComponent implements OnInit {
   btnCancel = true
 
   hideStaPanel = true
+  showResponsivebar = false
 
   urlFile = ''
   idFile = ''
@@ -92,11 +94,27 @@ export class VisorGraphComponent implements OnInit {
 
   actApli: any = []
 
+  formGroups: FormGroup[] = [];
+
   constructor(
     private obsApi: ObspyAPIService,
     private snackBar: MatSnackBar,
+    private cdRef: ChangeDetectorRef,
+  ) {
 
-  ) { }
+    this.FilterForm = new FormGroup({
+      type: new FormControl('', [Validators.required]),
+      freqmin: new FormControl('', [Validators.required]),
+      freqmax: new FormControl('', [Validators.required]),
+      order: new FormControl('', [Validators.required])
+    });
+
+    this.TrimForm = new FormGroup({
+      t_min: new FormControl('', [Validators.required]),
+      t_max: new FormControl('', [Validators.required])
+    });
+
+  }
 
   ngOnInit(): void {
     localStorage.clear()
@@ -106,17 +124,18 @@ export class VisorGraphComponent implements OnInit {
 
     })
 
-    this.FilterForm = new FormGroup({
-      type: new FormControl('', [Validators.required]),
-      freqmin: new FormControl('', [Validators.required]),
-      freqmax: new FormControl('', [Validators.required]),
-      order: new FormControl('', [Validators.required])
-    })
+    // this.FilterForm = new FormGroup({
+    //   type: new FormControl('', [Validators.required]),
+    //   freqmin: new FormControl('', [Validators.required]),
+    //   freqmax: new FormControl('', [Validators.required]),
+    //   order: new FormControl('', [Validators.required])
+    // })
 
-    this.TrimForm = new FormGroup({
-      type: new FormControl(''),
+    // this.TrimForm = new FormGroup({
+    //   t_min: new FormControl('', [Validators.required]),
+    //   t_max: new FormControl('', [Validators.required]),
+    // })
 
-    })
   }
 
   onFileSelected(event: any) {
@@ -162,11 +181,16 @@ export class VisorGraphComponent implements OnInit {
           this.idFile = value.id
           this.urlFile = value.file
           this.stringdata = value.string_data
-          localStorage.setItem('idSesion', value.id)
+
           localStorage.setItem('urlFileUpload', value.file)
           localStorage.setItem('urlSearched', value.string_data)
+
         },
-        error: err => console.error('REQUEST API ERROR: ' + err.message),
+        error: err => {
+          this.loadingSpinner = false
+          // console.error('REQUEST API ERROR: ' + err.message)
+          this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
+        },
         complete: () => {
 
           if (this.urlFile == null) {
@@ -203,6 +227,8 @@ export class VisorGraphComponent implements OnInit {
             this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
           }
 
+          this.loadingSpinner = false
+
         }
       })
 
@@ -210,6 +236,64 @@ export class VisorGraphComponent implements OnInit {
       this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
       this.loadingSpinner = false
     }
+  }
+
+  createTab(e: any, value: any): void {
+    this.ToggleGraph = false;
+
+    const graph = this.graphGenerator(e, value, '(RAWDATA)');
+
+    this.toggleTabs = true;
+
+    const FilterForm = new FormGroup({
+      type: new FormControl('', [Validators.required]),
+      freqmin: new FormControl('', [Validators.required]),
+      freqmax: new FormControl('', [Validators.required]),
+      order: new FormControl('', [Validators.required])
+    })
+
+    const TrimForm = new FormGroup({
+      t_min: new FormControl('', [Validators.required]),
+      t_max: new FormControl('', [Validators.required]),
+    })
+
+    this.tabs.push({
+      label: `${e.station}.${e.channel}`,
+      dataEst: e,
+      sttime: e.starttime,
+      entime: e.endtime,
+      FilterForm,
+      TrimForm,
+      graph,
+    });
+
+    //this.inicializarFormularios()
+
+    this.ToggleGraph = true;
+
+  }
+
+  inicializarFormularios(): void {
+    this.tabs.forEach(() => {
+
+      const FilterForm = new FormGroup({
+        type: new FormControl('', [Validators.required]),
+        freqmin: new FormControl('', [Validators.required]),
+        freqmax: new FormControl('', [Validators.required]),
+        order: new FormControl('', [Validators.required])
+      })
+
+      this.formGroups.push(FilterForm);
+
+      const TrimForm = new FormGroup({
+        t_min: new FormControl('', [Validators.required]),
+        t_max: new FormControl('', [Validators.required]),
+      })
+
+      this.formGroups.push(TrimForm);
+    });
+    console.log(this.formGroups);
+    
   }
 
   leer(e: any) {
@@ -221,9 +305,9 @@ export class VisorGraphComponent implements OnInit {
       }
     }
 
-    localStorage.setItem('net', e.network)
-    localStorage.setItem('sta', e.station)
-    localStorage.setItem('cha', e.channel)
+    // localStorage.setItem('net', e.network)
+    // localStorage.setItem('sta', e.station)
+    // localStorage.setItem('cha', e.channel)
 
     this.loadingSpinnerGraph = true
     this.ToggleGraph = false
@@ -237,45 +321,16 @@ export class VisorGraphComponent implements OnInit {
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
     this.obsApi.getTraceData(dataToUse, e.station, e.channel).subscribe({
-      next: value => {
-
-        this.ToggleGraph = false
-        this.plotedimages = value
-
-        const graph = this.graphGenerator(e, value, '(RAWDATA)')
-        this.toggleTabs = true
-        this.tabs.push(
-          {
-            label: `${e.station}.${e.channel}`,
-            graph,
-            index: this.tabIndex++
-          })
-
-      },
+      next: value => { this.createTab(e, value) },
       error: err => console.error('REQUEST API ERROR: ' + err.message),
       complete: () => {
-
         this.loadingSpinnerGraph = false
         this.ToggleGraph = true
       }
     })
   }
 
-  getTabLabel(tab: any): string {
-    return tab.label;
-  }
-
-  onCloseTab(index: number) {
-    // if(this.tabs.length < 0){
-    //   this.toggleTabs = false
-    // }
-    this.tabs.splice(index, 1);
-  }
-
-  baseLineCorrecion(base: string, index: number) {
-
-    console.log('tab index'+ index);
-    
+  baseLine(menuIndex: number, index: number) {
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
@@ -285,137 +340,279 @@ export class VisorGraphComponent implements OnInit {
       this.snackBar.open('Debe elegir una Estacion', 'cerrar', snackBar)
       return
     }
-    // let e = this.selectedStationInfo
 
-    localStorage.setItem('base', base)
-
-    this.ToggleGraph = false
-
-    //this.stationInfo = e
-    let net = localStorage.getItem('net')!
-    let sta = localStorage.getItem('sta')!
-    let cha = localStorage.getItem('cha')!
-
-    this.accel = {}
-    this.vel = {}
-    this.dsp = {}
+    let base = this.baseLineOptions[menuIndex]
+    // localStorage.setItem('base', base)
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
+    // let net = localStorage.getItem('net')!
+    // let sta = localStorage.getItem('sta')!
+    // let cha = localStorage.getItem('cha')!
 
-    // this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base).subscribe({
-    //   next: value => {
+    let sta = this.tabs[index].dataEst.station
+    let cha = this.tabs[index].dataEst.channel
 
-    //     this.ToggleGraph = false
+    let type = this.tabs[index].FilterForm.get('type').value
+    let fmin = this.tabs[index].FilterForm.get('freqmin').value
+    let fmax = this.tabs[index].FilterForm.get('freqmax').value
+    let corn = this.tabs[index].FilterForm.get('order').value
 
-    //     const indx = this.tabs[index].index
-        
-    //     if(indx !== -1){
-          
-    //       const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+    const t_min = parseFloat(this.tabs[index].TrimForm.get('t_min').value);
+    const t_max = parseFloat(this.tabs[index].TrimForm.get('t_max').value);
 
-    //       const updGraph = { ...this.tabs[indx], graph: graph };
+    let utc_min: any
+    let utc_max: any
 
-    //       this.tabs = [
-    //         ...this.tabs.slice(0, indx),
-    //         updGraph,
-    //         ...this.tabs.slice(indx + 1),
-    //       ]
-    //     }
+    let min = ''
+    let max = ''
+
+    if (isNaN(t_min) && isNaN(t_max)) {
+      min = ''
+      max = ''
+    } else {
+      utc_min = new Date(this.tabs[index].sttime);
+      utc_max = new Date(this.tabs[index].sttime);
+
+      utc_min.setUTCSeconds(utc_min.getUTCSeconds() + t_min);
+      utc_max.setUTCSeconds(utc_max.getUTCSeconds() + t_max);
+
+      min = utc_min.toISOString()
+      max = utc_max.toISOString()
+    }
+
+    this.ToggleGraph = false
+    this.isLoading = true
+
+    this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
+      next: value => {
+
+        this.ToggleGraph = false
        
 
-    //   },
-    //   error: err => {
-    //     this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-    //     this.loadingSpinnerGraph = false
-    //     console.error('REQUEST API ERROR: ' + err.message)
-    //   },
-    //   complete: () => {
-    //     this.actApli.push(`Linea Base: ${base}`)
-    //     this.loadingSpinnerData = false
-    //     this.ToggleGraph = true
-    //   }
-    // })
+        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+
+        if (indx !== -1) {
+
+          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+
+          this.tabs[indx].graph = graph;
+
+          // Manualmente activar la detección de cambios para la pestaña actualizada
+          this.cdRef.detectChanges();
+        }
+
+
+      },
+      error: err => {
+        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+        this.loadingSpinnerGraph = false
+        console.error('REQUEST API ERROR: ' + err.message)
+      },
+      complete: () => {
+        this.actApli.push(`Linea Base: ${base} a ${sta}.${cha}`)
+        this.loadingSpinnerData = false
+
+        this.ToggleGraph = true
+        this.isLoading = false
+      }
+    })
   }
 
-  addFilter(index: number) {
+  filter(index: number) {
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
-    let net = localStorage.getItem('net')!
-    let sta = localStorage.getItem('sta')!
-    let cha = localStorage.getItem('cha')!
-    let base = localStorage.getItem('base')!
+    var dataString: string = localStorage.getItem('urlSearched')!
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
 
-    let type = this.FilterForm.get('type').value
-    let fmin = this.FilterForm.get('freqmin').value
-    let fmax = this.FilterForm.get('freqmax').value
-    let corn = this.FilterForm.get('order').value
+    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+
+    // let net = localStorage.getItem('net')!
+    // let sta = localStorage.getItem('sta')!
+    // let cha = localStorage.getItem('cha')!
+    let base = localStorage.getItem('base') || ''
+
+
+    let sta = this.tabs[index].dataEst.station
+    let cha = this.tabs[index].dataEst.channel
+
+    let type = this.tabs[index].FilterForm.get('type').value
+    let fmin = this.tabs[index].FilterForm.get('freqmin').value
+    let fmax = this.tabs[index].FilterForm.get('freqmax').value
+    let corn = this.tabs[index].FilterForm.get('order').value
+
+    if (this.tabs[index].FilterForm.invalid || !dataToUse) {
+      this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+      return
+    }
+
+    const t_min = parseFloat(this.tabs[index].TrimForm.get('t_min').value);
+    const t_max = parseFloat(this.tabs[index].TrimForm.get('t_max').value);
+
+    let utc_min: any
+    let utc_max: any
+
+    let min = ''
+    let max = ''
+
+    if (isNaN(t_min) && isNaN(t_max)) {
+      min = ''
+      max = ''
+    } else {
+      utc_min = new Date(this.tabs[index].sttime);
+      utc_max = new Date(this.tabs[index].sttime);
+
+      utc_min.setUTCSeconds(utc_min.getUTCSeconds() + t_min);
+      utc_max.setUTCSeconds(utc_max.getUTCSeconds() + t_max);
+
+      min = utc_min.toISOString()
+      max = utc_max.toISOString()
+    }
+
+    this.isLoading = true
+
+    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
+      next: value => {
+
+        this.ToggleGraph = false
+        this.loadingSpinnerData = true       
+
+        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+
+        if (indx !== -1) {
+
+          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+
+          this.tabs[indx].graph = graph;
+
+          // Manualmente activar la detección de cambios para la pestaña actualizada
+          this.cdRef.detectChanges();
+        }
+
+      },
+      error: err => {
+        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+        this.loadingSpinnerGraph = false
+        console.error('REQUEST API ERROR: ' + err.message)
+      },
+      complete: () => {
+        this.actApli.push(`Filtro: ${type} a ${sta}.${cha}`)
+
+        this.loadingSpinnerData = false
+        this.ToggleGraph = true
+
+        this.isLoading = false
+      }
+    })
+  }
+
+  trim(index: number) {
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 3 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
-    if (this.FilterForm.invalid || !dataToUse) {
+    // let net = localStorage.getItem('net')!
+    // let sta = localStorage.getItem('sta')!
+    // let cha = localStorage.getItem('cha')!
+    let base = localStorage.getItem('base') || ''
+
+    let sta = this.tabs[index].dataEst.station
+    let cha = this.tabs[index].dataEst.channel
+
+    const t_min = parseFloat(this.tabs[index].TrimForm.get('t_min').value);
+    const t_max = parseFloat(this.tabs[index].TrimForm.get('t_max').value);
+
+    let type = this.tabs[index].FilterForm.get('type').value
+    let fmin = this.tabs[index].FilterForm.get('freqmin').value
+    let fmax = this.tabs[index].FilterForm.get('freqmax').value
+    let corn = this.tabs[index].FilterForm.get('order').value
+
+    if (this.tabs[index].TrimForm.invalid || !dataToUse) {
       this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
       return
     }
 
-    this.loadingSpinnerGraph = true
+    if (t_max < t_min) {
+      this.snackBar.open('Verificar los Tiempos de Inicio y Fin', 'cerrar', snackBar)
+      return
+    }
+
+    let utc_min = new Date(this.tabs[index].sttime)
+    let utc_max = new Date(this.tabs[index].sttime)
+
+    utc_min.setUTCSeconds(utc_min.getUTCSeconds() + t_min)
+    utc_max.setUTCSeconds(utc_max.getUTCSeconds() + t_max)
+
+    let min = utc_min.toISOString()
+    let max = utc_max.toISOString()
+
     this.ToggleGraph = false
 
-    this.accel = {}
-    this.vel = {}
-    this.dsp = {}
+    this.isLoading = true
 
-    // this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn).subscribe({
-    //   next: value => {
+    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
+      next: value => {
 
-    //     this.ToggleGraph = false
-    //     this.loadingSpinnerData = true
+        this.ToggleGraph = false
+        this.loadingSpinnerData = true
+      
+        // const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
+        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
 
-    //     const indx = this.tabs[index].index
-        
-    //     if(indx !== -1){
-          
-    //       const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+        if (indx !== -1) {
 
-    //       const updGraph = { ...this.tabs[indx], graph: graph };
+          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
 
-    //       this.tabs = [
-    //         ...this.tabs.slice(0, indx),
-    //         updGraph,
-    //         ...this.tabs.slice(indx + 1),
-    //       ]
-    //     }
+          this.tabs[indx].graph = graph;
 
-    //   },
-    //   error: err => {
-    //     this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-    //     this.loadingSpinnerGraph = false
-    //     console.error('REQUEST API ERROR: ' + err.message)
-    //   },
-    //   complete: () => {
-    //     this.loadingSpinnerData = false
-    //     this.loadingSpinnerGraph = false
-    //     this.ToggleGraph = true
-    //   }
-    // })
+          // Manualmente activar la detección de cambios para la pestaña actualizada
+          this.cdRef.detectChanges();
+        }
+
+      },
+      error: err => {
+        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+        this.loadingSpinnerGraph = false
+        console.error('REQUEST API ERROR: ' + err.message)
+      },
+      complete: () => {
+        this.actApli.push(`Trim: ${t_max-t_min}seg a ${sta}.${cha}`)
+
+        this.loadingSpinnerData = false
+
+        this.ToggleGraph = true
+
+        this.isLoading = false
+      }
+    })
   }
 
   deleteFile() {
+
+    this.tabs = []
+    this.actApli = []
+
     this.btnShow = false;
     this.btnCancel = true;
+
     this.fileInput.nativeElement.value = ''
+
     this.groupedData = {}
     this.arch = ''
     this.controlForm.get('url').enable()
+
     this.accel = {}
     this.vel = {}
     this.dsp = {}
@@ -426,11 +623,21 @@ export class VisorGraphComponent implements OnInit {
   }
 
   filterData() {
+    if (this.toogleTrim === true) {
+      this.toogleTrim = false
+    }
     this.toogleFilter = !this.toogleFilter
   }
 
-  trimData() {
+  toggleData() {
+    if (this.toogleFilter === true) {
+      this.toogleFilter = false
+    }
     this.toogleTrim = !this.toogleTrim
+  }
+
+  toggleStaResponsive() {
+    this.showResponsivebar = !this.showResponsivebar;
   }
 
   groupedData: { [key: string]: any[] } = {};
@@ -461,7 +668,19 @@ export class VisorGraphComponent implements OnInit {
   }
 
   onTabChange(event: MatTabChangeEvent) {
+    if (!this.tabs[event.index].dataEst) {
+      return
+    } else {
+      this.stationInfo = this.tabs[event.index].dataEst
+    }
+  }
 
+  getTabLabel(tab: any): string {
+    return tab.label;
+  }
+
+  onCloseTab(index: number) {
+    this.tabs.splice(index, 1);
   }
 
   graphGenerator(e: any, value: any, dataformat: any) {
@@ -481,7 +700,7 @@ export class VisorGraphComponent implements OnInit {
     const accel = {
       animationDuration: 5000,
       title: {
-        text: `${dataformat} - Aceleracion | ${e.network}.${e.station}.${e.channel}`,
+        text: `${dataformat} - Aceleracion | ${e.network}.${e.station}.${e.location}.${e.channel}`,
         subtext: `Inicio: ${e.starttime} || Fin: ${e.endtime} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
       },
       tooltip: {
@@ -492,6 +711,7 @@ export class VisorGraphComponent implements OnInit {
       },
       toolbox: {
         show: true,
+        itemSize: 25,
         feature: {
           dataZoom: {
             yAxisIndex: 'none'
@@ -522,7 +742,8 @@ export class VisorGraphComponent implements OnInit {
         {
           type: 'inside',
           start: 0,
-          end: 100
+          end: 100,
+          zoomLock: true
         },
         {
           start: 0,
@@ -550,7 +771,7 @@ export class VisorGraphComponent implements OnInit {
     const vel = {
       animationDuration: 5000,
       title: {
-        text: `${dataformat} - Velocidad | ${e.network}.${e.station}.${e.channel}`,
+        text: `${dataformat} - Velocidad | ${e.network}.${e.station}.${e.location}.${e.channel}`,
         subtext: `Inicio: ${e.starttime} || Fin: ${e.endtime} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
       },
       tooltip: {
@@ -558,6 +779,7 @@ export class VisorGraphComponent implements OnInit {
       },
       toolbox: {
         show: true,
+        itemSize: 25,
         feature: {
           dataZoom: {
             yAxisIndex: 'none'
@@ -588,7 +810,8 @@ export class VisorGraphComponent implements OnInit {
         {
           type: 'inside',
           start: 0,
-          end: 100
+          end: 100,
+          zoomLock: true
         },
         {
           start: 0,
@@ -602,7 +825,7 @@ export class VisorGraphComponent implements OnInit {
       ],
       series: [
         {
-          name: 'Aceleracion (mk/s/s)',
+          name: 'Velocidad (cm/s)',
           type: 'line',
           showSymbol: false,
           data: value[0].traces_v,
@@ -616,7 +839,7 @@ export class VisorGraphComponent implements OnInit {
     const dsp = {
       animationDuration: 5000,
       title: {
-        text: `${dataformat} - Desplazamiento | ${e.network}.${e.station}.${e.channel}`,
+        text: `${dataformat} - Desplazamiento | ${e.network}.${e.station}.${e.location}.${e.channel}`,
         subtext: `Inicio: ${e.starttime} || Fin: ${e.endtime} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
       },
       tooltip: {
@@ -627,6 +850,7 @@ export class VisorGraphComponent implements OnInit {
       },
       toolbox: {
         show: true,
+        itemSize: 25,
         feature: {
           dataZoom: {
             yAxisIndex: 'none'
@@ -657,7 +881,8 @@ export class VisorGraphComponent implements OnInit {
         {
           type: 'inside',
           start: 0,
-          end: 100
+          end: 100,
+          zoomLock: true
         },
         {
           start: 0,
@@ -671,7 +896,7 @@ export class VisorGraphComponent implements OnInit {
       ],
       series: [
         {
-          name: 'Aceleracion (mk/s/s)',
+          name: 'Desplazamiento (cm)',
           type: 'line',
           showSymbol: false,
           data: value[0].traces_d,
@@ -725,7 +950,4 @@ export class VisorGraphComponent implements OnInit {
     this.groupedData = {}
   }
 
-  f() {
-
-  }
 }

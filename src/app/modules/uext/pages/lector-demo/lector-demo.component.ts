@@ -330,8 +330,6 @@ export class LectorDemoComponent implements OnInit {
     })
   }
 
-
-
   baseLine(menuIndex: number, index: number) {
 
     const snackBar = new MatSnackBarConfig();
@@ -600,8 +598,6 @@ export class LectorDemoComponent implements OnInit {
       }
     })
   }
-
-
 
   deleteFile() {
 

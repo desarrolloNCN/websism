@@ -23,17 +23,17 @@ export class HttpHeadersInterceptor implements HttpInterceptor {
       req = req.clone({
         setHeaders: {
           Authorization: authHeader,
-          
+
         },
         // url: `http://pedro.ncn.pe:8000/${req.url}`
         // url: `https://apiqs.ncn.pe/${req.url}`
-         url: `http://localhost:8000/${req.url}`
-        //url: `http://192.168.1.42:8000/${req.url}`
+        //url: `http://localhost:8000/${req.url}`
+        // url: `http://192.168.1.42:8000/${req.url}`
       });
     }
 
     // Continúa con la solicitud modificada
     return next.handle(req);
   }
-  
+
 }
