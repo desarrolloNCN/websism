@@ -84,6 +84,13 @@ h4 {
     height: 275px;
 }
 
+.infListSt {
+    border-radius: 5px;
+    padding: 5px;
+    background-color: rgb(248, 248, 248);
+    height: 100%;
+}
+
 .scrlSta {
     overflow: scroll;
     border-radius: 5px;

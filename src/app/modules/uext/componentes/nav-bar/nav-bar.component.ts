@@ -10,7 +10,7 @@ import { AuthService } from 'src/app/service/auth.service';
 })
 export class NavBarComponent implements OnInit {
 
-  apiAuth :any = {}
+  apiAuth: any = {}
   showUserNav = false
   hideCommonAuth = true
 
@@ -18,30 +18,33 @@ export class NavBarComponent implements OnInit {
     private auth: AuthService
   ) {
     delay(5000)
-   }
+  }
 
   ngOnInit(): void {
+    window.addEventListener('popstate', this.onBackButtonClicked.bind(this));
     this.getAuthCrede()
-    
   }
 
   redirect() {
     window.location.href = 'https://qs.ncn.pe/site/'
   }
-  
-  redirectRegister(){ 
+
+  redirectRegister() {
     window.location.href = 'https://qs.ncn.pe/site/index.php/component/users/registration?Itemid=101'
+  }
+
+  onBackButtonClicked(event: PopStateEvent): void {
+    window.location.reload();
   }
 
   getAuthCrede() {
 
     this.auth.getToken().subscribe({
       next: value => {
-        console.log(typeof(value.name));
-        
-        if(value.name == null){
+
+        if (value.name == null) {
           return
-        }else{ 
+        } else {
           this.showUserNav = true
           this.hideCommonAuth = false
           this.apiAuth = value
@@ -50,11 +53,8 @@ export class NavBarComponent implements OnInit {
       error: err => {
         this.showUserNav = false
         this.hideCommonAuth = true
-        console.log(err);
-        
       },
       complete: () => {
-        console.log('Exito');        
       }
 
     })

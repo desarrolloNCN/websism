@@ -6,15 +6,16 @@
 
         <div *ngIf="hideStaPanel" [@enterAnimation2] class="winTitle">
             <h2><b>(DEMO) - Lector de Archivos Acelerográficos</b></h2>
-            <h4 fxHide.lt-sm>Podras manipular archivos de diferentes acelerografos y aplicar las diferentes herramientas que ofrecemos </h4>
+            <h4 fxHide.lt-sm>Podras manipular archivos de diferentes acelerografos y aplicar las diferentes herramientas
+                que ofrecemos </h4>
         </div>
 
         <div *ngIf="hideStaPanel" [@enterAnimation2] class="dndZoneContainer">
 
             <div class="dndZone" fxLayout="row" fxLayoutAlign="center start">
 
-                <form [formGroup]="controlForm" fxLayout="row" fxLayout.lt-md="column" fxLayoutAlign="center center" fxLayoutGap="10"
-                    (submit)="leerArchivo()">
+                <form [formGroup]="controlForm" fxLayout="row" fxLayout.lt-md="column" fxLayoutAlign="center center"
+                    fxLayoutGap="10" (submit)="leerArchivo()">
 
                     <div class="inputUrl" [ngStyle.lt-sm]="{'width': '250px'}" fxLayout="row" fxLayoutGap="5">
                         <mat-icon class="colorIcon">link</mat-icon>
@@ -22,7 +23,7 @@
                             placeholder="Ejm: http://examples.obspy.org/RJOB_061005_072159.ehz.new">
                     </div>
 
-                    <p fxHide.lt-md >O</p>
+                    <p fxHide.lt-md>O</p>
 
                     <div>
                         <div [hidden]="btnShow">
@@ -86,7 +87,8 @@
                 </button>
             </div>
 
-            <div *ngIf="hideStaPanel" [@enterAnimation] class="stInfo" fxLayout="column" fxLayout.lt-md="row" fxLayoutGap="10" fxFlex="23">
+            <div *ngIf="hideStaPanel" [@enterAnimation] class="stInfo" fxLayout="column" fxLayout.lt-md="row"
+                fxLayoutGap="10" fxFlex="23">
 
                 <div fxLayout="column" [fxHide.lt-md]="!showResponsivebar" fxLayoutGap="5">
                     <div style="padding-left: 10px;">
@@ -100,10 +102,13 @@
                         </div>
 
                         <div class="scrlSta">
+
                             <div *ngFor="let sta of groupedData | keyvalue; let i = index">
+
                                 <div [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
                                     (click)="selectGroup(sta.key)" fxLayout="column" fxLayoutGap="3"
                                     fxLayoutAlign="space-around">
+
                                     <div *ngFor="let item of getGroupValues(sta)" fxLayout="row"
                                         fxLayoutAlign="space-around center" (click)="leer(item)"
                                         style="cursor: pointer; padding: 2px;">
@@ -114,9 +119,13 @@
                                             [ngStyle]="setColorStationChannel(item.channel)">
                                             {{item.channel}} </p>
                                     </div>
+
                                 </div>
+
                                 <div style="height: 5px;"></div>
+
                             </div>
+
                         </div>
 
                     </div>
@@ -126,14 +135,14 @@
                         <h2><b>INFORMACION DE ESTACION</b></h2>
                         <h4>Datos relevantes de la estacion seleccionada</h4>
                     </div>
-                    <div class="listSt" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
+                    <div class="infListSt" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
 
                         <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
                             <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
                                 <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                                 <p> NETWORK:</p>
                             </div>
-                            <P><b>{{stationInfo.network}} </b></P>
+                            <P><b>{{stationInfo.network || '-'}} </b></P>
                         </div>
 
                         <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
@@ -149,7 +158,7 @@
                                 <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                                 <p> LOCATION:</p>
                             </div>
-                            <P><b>{{stationInfo.location}} </b></P>
+                            <P><b>{{stationInfo.location || '-'}} </b></P>
                         </div>
 
                         <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
@@ -208,6 +217,22 @@
                             <P><b>{{stationInfo.calib}} </b></P>
                         </div>
 
+                        <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                                <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                                <p> SENS.:</p>
+                            </div>
+                            <P><b>{{stationInfo.f_calib || '-'}} </b></P>
+                        </div>
+
+                        <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                                <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                                <p> UNIDAD:</p>
+                            </div>
+                            <P><b>{{stationInfo.und_calib || '-'}} </b></P>
+                        </div>
+
                     </div>
                 </div>
                 <div fxLayout="column" [fxHide.lt-md]="!showResponsivebar" fxLayoutGap="5">
@@ -249,7 +274,7 @@
                     <mat-tab-group (selectedTabChange)="onTabChange($event)" #tabGroup style="width: 100%;"
                         [ngStyle]="showtabs(toggleTabs)">
 
-                        <mat-tab *ngFor="let tab of tabs; let i = index" [label]="getTabLabel(tab)"  >
+                        <mat-tab *ngFor="let tab of tabs; let i = index" [label]="getTabLabel(tab)">
 
                             <ng-template mat-tab-label>
                                 {{ getTabLabel(tab) }}
@@ -275,7 +300,7 @@
 
                                         <div fxLayout="row" fxLayoutGap="1" fxLayoutAlign="center center">
                                             <button mat-icon-button type="button" [matMenuTriggerFor]="cambioUnidad">
-                                                <mat-icon class="colorIconBar" title="Calibrar Trazas">gavel</mat-icon>
+                                                <mat-icon class="colorIconBar" title="Cambio Magnitud">gavel</mat-icon>
                                                 <mat-menu #cambioUnidad>
                                                     <button mat-menu-item>
                                                         <mat-icon>add_to_drive</mat-icon>
@@ -469,7 +494,8 @@
 
         </div>
 
-        <div style="height: 100%; padding: 20px; border-radius: 5px; background-color: #31456D;" fxShow="false" fxShow.lt-sm>
+        <div style="height: 100%; padding: 20px; border-radius: 5px; background-color: #31456D;" fxShow="false"
+            fxShow.lt-sm>
             <h1 style="text-align: center; color: white;"><b>Voltear el Dispositivo, para Mejor Visualizacion</b></h1>
         </div>
 

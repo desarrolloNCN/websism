@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http'
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http'
 import { Observable, catchError, of, throwError } from 'rxjs';
 
 @Injectable({
@@ -7,11 +7,14 @@ import { Observable, catchError, of, throwError } from 'rxjs';
 })
 export class ObspyAPIService {
 
+  headers = {}
 
   constructor(private http: HttpClient) { }
 
 
   uploadFile(data: File | string | undefined): Observable<any> {
+
+
     const formData = new FormData();
     const url = `upload/`;
 

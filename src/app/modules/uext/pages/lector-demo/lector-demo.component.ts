@@ -162,7 +162,7 @@ export class LectorDemoComponent implements OnInit {
     this.clearData()
 
     const snackBar = new MatSnackBarConfig();
-    snackBar.duration = 3 * 1000;
+    snackBar.duration = 5 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
     let textoValue = this.controlForm.get('url').value;
@@ -196,7 +196,7 @@ export class LectorDemoComponent implements OnInit {
           if (this.urlFile == null) {
             this.obsApi.getData(this.stringdata).subscribe({
               next: value => {
-                this.groupedData = this.groupByNetworkAndStation(value.data)
+                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
               },
               error: err => {
                 this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
@@ -213,7 +213,7 @@ export class LectorDemoComponent implements OnInit {
               next: value => {
 
                 this.toggleTabs = true
-                this.groupedData = this.groupByNetworkAndStation(value.data)
+                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
               },
               error: err => {
                 this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
@@ -293,7 +293,7 @@ export class LectorDemoComponent implements OnInit {
       this.formGroups.push(TrimForm);
     });
     console.log(this.formGroups);
-    
+
   }
 
   leer(e: any) {
@@ -391,7 +391,7 @@ export class LectorDemoComponent implements OnInit {
       next: value => {
 
         this.ToggleGraph = false
-       
+
 
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
 
@@ -481,7 +481,7 @@ export class LectorDemoComponent implements OnInit {
       next: value => {
 
         this.ToggleGraph = false
-        this.loadingSpinnerData = true       
+        this.loadingSpinnerData = true
 
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
 
@@ -567,7 +567,7 @@ export class LectorDemoComponent implements OnInit {
 
         this.ToggleGraph = false
         this.loadingSpinnerData = true
-      
+
         // const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
 
@@ -588,7 +588,7 @@ export class LectorDemoComponent implements OnInit {
         console.error('REQUEST API ERROR: ' + err.message)
       },
       complete: () => {
-        this.actApli.push(`Trim: ${t_max-t_min}seg a ${sta}.${cha}`)
+        this.actApli.push(`Trim: ${t_max - t_min}seg a ${sta}.${cha}`)
 
         this.loadingSpinnerData = false
 
@@ -643,20 +643,20 @@ export class LectorDemoComponent implements OnInit {
   groupedData: { [key: string]: any[] } = {};
   selectedGroup: string | null = null;
 
-  groupByNetworkAndStation(data: any[]): { [key: string]: any[] } {
-    const grouped: { [key: string]: any[] } = {};
+  groupByNetworkAndStation(data: any[], inv: any[]): { [key: string]: any[] } {
+    const groupedD: { [key: string]: any[] } = {};
 
     data.forEach(item => {
       const key = `${item.network}.${item.station}`;
 
-      if (!grouped[key]) {
-        grouped[key] = [];
+      if (!groupedD[key]) {
+        groupedD[key] = [];
       }
 
-      grouped[key].push(item);
+      groupedD[key].push(item);
     });
 
-    return grouped;
+    return groupedD;
   }
 
   selectGroup(groupKey: string): void {
@@ -668,7 +668,7 @@ export class LectorDemoComponent implements OnInit {
   }
 
   onTabChange(event: MatTabChangeEvent) {
-    if (!this.tabs[event.index].dataEst) {
+    if (event.index == -1 || !this.tabs[event.index].dataEst) {
       return
     } else {
       this.stationInfo = this.tabs[event.index].dataEst
@@ -681,6 +681,22 @@ export class LectorDemoComponent implements OnInit {
 
   onCloseTab(index: number) {
     this.tabs.splice(index, 1);
+  }
+
+  dateConverter(date: string) {
+
+    const fechaHora = new Date(date);
+
+    const año = fechaHora.getFullYear();
+    const mes = fechaHora.getMonth() + 1; // Los meses comienzan desde 0
+    const dia = fechaHora.getDate();
+    const horas = fechaHora.getHours();
+    const minutos = fechaHora.getMinutes();
+    const segundos = fechaHora.getSeconds();
+
+    const formatoFechaHora = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+
+    return formatoFechaHora
   }
 
   graphGenerator(e: any, value: any, dataformat: any) {
@@ -696,6 +712,10 @@ export class LectorDemoComponent implements OnInit {
     const ms = diff % 1000;
 
     const graphArr: any = []
+
+    let und = e.und_calib
+
+    und ? e.und_calib : 'unk'
 
     const accel = {
       animationDuration: 5000,
@@ -736,7 +756,7 @@ export class LectorDemoComponent implements OnInit {
         }
       },
       yAxis: {
-        name: "Aceleracion (cm/s^2)",
+        name: `Aceleracion ${und}`,
       },
       dataZoom: [
         {
@@ -764,6 +784,20 @@ export class LectorDemoComponent implements OnInit {
           animationDelay: (idx: number) => idx * 10,
         },
       ],
+      graphic: [{
+        type: 'image',
+        id: 'logo',
+        left: 'center',
+        top: 'center',
+        z: -10,
+        bounding: 'all',
+        style: {
+          image: 'assets/ncnLogoColor.png',
+          width: 300,
+          height: 300,
+          opacity: 0.2
+        }
+      }],
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx: number) => idx * 5,
     };
@@ -832,6 +866,20 @@ export class LectorDemoComponent implements OnInit {
           animationDelay: (idx: number) => idx * 10,
         },
       ],
+      graphic: [{
+        type: 'image',
+        id: 'logo2',
+        left: 'center',
+        top: 'center',
+        z: -10,
+        bounding: 'all',
+        style: {
+          image: 'assets/ncnLogoColor.png',
+          width: 300,
+          height: 300,
+          opacity: 0.2
+        }
+      }],
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx: number) => idx * 5,
     };
@@ -903,6 +951,20 @@ export class LectorDemoComponent implements OnInit {
           animationDelay: (idx: number) => idx * 10,
         },
       ],
+      graphic: [{
+        type: 'image',
+        id: 'logo3',
+        left: 'center',
+        top: 'center',
+        z: -10,
+        bounding: 'all',
+        style: {
+          image: 'assets/ncnLogoColor.png',
+          width: 300,
+          height: 300,
+          opacity: 0.2
+        }
+      }],
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx: number) => idx * 5,
     };

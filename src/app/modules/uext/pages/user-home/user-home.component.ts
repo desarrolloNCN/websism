@@ -27,10 +27,12 @@ export class UserHomeComponent implements OnInit {
 
   }
 
+
+
   getJsonResponse() {
 
     this.showSpinner = true
-
+    
     this.auth.getToken().subscribe({
       next: value => {
         this.resp = value
