@@ -108,7 +108,7 @@ export class LectorDemoComponent implements OnInit {
       type: new FormControl('', [Validators.required]),
       freqmin: new FormControl('', [Validators.required]),
       freqmax: new FormControl('', [Validators.required]),
-      order: new FormControl('', [Validators.required])
+      order: new FormControl('',)
     });
 
     this.TrimForm = new FormGroup({
@@ -385,6 +385,7 @@ export class LectorDemoComponent implements OnInit {
           const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
 
           this.tabs[indx].graph = graph;
+          this.tabs[indx].base = base
 
           this.cdRef.detectChanges();
         }
@@ -416,8 +417,10 @@ export class LectorDemoComponent implements OnInit {
     var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+    
+    console.log(this.tabs[index]);
 
-    let base = localStorage.getItem('base') || ''
+    let base = this.tabs[index].base || ''
 
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
@@ -460,7 +463,7 @@ export class LectorDemoComponent implements OnInit {
     this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
       next: value => {
 
-        this.ToggleGraph = false
+        this.ToggleGraph = false 
         this.loadingSpinnerData = true
 
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
@@ -538,6 +541,7 @@ export class LectorDemoComponent implements OnInit {
     this.ToggleGraph = false
 
     this.isLoading = true
+    
 
     this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
       next: value => {

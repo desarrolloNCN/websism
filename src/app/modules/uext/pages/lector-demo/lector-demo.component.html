@@ -102,10 +102,10 @@
                                 [(ngModel)]="buscarTexto">
                         </div>
 
-                        <div class="scrlSta" fxLayout="column" fxLayoutAlign="center center">
+                        <div class="scrlSta" fxLayout="column"  >
 
                             <div *ngIf="loadingSpinnerStaInfo" fxLayout="column" fxLayoutGap="10"
-                                fxLayoutAlign="center center">
+                                fxLayoutAlign="center center" style="padding-top: 20%;">
                                 <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                                     [diameter]="50"></mat-progress-spinner>
                                 <h3> <b>Cargando Datos ....</b> </h3>
@@ -136,7 +136,8 @@
 
                             <ng-container style="width: 100%;"
                                 *ngFor="let sta of groupedData | keyvalue; let i = index">
-                                <div style="width: 100%;" [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
+                                <div style="width: 100%;" 
+                                    [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
                                     (click)="selectGroup(sta.key)" fxLayout="column" fxLayoutGap="3"
                                     fxLayoutAlign="space-around">
                                     <ng-container *ngFor="let item of getGroupValues(sta)">
@@ -145,6 +146,7 @@
                                             <mat-icon style="color: white;">router</mat-icon>
                                             <p> {{item.network}} </p>
                                             <p> {{item.station}} </p>
+                                            <p> {{item.location || '-'}}</p>
                                             <p style="padding: 1px 4px 1px 4px; border-radius: 3px;"
                                                 [ngStyle]="setColorStationChannel(item.channel)">
                                                 {{item.channel}} </p>
@@ -480,9 +482,9 @@
                                                 <mat-icon class="colorIconSubBar"
                                                     matPrefix>stacked_line_chart</mat-icon>
                                                 <input matInput type="number" formControlName="order">
-                                                <mat-error *ngIf="FilterForm.get('order')?.hasError('required')">
+                                                <!-- <mat-error *ngIf="FilterForm.get('order')?.hasError('required')">
                                                     Ingrese <strong>
-                                                        Corner </strong> </mat-error>
+                                                        Corner </strong> </mat-error> -->
                                             </mat-form-field>
 
                                             <div style="padding-bottom: 16px; padding-left: 15px;">

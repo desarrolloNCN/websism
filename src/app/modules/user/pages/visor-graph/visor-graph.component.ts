@@ -384,6 +384,7 @@ export class VisorGraphComponent implements OnInit {
           const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
 
           this.tabs[indx].graph = graph;
+          this.tabs[indx].base = base
 
           this.cdRef.detectChanges();
         }
@@ -416,7 +417,7 @@ export class VisorGraphComponent implements OnInit {
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
-    let base = localStorage.getItem('base') || ''
+    let base = this.tabs[index].base || ''
 
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
