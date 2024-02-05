@@ -78,32 +78,40 @@
 
         </div>
 
-        <div fxHide.lt-sm style="padding-top: 10px;" fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="10">
+        <div fxHide.lt-sm style="padding-top: 10px;" fxLayout="row" fxLayout.lt-lg="column" fxLayoutGap="10">
 
-            <div fxShow="false" fxShow.lt-md>
+            <div class="toggleStaInfoCon" fxLayout="row" fxLayoutAlign="center center" fxShow="false" fxShow.lt-lg>
                 <button type="button" mat-flat-button (click)="toggleStaResponsive()">
                     <mat-icon>visibility</mat-icon>
                     <span>Mostrar</span>
                 </button>
             </div>
 
-            <div *ngIf="hideStaPanel" [@enterAnimation] class="stInfo" fxLayout="column" fxLayout.lt-md="row"
+            <div *ngIf="hideStaPanel" [@enterAnimation] class="stInfo" fxLayout="column" fxLayout.lt-lg="row"
                 fxLayoutGap="10" fxFlex="23">
 
-                <div fxLayout="column" [fxHide.lt-md]="!showResponsivebar" fxLayoutGap="5">
+                <div fxLayout="column" [fxHide.lt-lg]="showResponsivebar" fxLayoutGap="5" fxFlex.lt-lg="33">
                     <div style="padding-left: 10px;">
-                        <h2><b>ESTACIONES ENCONTRADAS</b></h2>
-                        <h4>Busque y eliga la estacion que quiera consultar</h4>
+                        <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>ESTACIONES ENCONTRADAS</b></h2>
+                        <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Busque y eliga la estacion que quiera consultar</h4>
                     </div>
                     <div class="listSt" fxLayout="column" fxLayoutGap="5">
                         <div class="inputUrl" fxLayout="row" fxLayoutGap="5">
                             <mat-icon class="colorIcon">search</mat-icon>
-                            <input matInput type="text" placeholder="Ejm: Station, Network, Channels , etc">
+                            <input matInput type="text" placeholder="Ejm: Station, Network, Channels , etc"
+                                [(ngModel)]="buscarTexto">
                         </div>
 
-                        <div class="scrlSta">
+                        <div class="scrlSta" fxLayout="column" fxLayoutAlign="center center">
 
-                            <div *ngFor="let sta of groupedData | keyvalue; let i = index">
+                            <div *ngIf="loadingSpinnerStaInfo" fxLayout="column" fxLayoutGap="10"
+                                fxLayoutAlign="center center">
+                                <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
+                                    [diameter]="50"></mat-progress-spinner>
+                                <h3> <b>Cargando Datos ....</b> </h3>
+                            </div>
+
+                            <!-- <div style="width: 100%;" *ngFor="let sta of groupedData | keyvalue; let i = index">
 
                                 <div [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
                                     (click)="selectGroup(sta.key)" fxLayout="column" fxLayoutGap="3"
@@ -124,16 +132,36 @@
 
                                 <div style="height: 5px;"></div>
 
-                            </div>
+                            </div> -->
+
+                            <ng-container style="width: 100%;"
+                                *ngFor="let sta of groupedData | keyvalue; let i = index">
+                                <div style="width: 100%;" [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
+                                    (click)="selectGroup(sta.key)" fxLayout="column" fxLayoutGap="3"
+                                    fxLayoutAlign="space-around">
+                                    <ng-container *ngFor="let item of getGroupValues(sta)">
+                                        <div fxLayout="row" fxLayoutAlign="space-around center" (click)="leer(item)"
+                                            style="cursor: pointer; padding: 2px;" *ngIf="filterDataT(item)">
+                                            <mat-icon style="color: white;">router</mat-icon>
+                                            <p> {{item.network}} </p>
+                                            <p> {{item.station}} </p>
+                                            <p style="padding: 1px 4px 1px 4px; border-radius: 3px;"
+                                                [ngStyle]="setColorStationChannel(item.channel)">
+                                                {{item.channel}} </p>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                                <div style="height: 5px;"></div>
+                            </ng-container>
 
                         </div>
 
                     </div>
                 </div>
-                <div fxLayout="column" [fxHide.lt-md]="!showResponsivebar" fxLayoutGap="5">
+                <div fxLayout="column" [fxHide.lt-lg]="showResponsivebar" fxLayoutGap="5" fxFlex.lt-lg="33">
                     <div style="padding-left: 10px;">
-                        <h2><b>INFORMACION DE ESTACION</b></h2>
-                        <h4>Datos relevantes de la estacion seleccionada</h4>
+                        <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>INFORMACION DE ESTACION</b></h2>
+                        <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Datos relevantes de la estacion seleccionada</h4>
                     </div>
                     <div class="infListSt" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
 
@@ -235,10 +263,10 @@
 
                     </div>
                 </div>
-                <div fxLayout="column" [fxHide.lt-md]="!showResponsivebar" fxLayoutGap="5">
+                <div fxLayout="column" [fxHide.lt-lg]="showResponsivebar" fxLayoutGap="5" fxFlex.lt-lg="33">
                     <div style="padding-left: 10px;">
-                        <h2><b>ACTIVIDADES APLICADAS</b></h2>
-                        <h4>Lista de actividades aplicada a los datos</h4>
+                        <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>ACTIVIDADES APLICADAS</b></h2>
+                        <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Lista de actividades aplicada a los datos</h4>
                     </div>
                     <div class="listAct" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
 
@@ -364,7 +392,7 @@
 
                                         <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                                             <mat-divider class="separator" vertical="true"></mat-divider>
-                                            <button mat-icon-button type="button" (click)="leerArchivo()">
+                                            <button mat-icon-button type="button" (click)="resetGraph(tab)">
                                                 <mat-icon class="colorIconBar"
                                                     title="Reestablecer Datos">refresh</mat-icon>
                                             </button>

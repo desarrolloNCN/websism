@@ -21,10 +21,6 @@ export class UserHomeComponent implements OnInit {
 
   ngOnInit(): void {
 
-    setInterval(() => {
-      this.getJsonResponse();
-    }, 10000);
-
   }
 
 

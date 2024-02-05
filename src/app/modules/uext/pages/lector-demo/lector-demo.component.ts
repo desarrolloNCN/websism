@@ -60,10 +60,12 @@ export class LectorDemoComponent implements OnInit {
   enproges = false
 
   arch: File[] | any = ''
+  buscarTexto: string = '';
 
   stationInfo: any = {}
 
   loadingSpinner = false
+  loadingSpinnerStaInfo = false
   loadingSpinnerGraph = false
   loadingSpinnerData = false
   isLoading = false
@@ -123,19 +125,6 @@ export class LectorDemoComponent implements OnInit {
       url: new FormControl(''),
 
     })
-
-    // this.FilterForm = new FormGroup({
-    //   type: new FormControl('', [Validators.required]),
-    //   freqmin: new FormControl('', [Validators.required]),
-    //   freqmax: new FormControl('', [Validators.required]),
-    //   order: new FormControl('', [Validators.required])
-    // })
-
-    // this.TrimForm = new FormGroup({
-    //   t_min: new FormControl('', [Validators.required]),
-    //   t_max: new FormControl('', [Validators.required]),
-    // })
-
   }
 
   onFileSelected(event: any) {
@@ -171,6 +160,7 @@ export class LectorDemoComponent implements OnInit {
     let valorNoVacio: string | File | undefined;
 
     this.loadingSpinner = true
+    this.loadingSpinnerStaInfo = true
 
     if (archivoValue instanceof File || typeof textoValue === 'string' && textoValue.trim() !== '') {
 
@@ -188,6 +178,7 @@ export class LectorDemoComponent implements OnInit {
         },
         error: err => {
           this.loadingSpinner = false
+          this.loadingSpinnerStaInfo = false
           // console.error('REQUEST API ERROR: ' + err.message)
           this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
         },
@@ -201,10 +192,11 @@ export class LectorDemoComponent implements OnInit {
               error: err => {
                 this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
                 this.loadingSpinner = false
-
+                this.loadingSpinnerStaInfo = false
               },
               complete: () => {
                 this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
               }
             })
 
@@ -218,23 +210,25 @@ export class LectorDemoComponent implements OnInit {
               error: err => {
                 this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
                 this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
               },
               complete: () => {
                 this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
               }
             })
           } else {
             this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+            this.loadingSpinner = false
+            this.loadingSpinnerStaInfo = false
           }
-
-          this.loadingSpinner = false
-
         }
       })
 
     } else {
       this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
       this.loadingSpinner = false
+      this.loadingSpinnerStaInfo = false
     }
   }
 
@@ -305,10 +299,6 @@ export class LectorDemoComponent implements OnInit {
       }
     }
 
-    // localStorage.setItem('net', e.network)
-    // localStorage.setItem('sta', e.station)
-    // localStorage.setItem('cha', e.channel)
-
     this.loadingSpinnerGraph = true
     this.ToggleGraph = false
     this.toggleTabs = false
@@ -342,16 +332,11 @@ export class LectorDemoComponent implements OnInit {
     }
 
     let base = this.baseLineOptions[menuIndex]
-    // localStorage.setItem('base', base)
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
-
-    // let net = localStorage.getItem('net')!
-    // let sta = localStorage.getItem('sta')!
-    // let cha = localStorage.getItem('cha')!
 
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
@@ -401,7 +386,6 @@ export class LectorDemoComponent implements OnInit {
 
           this.tabs[indx].graph = graph;
 
-          // Manualmente activar la detección de cambios para la pestaña actualizada
           this.cdRef.detectChanges();
         }
 
@@ -433,11 +417,7 @@ export class LectorDemoComponent implements OnInit {
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
-    // let net = localStorage.getItem('net')!
-    // let sta = localStorage.getItem('sta')!
-    // let cha = localStorage.getItem('cha')!
     let base = localStorage.getItem('base') || ''
-
 
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
@@ -523,9 +503,6 @@ export class LectorDemoComponent implements OnInit {
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
-    // let net = localStorage.getItem('net')!
-    // let sta = localStorage.getItem('sta')!
-    // let cha = localStorage.getItem('cha')!
     let base = localStorage.getItem('base') || ''
 
     let sta = this.tabs[index].dataEst.station
@@ -577,7 +554,6 @@ export class LectorDemoComponent implements OnInit {
 
           this.tabs[indx].graph = graph;
 
-          // Manualmente activar la detección de cambios para la pestaña actualizada
           this.cdRef.detectChanges();
         }
 
@@ -612,10 +588,6 @@ export class LectorDemoComponent implements OnInit {
     this.groupedData = {}
     this.arch = ''
     this.controlForm.get('url').enable()
-
-    this.accel = {}
-    this.vel = {}
-    this.dsp = {}
   }
 
   togglePanel() {
@@ -756,7 +728,7 @@ export class LectorDemoComponent implements OnInit {
         }
       },
       yAxis: {
-        name: `Aceleracion ${und}`,
+        name: `Aceleracion`,
       },
       dataZoom: [
         {
@@ -777,7 +749,7 @@ export class LectorDemoComponent implements OnInit {
       ],
       series: [
         {
-          name: 'Aceleracion (cm/s^2)',
+          name: 'Aceleracion',
           type: 'line',
           showSymbol: false,
           data: value[0].traces_a,
@@ -838,7 +810,7 @@ export class LectorDemoComponent implements OnInit {
         }
       },
       yAxis: {
-        name: "Velocidad (cm/s)",
+        name: "Velocidad",
       },
       dataZoom: [
         {
@@ -859,7 +831,7 @@ export class LectorDemoComponent implements OnInit {
       ],
       series: [
         {
-          name: 'Velocidad (cm/s)',
+          name: 'Velocidad',
           type: 'line',
           showSymbol: false,
           data: value[0].traces_v,
@@ -923,7 +895,7 @@ export class LectorDemoComponent implements OnInit {
         }
       },
       yAxis: {
-        name: "Desplazamiento (cm) ",
+        name: "Desplazamiento",
       },
       dataZoom: [
         {
@@ -944,7 +916,7 @@ export class LectorDemoComponent implements OnInit {
       ],
       series: [
         {
-          name: 'Desplazamiento (cm)',
+          name: 'Desplazamiento',
           type: 'line',
           showSymbol: false,
           data: value[0].traces_d,
@@ -1002,14 +974,51 @@ export class LectorDemoComponent implements OnInit {
 
   clearData() {
     localStorage.clear
+
     this.tabs = []
     this.actApli = []
-
-    this.accel = {}
-    this.vel = {}
-    this.dsp = {}
 
     this.groupedData = {}
   }
 
-}
+  resetGraph(tabInfo: any) {
+
+    var dataString: string = localStorage.getItem('urlSearched')!
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
+
+    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+
+    this.isLoading = true
+
+    this.obsApi.getTraceData(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel).subscribe({
+      next: value => { 
+
+        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`);
+
+        if (indx !== -1) {
+
+          const graph = this.graphGenerator(this.stationInfo, value, '(RAWDATA)')
+
+          this.tabs[indx].graph = graph;
+
+          this.cdRef.detectChanges();
+        }
+      },
+      error: err => { this.isLoading = false },
+      complete: () => {
+        this.loadingSpinnerGraph = false
+        this.ToggleGraph = true
+        this.isLoading = false
+      }
+    })
+
+  }
+
+  filterDataT(data: any): boolean {
+    const searchLower = this.buscarTexto.toLowerCase();
+    return data.network.toLowerCase().includes(searchLower) ||
+           data.station.toLowerCase().includes(searchLower) ||
+           data.channel.toLowerCase().includes(searchLower);
+  }
+
+} 

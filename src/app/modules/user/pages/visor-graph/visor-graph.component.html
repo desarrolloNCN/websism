@@ -16,7 +16,7 @@
             <div class="inputUrl" [ngStyle.lt-sm]="{'width': '250px'}" fxLayout="row" fxLayoutGap="5">
                 <mat-icon class="colorIcon">link</mat-icon>
                 <input matInput type="text" formControlName="url"
-                    placeholder="Ejm: https://apiqs.ncn.pe/media/uploads/lagunas_eoAAyZk.seed">
+                    placeholder="Ejm: http://examples.obspy.org/RJOB_061005_072159.ehz.new">
             </div>
 
             <p fxHide.lt-md>O</p>
@@ -74,22 +74,22 @@
 
 </div>
 
-<div fxHide.lt-sm style="padding-top: 10px;" fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="10">
+<div fxHide.lt-sm style="padding-top: 10px;" fxLayout="row" fxLayout.lt-lg="column" fxLayoutGap="10">
 
-    <div fxShow="false" fxShow.lt-md>
+    <div class="toggleStaInfoCon" fxLayout="row" fxLayoutAlign="center center" fxShow="false" fxShow.lt-lg>
         <button type="button" mat-flat-button (click)="toggleStaResponsive()">
             <mat-icon>visibility</mat-icon>
             <span>Mostrar</span>
         </button>
     </div>
 
-    <div *ngIf="hideStaPanel" [@enterAnimation] class="stInfo" fxLayout="column" fxLayout.lt-md="row" fxLayoutGap="10"
-        fxFlex="23">
+    <div *ngIf="hideStaPanel" [@enterAnimation] class="stInfo" fxLayout="column" fxLayout.lt-lg="row"
+        fxLayoutGap="10" fxFlex="23">
 
-        <div fxLayout="column" [fxHide.lt-md]="!showResponsivebar" fxLayoutGap="5">
+        <div fxLayout="column" [fxHide.lt-lg]="showResponsivebar" fxLayoutGap="5" fxFlex.lt-lg="33">
             <div style="padding-left: 10px;">
-                <h2><b>ESTACIONES ENCONTRADAS</b></h2>
-                <h4>Busque y eliga la estacion que quiera consultar</h4>
+                <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>ESTACIONES ENCONTRADAS</b></h2>
+                <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Busque y eliga la estacion que quiera consultar</h4>
             </div>
             <div class="listSt" fxLayout="column" fxLayoutGap="5">
                 <div class="inputUrl" fxLayout="row" fxLayoutGap="5">
@@ -97,11 +97,20 @@
                     <input matInput type="text" placeholder="Ejm: Station, Network, Channels , etc">
                 </div>
 
-                <div class="scrlSta">
-                    <div *ngFor="let sta of groupedData | keyvalue; let i = index">
+                <div class="scrlSta" fxLayout="column" fxLayoutAlign="center center">
+
+                    <div *ngIf="loadingSpinnerStaInfo" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+                        <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
+                            [diameter]="50"></mat-progress-spinner>
+                        <h3> <b>Cargando Datos ....</b> </h3>
+                    </div>
+
+                    <div style="width: 100%;" *ngFor="let sta of groupedData | keyvalue; let i = index">
+
                         <div [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
                             (click)="selectGroup(sta.key)" fxLayout="column" fxLayoutGap="3"
                             fxLayoutAlign="space-around">
+
                             <div *ngFor="let item of getGroupValues(sta)" fxLayout="row"
                                 fxLayoutAlign="space-around center" (click)="leer(item)"
                                 style="cursor: pointer; padding: 2px;">
@@ -112,26 +121,30 @@
                                     [ngStyle]="setColorStationChannel(item.channel)">
                                     {{item.channel}} </p>
                             </div>
+
                         </div>
+
                         <div style="height: 5px;"></div>
+
                     </div>
+
                 </div>
 
             </div>
         </div>
-        <div fxLayout="column" [fxHide.lt-md]="!showResponsivebar" fxLayoutGap="5">
+        <div fxLayout="column" [fxHide.lt-lg]="showResponsivebar" fxLayoutGap="5" fxFlex.lt-lg="33">
             <div style="padding-left: 10px;">
-                <h2><b>INFORMACION DE ESTACION</b></h2>
-                <h4>Datos relevantes de la estacion seleccionada</h4>
+                <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>INFORMACION DE ESTACION</b></h2>
+                <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Datos relevantes de la estacion seleccionada</h4>
             </div>
-            <div class="listSt" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
+            <div class="infListSt" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
 
                 <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
                     <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> NETWORK:</p>
                     </div>
-                    <P><b>{{stationInfo.network}} </b></P>
+                    <P><b>{{stationInfo.network || '-'}} </b></P>
                 </div>
 
                 <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
@@ -147,7 +160,7 @@
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> LOCATION:</p>
                     </div>
-                    <P><b>{{stationInfo.location}} </b></P>
+                    <P><b>{{stationInfo.location || '-'}} </b></P>
                 </div>
 
                 <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
@@ -206,12 +219,28 @@
                     <P><b>{{stationInfo.calib}} </b></P>
                 </div>
 
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                        <p> SENS.:</p>
+                    </div>
+                    <P><b>{{stationInfo.f_calib || '-'}} </b></P>
+                </div>
+
+                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                        <p> UNIDAD:</p>
+                    </div>
+                    <P><b>{{stationInfo.und_calib || '-'}} </b></P>
+                </div>
+
             </div>
         </div>
-        <div fxLayout="column" [fxHide.lt-md]="!showResponsivebar" fxLayoutGap="5">
+        <div fxLayout="column" [fxHide.lt-lg]="showResponsivebar" fxLayoutGap="5" fxFlex.lt-lg="33">
             <div style="padding-left: 10px;">
-                <h2><b>ACTIVIDADES APLICADAS</b></h2>
-                <h4>Lista de actividades aplicada a los datos</h4>
+                <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>ACTIVIDADES APLICADAS</b></h2>
+                <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Lista de actividades aplicada a los datos</h4>
             </div>
             <div class="listAct" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
 
@@ -265,14 +294,15 @@
 
                                 <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                                     <button mat-icon-button type="button" (click)="togglePanel()">
-                                        <mat-icon class="colorIconBar" title="Ocultar Paneles">visibility_off</mat-icon>
+                                        <mat-icon class="colorIconBar"
+                                            title="Ocultar Paneles">visibility_off</mat-icon>
                                     </button>
                                     <mat-divider class="separator" vertical="true"></mat-divider>
                                 </div>
 
                                 <div fxLayout="row" fxLayoutGap="1" fxLayoutAlign="center center">
                                     <button mat-icon-button type="button" [matMenuTriggerFor]="cambioUnidad">
-                                        <mat-icon class="colorIconBar" title="Calibrar Trazas">gavel</mat-icon>
+                                        <mat-icon class="colorIconBar" title="Cambio Magnitud">gavel</mat-icon>
                                         <mat-menu #cambioUnidad>
                                             <button mat-menu-item>
                                                 <mat-icon>add_to_drive</mat-icon>
@@ -299,7 +329,8 @@
                                     <mat-icon class="colorIconBar"
                                         title="Correccion por Linea Base">monitor_heart</mat-icon>
                                     <mat-menu #menuBaseLine="matMenu">
-                                        <button mat-menu-item *ngFor="let item of baseLineOptions; let btni = index"
+                                        <button mat-menu-item
+                                            *ngFor="let item of baseLineOptions; let btni = index"
                                             (click)="baseLine(btni, i)">
                                             {{item}}
                                         </button>
@@ -336,7 +367,8 @@
                                 <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                                     <mat-divider class="separator" vertical="true"></mat-divider>
                                     <button mat-icon-button type="button" (click)="leerArchivo()">
-                                        <mat-icon class="colorIconBar" title="Reestablecer Datos">refresh</mat-icon>
+                                        <mat-icon class="colorIconBar"
+                                            title="Reestablecer Datos">refresh</mat-icon>
                                     </button>
                                 </div>
 
@@ -367,7 +399,8 @@
                                     </mat-form-field>
 
                                     <div style="padding-bottom: 16px; padding-left: 15px;">
-                                        <button type="submit" class="sendInfoSubBar" mat-raised-button color="primary">
+                                        <button type="submit" class="sendInfoSubBar" mat-raised-button
+                                            color="primary">
                                             <mat-icon>query_stats</mat-icon>
                                             APLICAR
                                         </button>
@@ -408,7 +441,8 @@
 
                                     <mat-form-field appearance="outline">
                                         <mat-label>Frecuencia Max</mat-label>
-                                        <mat-icon class="colorIconSubBar" matPrefix>stacked_line_chart</mat-icon>
+                                        <mat-icon class="colorIconSubBar"
+                                            matPrefix>stacked_line_chart</mat-icon>
                                         <input matInput type="number" formControlName="freqmax">
                                         <mat-error *ngIf="FilterForm.get('freqmax')?.hasError('required')">
                                             Ingrese <strong>
@@ -417,7 +451,8 @@
 
                                     <mat-form-field appearance="outline">
                                         <mat-label>Corner</mat-label>
-                                        <mat-icon class="colorIconSubBar" matPrefix>stacked_line_chart</mat-icon>
+                                        <mat-icon class="colorIconSubBar"
+                                            matPrefix>stacked_line_chart</mat-icon>
                                         <input matInput type="number" formControlName="order">
                                         <mat-error *ngIf="FilterForm.get('order')?.hasError('required')">
                                             Ingrese <strong>
@@ -425,7 +460,8 @@
                                     </mat-form-field>
 
                                     <div style="padding-bottom: 16px; padding-left: 15px;">
-                                        <button type="submit" class="sendInfoSubBar" mat-raised-button color="primary">
+                                        <button type="submit" class="sendInfoSubBar" mat-raised-button
+                                            color="primary">
                                             <mat-icon>query_stats</mat-icon>
                                             APLICAR
                                         </button>
@@ -460,6 +496,7 @@
 
 </div>
 
-<div style="height: 100%; padding: 20px; border-radius: 5px; background-color: #31456D;" fxShow="false" fxShow.lt-sm>
+<div style="height: 100%; padding: 20px; border-radius: 5px; background-color: #31456D;" fxShow="false"
+    fxShow.lt-sm>
     <h1 style="text-align: center; color: white;"><b>Voltear el Dispositivo, para Mejor Visualizacion</b></h1>
 </div>

@@ -64,6 +64,7 @@ export class VisorGraphComponent implements OnInit {
   stationInfo: any = {}
 
   loadingSpinner = false
+  loadingSpinnerStaInfo = false
   loadingSpinnerGraph = false
   loadingSpinnerData = false
   isLoading = false
@@ -123,19 +124,6 @@ export class VisorGraphComponent implements OnInit {
       url: new FormControl(''),
 
     })
-
-    // this.FilterForm = new FormGroup({
-    //   type: new FormControl('', [Validators.required]),
-    //   freqmin: new FormControl('', [Validators.required]),
-    //   freqmax: new FormControl('', [Validators.required]),
-    //   order: new FormControl('', [Validators.required])
-    // })
-
-    // this.TrimForm = new FormGroup({
-    //   t_min: new FormControl('', [Validators.required]),
-    //   t_max: new FormControl('', [Validators.required]),
-    // })
-
   }
 
   onFileSelected(event: any) {
@@ -162,7 +150,7 @@ export class VisorGraphComponent implements OnInit {
     this.clearData()
 
     const snackBar = new MatSnackBarConfig();
-    snackBar.duration = 3 * 1000;
+    snackBar.duration = 5 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
     let textoValue = this.controlForm.get('url').value;
@@ -171,6 +159,7 @@ export class VisorGraphComponent implements OnInit {
     let valorNoVacio: string | File | undefined;
 
     this.loadingSpinner = true
+    this.loadingSpinnerStaInfo = true
 
     if (archivoValue instanceof File || typeof textoValue === 'string' && textoValue.trim() !== '') {
 
@@ -188,6 +177,7 @@ export class VisorGraphComponent implements OnInit {
         },
         error: err => {
           this.loadingSpinner = false
+          this.loadingSpinnerStaInfo = false
           // console.error('REQUEST API ERROR: ' + err.message)
           this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
         },
@@ -196,15 +186,16 @@ export class VisorGraphComponent implements OnInit {
           if (this.urlFile == null) {
             this.obsApi.getData(this.stringdata).subscribe({
               next: value => {
-                this.groupedData = this.groupByNetworkAndStation(value.data)
+                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
               },
               error: err => {
                 this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
                 this.loadingSpinner = false
-
+                this.loadingSpinnerStaInfo = false
               },
               complete: () => {
                 this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
               }
             })
 
@@ -213,28 +204,30 @@ export class VisorGraphComponent implements OnInit {
               next: value => {
 
                 this.toggleTabs = true
-                this.groupedData = this.groupByNetworkAndStation(value.data)
+                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
               },
               error: err => {
                 this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
                 this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
               },
               complete: () => {
                 this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
               }
             })
           } else {
             this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+            this.loadingSpinner = false
+            this.loadingSpinnerStaInfo = false
           }
-
-          this.loadingSpinner = false
-
         }
       })
 
     } else {
       this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
       this.loadingSpinner = false
+      this.loadingSpinnerStaInfo = false
     }
   }
 
@@ -293,7 +286,7 @@ export class VisorGraphComponent implements OnInit {
       this.formGroups.push(TrimForm);
     });
     console.log(this.formGroups);
-    
+
   }
 
   leer(e: any) {
@@ -304,10 +297,6 @@ export class VisorGraphComponent implements OnInit {
         return
       }
     }
-
-    // localStorage.setItem('net', e.network)
-    // localStorage.setItem('sta', e.station)
-    // localStorage.setItem('cha', e.channel)
 
     this.loadingSpinnerGraph = true
     this.ToggleGraph = false
@@ -342,16 +331,11 @@ export class VisorGraphComponent implements OnInit {
     }
 
     let base = this.baseLineOptions[menuIndex]
-    // localStorage.setItem('base', base)
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
-
-    // let net = localStorage.getItem('net')!
-    // let sta = localStorage.getItem('sta')!
-    // let cha = localStorage.getItem('cha')!
 
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
@@ -391,7 +375,7 @@ export class VisorGraphComponent implements OnInit {
       next: value => {
 
         this.ToggleGraph = false
-       
+
 
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
 
@@ -401,7 +385,6 @@ export class VisorGraphComponent implements OnInit {
 
           this.tabs[indx].graph = graph;
 
-          // Manualmente activar la detección de cambios para la pestaña actualizada
           this.cdRef.detectChanges();
         }
 
@@ -433,11 +416,7 @@ export class VisorGraphComponent implements OnInit {
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
-    // let net = localStorage.getItem('net')!
-    // let sta = localStorage.getItem('sta')!
-    // let cha = localStorage.getItem('cha')!
     let base = localStorage.getItem('base') || ''
-
 
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
@@ -481,7 +460,7 @@ export class VisorGraphComponent implements OnInit {
       next: value => {
 
         this.ToggleGraph = false
-        this.loadingSpinnerData = true       
+        this.loadingSpinnerData = true
 
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
 
@@ -523,9 +502,6 @@ export class VisorGraphComponent implements OnInit {
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
-    // let net = localStorage.getItem('net')!
-    // let sta = localStorage.getItem('sta')!
-    // let cha = localStorage.getItem('cha')!
     let base = localStorage.getItem('base') || ''
 
     let sta = this.tabs[index].dataEst.station
@@ -567,7 +543,7 @@ export class VisorGraphComponent implements OnInit {
 
         this.ToggleGraph = false
         this.loadingSpinnerData = true
-      
+
         // const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
 
@@ -577,7 +553,6 @@ export class VisorGraphComponent implements OnInit {
 
           this.tabs[indx].graph = graph;
 
-          // Manualmente activar la detección de cambios para la pestaña actualizada
           this.cdRef.detectChanges();
         }
 
@@ -588,7 +563,7 @@ export class VisorGraphComponent implements OnInit {
         console.error('REQUEST API ERROR: ' + err.message)
       },
       complete: () => {
-        this.actApli.push(`Trim: ${t_max-t_min}seg a ${sta}.${cha}`)
+        this.actApli.push(`Trim: ${t_max - t_min}seg a ${sta}.${cha}`)
 
         this.loadingSpinnerData = false
 
@@ -612,10 +587,6 @@ export class VisorGraphComponent implements OnInit {
     this.groupedData = {}
     this.arch = ''
     this.controlForm.get('url').enable()
-
-    this.accel = {}
-    this.vel = {}
-    this.dsp = {}
   }
 
   togglePanel() {
@@ -643,20 +614,20 @@ export class VisorGraphComponent implements OnInit {
   groupedData: { [key: string]: any[] } = {};
   selectedGroup: string | null = null;
 
-  groupByNetworkAndStation(data: any[]): { [key: string]: any[] } {
-    const grouped: { [key: string]: any[] } = {};
+  groupByNetworkAndStation(data: any[], inv: any[]): { [key: string]: any[] } {
+    const groupedD: { [key: string]: any[] } = {};
 
     data.forEach(item => {
       const key = `${item.network}.${item.station}`;
 
-      if (!grouped[key]) {
-        grouped[key] = [];
+      if (!groupedD[key]) {
+        groupedD[key] = [];
       }
 
-      grouped[key].push(item);
+      groupedD[key].push(item);
     });
 
-    return grouped;
+    return groupedD;
   }
 
   selectGroup(groupKey: string): void {
@@ -668,7 +639,7 @@ export class VisorGraphComponent implements OnInit {
   }
 
   onTabChange(event: MatTabChangeEvent) {
-    if (!this.tabs[event.index].dataEst) {
+    if (event.index == -1 || !this.tabs[event.index].dataEst) {
       return
     } else {
       this.stationInfo = this.tabs[event.index].dataEst
@@ -681,6 +652,22 @@ export class VisorGraphComponent implements OnInit {
 
   onCloseTab(index: number) {
     this.tabs.splice(index, 1);
+  }
+
+  dateConverter(date: string) {
+
+    const fechaHora = new Date(date);
+
+    const año = fechaHora.getFullYear();
+    const mes = fechaHora.getMonth() + 1; // Los meses comienzan desde 0
+    const dia = fechaHora.getDate();
+    const horas = fechaHora.getHours();
+    const minutos = fechaHora.getMinutes();
+    const segundos = fechaHora.getSeconds();
+
+    const formatoFechaHora = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+
+    return formatoFechaHora
   }
 
   graphGenerator(e: any, value: any, dataformat: any) {
@@ -696,6 +683,10 @@ export class VisorGraphComponent implements OnInit {
     const ms = diff % 1000;
 
     const graphArr: any = []
+
+    let und = e.und_calib
+
+    und ? e.und_calib : 'unk'
 
     const accel = {
       animationDuration: 5000,
@@ -736,7 +727,7 @@ export class VisorGraphComponent implements OnInit {
         }
       },
       yAxis: {
-        name: "Aceleracion (cm/s^2)",
+        name: `Aceleracion`,
       },
       dataZoom: [
         {
@@ -757,13 +748,27 @@ export class VisorGraphComponent implements OnInit {
       ],
       series: [
         {
-          name: 'Aceleracion (cm/s^2)',
+          name: 'Aceleracion',
           type: 'line',
           showSymbol: false,
           data: value[0].traces_a,
           animationDelay: (idx: number) => idx * 10,
         },
       ],
+      graphic: [{
+        type: 'image',
+        id: 'logo',
+        left: 'center',
+        top: 'center',
+        z: -10,
+        bounding: 'all',
+        style: {
+          image: 'assets/ncnLogoColor.png',
+          width: 300,
+          height: 300,
+          opacity: 0.2
+        }
+      }],
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx: number) => idx * 5,
     };
@@ -804,7 +809,7 @@ export class VisorGraphComponent implements OnInit {
         }
       },
       yAxis: {
-        name: "Velocidad (cm/s)",
+        name: "Velocidad",
       },
       dataZoom: [
         {
@@ -825,13 +830,27 @@ export class VisorGraphComponent implements OnInit {
       ],
       series: [
         {
-          name: 'Velocidad (cm/s)',
+          name: 'Velocidad',
           type: 'line',
           showSymbol: false,
           data: value[0].traces_v,
           animationDelay: (idx: number) => idx * 10,
         },
       ],
+      graphic: [{
+        type: 'image',
+        id: 'logo2',
+        left: 'center',
+        top: 'center',
+        z: -10,
+        bounding: 'all',
+        style: {
+          image: 'assets/ncnLogoColor.png',
+          width: 300,
+          height: 300,
+          opacity: 0.2
+        }
+      }],
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx: number) => idx * 5,
     };
@@ -875,7 +894,7 @@ export class VisorGraphComponent implements OnInit {
         }
       },
       yAxis: {
-        name: "Desplazamiento (cm) ",
+        name: "Desplazamiento",
       },
       dataZoom: [
         {
@@ -896,13 +915,27 @@ export class VisorGraphComponent implements OnInit {
       ],
       series: [
         {
-          name: 'Desplazamiento (cm)',
+          name: 'Desplazamiento',
           type: 'line',
           showSymbol: false,
           data: value[0].traces_d,
           animationDelay: (idx: number) => idx * 10,
         },
       ],
+      graphic: [{
+        type: 'image',
+        id: 'logo3',
+        left: 'center',
+        top: 'center',
+        z: -10,
+        bounding: 'all',
+        style: {
+          image: 'assets/ncnLogoColor.png',
+          width: 300,
+          height: 300,
+          opacity: 0.2
+        }
+      }],
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx: number) => idx * 5,
     };
@@ -940,14 +973,12 @@ export class VisorGraphComponent implements OnInit {
 
   clearData() {
     localStorage.clear
+
     this.tabs = []
     this.actApli = []
 
-    this.accel = {}
-    this.vel = {}
-    this.dsp = {}
-
     this.groupedData = {}
   }
+
 
 }
