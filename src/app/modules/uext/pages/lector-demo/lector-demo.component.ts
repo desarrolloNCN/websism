@@ -108,7 +108,8 @@ export class LectorDemoComponent implements OnInit {
       type: new FormControl('', [Validators.required]),
       freqmin: new FormControl('', [Validators.required]),
       freqmax: new FormControl('', [Validators.required]),
-      order: new FormControl('',)
+      order: new FormControl('',),
+      zero: new FormControl(false)
     });
 
     this.TrimForm = new FormGroup({
@@ -137,7 +138,6 @@ export class LectorDemoComponent implements OnInit {
       this.btnCancel = false;
       this.controlForm.get('url').disable()
     } else {
-      console.log('No se seleccionó ningún archivo');
       this.btnShow = false;
       this.btnCancel = true;
       this.arch = null;
@@ -243,7 +243,8 @@ export class LectorDemoComponent implements OnInit {
       type: new FormControl('', [Validators.required]),
       freqmin: new FormControl('', [Validators.required]),
       freqmax: new FormControl('', [Validators.required]),
-      order: new FormControl('', [Validators.required])
+      order: new FormControl('', [Validators.required]),
+      zero: new FormControl(false)
     })
 
     const TrimForm = new FormGroup({
@@ -261,32 +262,7 @@ export class LectorDemoComponent implements OnInit {
       graph,
     });
 
-    //this.inicializarFormularios()
-
     this.ToggleGraph = true;
-
-  }
-
-  inicializarFormularios(): void {
-    this.tabs.forEach(() => {
-
-      const FilterForm = new FormGroup({
-        type: new FormControl('', [Validators.required]),
-        freqmin: new FormControl('', [Validators.required]),
-        freqmax: new FormControl('', [Validators.required]),
-        order: new FormControl('', [Validators.required])
-      })
-
-      this.formGroups.push(FilterForm);
-
-      const TrimForm = new FormGroup({
-        t_min: new FormControl('', [Validators.required]),
-        t_max: new FormControl('', [Validators.required]),
-      })
-
-      this.formGroups.push(TrimForm);
-    });
-    console.log(this.formGroups);
 
   }
 
@@ -345,6 +321,7 @@ export class LectorDemoComponent implements OnInit {
     let fmin = this.tabs[index].FilterForm.get('freqmin').value
     let fmax = this.tabs[index].FilterForm.get('freqmax').value
     let corn = this.tabs[index].FilterForm.get('order').value
+    let zero = this.tabs[index].FilterForm.get('zero').value
 
     const t_min = parseFloat(this.tabs[index].TrimForm.get('t_min').value);
     const t_max = parseFloat(this.tabs[index].TrimForm.get('t_max').value);
@@ -417,8 +394,6 @@ export class LectorDemoComponent implements OnInit {
     var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
-    
-    console.log(this.tabs[index]);
 
     let base = this.tabs[index].base || ''
 
@@ -429,6 +404,7 @@ export class LectorDemoComponent implements OnInit {
     let fmin = this.tabs[index].FilterForm.get('freqmin').value
     let fmax = this.tabs[index].FilterForm.get('freqmax').value
     let corn = this.tabs[index].FilterForm.get('order').value
+    let zero = this.tabs[index].FilterForm.get('zero').value
 
     if (this.tabs[index].FilterForm.invalid || !dataToUse) {
       this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
@@ -460,10 +436,13 @@ export class LectorDemoComponent implements OnInit {
 
     this.isLoading = true
 
-    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
+    console.log(this.tabs[index]);
+
+
+    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max).subscribe({
       next: value => {
 
-        this.ToggleGraph = false 
+        this.ToggleGraph = false
         this.loadingSpinnerData = true
 
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
@@ -506,7 +485,7 @@ export class LectorDemoComponent implements OnInit {
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
-    let base = localStorage.getItem('base') || ''
+    let base = this.tabs[index].base || ''
 
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
@@ -541,7 +520,7 @@ export class LectorDemoComponent implements OnInit {
     this.ToggleGraph = false
 
     this.isLoading = true
-    
+
 
     this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
       next: value => {
@@ -693,6 +672,28 @@ export class LectorDemoComponent implements OnInit {
 
     und ? e.und_calib : 'unk'
 
+    const dataZoomConfig = [
+      {
+        type: 'inside',
+        start: 0,
+        end: 100,
+        zoomLock: true
+      },
+      {
+        start: 0,
+        end: 100,
+        handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
+        handleSize: '100%',
+        handleStyle: {
+          color: '#ddd'
+        }
+      }
+    ]
+
+    let peakA = value[0].peak_a || 0.00
+    let peakV = value[0].peak_v || 0.00
+    let peakD = value[0].peak_d || 0.00
+
     const accel = {
       animationDuration: 5000,
       title: {
@@ -760,20 +761,35 @@ export class LectorDemoComponent implements OnInit {
           animationDelay: (idx: number) => idx * 10,
         },
       ],
-      graphic: [{
-        type: 'image',
-        id: 'logo',
-        left: 'center',
-        top: 'center',
-        z: -10,
-        bounding: 'all',
-        style: {
-          image: 'assets/ncnLogoColor.png',
-          width: 300,
-          height: 300,
-          opacity: 0.2
+      graphic: [
+        {
+          type: 'image',
+          id: 'logo',
+          left: 'center',
+          top: 'center',
+          z: -10,
+          bounding: 'all',
+          style: {
+            image: 'assets/ncnLogoColor.png',
+            width: 300,
+            height: 300,
+            opacity: 0.2
+          }
+        },
+        {
+          type: 'text',
+          z: 100,
+          right: 0,
+          top: 50,
+          style: {
+            fill: '#333',
+            width: 220,
+            overflow: 'break',
+            text: `PGA: ${parseFloat(peakA).toFixed(5)} (m/s2) `,
+            font: '14px Microsoft YaHei'
+          }
         }
-      }],
+      ],
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx: number) => idx * 5,
     };
@@ -842,20 +858,35 @@ export class LectorDemoComponent implements OnInit {
           animationDelay: (idx: number) => idx * 10,
         },
       ],
-      graphic: [{
-        type: 'image',
-        id: 'logo2',
-        left: 'center',
-        top: 'center',
-        z: -10,
-        bounding: 'all',
-        style: {
-          image: 'assets/ncnLogoColor.png',
-          width: 300,
-          height: 300,
-          opacity: 0.2
+      graphic: [
+        {
+          type: 'image',
+          id: 'logo2',
+          left: 'center',
+          top: 'center',
+          z: -10,
+          bounding: 'all',
+          style: {
+            image: 'assets/ncnLogoColor.png',
+            width: 300,
+            height: 300,
+            opacity: 0.2
+          }
+        },
+        {
+          type: 'text',
+          z: 100,
+          right: 0,
+          top: 50,
+          style: {
+            fill: '#333',
+            width: 220,
+            overflow: 'break',
+            text: `PGV: ${parseFloat(peakV).toFixed(5)} (m/s) `,
+            font: '14px Microsoft YaHei'
+          }
         }
-      }],
+      ],
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx: number) => idx * 5,
     };
@@ -927,20 +958,35 @@ export class LectorDemoComponent implements OnInit {
           animationDelay: (idx: number) => idx * 10,
         },
       ],
-      graphic: [{
-        type: 'image',
-        id: 'logo3',
-        left: 'center',
-        top: 'center',
-        z: -10,
-        bounding: 'all',
-        style: {
-          image: 'assets/ncnLogoColor.png',
-          width: 300,
-          height: 300,
-          opacity: 0.2
+      graphic: [
+        {
+          type: 'image',
+          id: 'logo3',
+          left: 'center',
+          top: 'center',
+          z: -10,
+          bounding: 'all',
+          style: {
+            image: 'assets/ncnLogoColor.png',
+            width: 300,
+            height: 300,
+            opacity: 0.2
+          }
+        },
+        {
+          type: 'text',
+          z: 100,
+          right: 0,
+          top: 50,
+          style: {
+            fill: '#333',
+            width: 220,
+            overflow: 'break',
+            text: `PGD: ${parseFloat(peakD).toFixed(5)} (m)`,
+            font: '14px Microsoft YaHei'
+          }
         }
-      }],
+      ],
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx: number) => idx * 5,
     };
@@ -995,7 +1041,7 @@ export class LectorDemoComponent implements OnInit {
     this.isLoading = true
 
     this.obsApi.getTraceData(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel).subscribe({
-      next: value => { 
+      next: value => {
 
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`);
 
@@ -1021,8 +1067,8 @@ export class LectorDemoComponent implements OnInit {
   filterDataT(data: any): boolean {
     const searchLower = this.buscarTexto.toLowerCase();
     return data.network.toLowerCase().includes(searchLower) ||
-           data.station.toLowerCase().includes(searchLower) ||
-           data.channel.toLowerCase().includes(searchLower);
+      data.station.toLowerCase().includes(searchLower) ||
+      data.channel.toLowerCase().includes(searchLower);
   }
 
 } 

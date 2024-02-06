@@ -426,7 +426,8 @@ export class VisorGraphComponent implements OnInit {
     let fmin = this.tabs[index].FilterForm.get('freqmin').value
     let fmax = this.tabs[index].FilterForm.get('freqmax').value
     let corn = this.tabs[index].FilterForm.get('order').value
-
+    let zero = this.tabs[index].FilterForm.get('zero').value
+    
     if (this.tabs[index].FilterForm.invalid || !dataToUse) {
       this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
       return
@@ -457,7 +458,7 @@ export class VisorGraphComponent implements OnInit {
 
     this.isLoading = true
 
-    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
+    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max).subscribe({
       next: value => {
 
         this.ToggleGraph = false

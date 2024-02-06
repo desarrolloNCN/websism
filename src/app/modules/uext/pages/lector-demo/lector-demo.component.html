@@ -102,7 +102,7 @@
                                 [(ngModel)]="buscarTexto">
                         </div>
 
-                        <div class="scrlSta" fxLayout="column"  >
+                        <div class="scrlSta" fxLayout="column">
 
                             <div *ngIf="loadingSpinnerStaInfo" fxLayout="column" fxLayoutGap="10"
                                 fxLayoutAlign="center center" style="padding-top: 20%;">
@@ -136,13 +136,16 @@
 
                             <ng-container style="width: 100%;"
                                 *ngFor="let sta of groupedData | keyvalue; let i = index">
-                                <div style="width: 100%;" 
+                                <div style="width: 100%;"
                                     [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
                                     (click)="selectGroup(sta.key)" fxLayout="column" fxLayoutGap="3"
                                     fxLayoutAlign="space-around">
                                     <ng-container *ngFor="let item of getGroupValues(sta)">
-                                        <div fxLayout="row" fxLayoutAlign="space-around center" (click)="leer(item)"
-                                            style="cursor: pointer; padding: 2px;" *ngIf="filterDataT(item)">
+                                        <div fxLayout="row" 
+                                        fxLayoutAlign="space-around center" 
+                                        (click)="leer(item)"
+                                        style="cursor: pointer;"
+                                        *ngIf="filterDataT(item)">
                                             <mat-icon style="color: white;">router</mat-icon>
                                             <p> {{item.network}} </p>
                                             <p> {{item.station}} </p>
@@ -153,7 +156,7 @@
                                         </div>
                                     </ng-container>
                                 </div>
-                                <div style="height: 5px;"></div>
+                               
                             </ng-container>
 
                         </div>
@@ -323,7 +326,7 @@
                                         <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                                             <button mat-icon-button type="button" (click)="togglePanel()">
                                                 <mat-icon class="colorIconBar"
-                                                    title="Ocultar Paneles">visibility_off</mat-icon>
+                                                    title="Ocultar Paneles">open_in_full</mat-icon>
                                             </button>
                                             <mat-divider class="separator" vertical="true"></mat-divider>
                                         </div>
@@ -441,51 +444,58 @@
                                         <form [formGroup]="tab.FilterForm" fxLayout="row" fxLayoutGap="10"
                                             fxLayoutAlign="center center" (submit)="filter(i)">
 
-                                            <h4 style="padding-bottom: 13px ; padding-left: 10px;"><b>Tipo de Filtro
-                                                    ButterWorth:</b></h4>
+                                            <h4 style="padding-bottom: 13px ; padding-left: 10px;">
+                                                <b>Tipo de Filtro ButterWorth:</b>
+                                            </h4>
 
-                                            <mat-form-field appearance="outline">
+                                            <mat-form-field appearance="outline" style="width: 160px;">
                                                 <mat-label>Tipo de Filtro</mat-label>
                                                 <mat-icon class="colorIconSubBar" matPrefix>query_stats</mat-icon>
                                                 <mat-select formControlName="type">
                                                     <mat-option value="">Sin Filtro</mat-option>
                                                     <mat-option value="bandpass">BandPass</mat-option>
                                                     <mat-option value="bandstop">BandStop</mat-option>
-                                                    <mat-option value="lowpass">LowPass</mat-option>
-                                                    <mat-option value="highpass">HighPass</mat-option>
+                                                    <mat-option value="lowpass" disabled>LowPass</mat-option>
+                                                    <mat-option value="highpass" disabled>HighPass</mat-option>
                                                 </mat-select>
                                             </mat-form-field>
 
                                             <mat-divider class="separatorSubBar" vertical="true"></mat-divider>
 
-                                            <mat-form-field appearance="outline">
+                                            <mat-form-field appearance="outline" style="width: 160px;">
                                                 <mat-label>Frecuencia Min</mat-label>
                                                 <mat-icon class="colorIconSubBar" matPrefix>show_chart</mat-icon>
-                                                <input matInput type="number" formControlName="freqmin">
+                                                <input matInput type="number" formControlName="freqmin"
+                                                    placeholder="0.1">
                                                 <mat-error *ngIf="FilterForm.get('freqmin')?.hasError('required')">
                                                     Ingrese <strong>
                                                         Freq. Min. </strong> </mat-error>
                                             </mat-form-field>
 
-                                            <mat-form-field appearance="outline">
+                                            <mat-form-field appearance="outline" style="width: 160px;">
                                                 <mat-label>Frecuencia Max</mat-label>
                                                 <mat-icon class="colorIconSubBar"
                                                     matPrefix>stacked_line_chart</mat-icon>
-                                                <input matInput type="number" formControlName="freqmax">
+                                                <input matInput type="number" formControlName="freqmax"
+                                                    placeholder="25">
                                                 <mat-error *ngIf="FilterForm.get('freqmax')?.hasError('required')">
                                                     Ingrese <strong>
                                                         Freq. Max. </strong> </mat-error>
                                             </mat-form-field>
 
-                                            <mat-form-field appearance="outline">
+                                            <mat-form-field appearance="outline" style="width: 160px;">
                                                 <mat-label>Corner</mat-label>
                                                 <mat-icon class="colorIconSubBar"
                                                     matPrefix>stacked_line_chart</mat-icon>
-                                                <input matInput type="number" formControlName="order">
-                                                <!-- <mat-error *ngIf="FilterForm.get('order')?.hasError('required')">
-                                                    Ingrese <strong>
-                                                        Corner </strong> </mat-error> -->
+                                                <input matInput type="number" formControlName="order" placeholder="2">
+                                                <mat-error *ngIf="FilterForm.get('order')?.hasError('required')">
+                                                    Ingrese <strong>Corner</strong> 
+                                                </mat-error>
                                             </mat-form-field>
+                                            
+                                            <div style="padding-bottom: 13px;">
+                                                <mat-checkbox formControlName="zero">Bilinear</mat-checkbox>
+                                            </div>
 
                                             <div style="padding-bottom: 16px; padding-left: 15px;">
                                                 <button type="submit" class="sendInfoSubBar" mat-raised-button
