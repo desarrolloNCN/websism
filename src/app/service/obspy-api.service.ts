@@ -99,6 +99,7 @@ export class ObspyAPIService {
     freqmin: string, 
     freqmax: string, 
     corner: string, 
+    zero: string, 
     t_min: string, 
     t_max: string,
     unit: string): Observable<any> {
@@ -114,6 +115,7 @@ export class ObspyAPIService {
       formData.append('freq_min', freqmin)
       formData.append('freq_max', freqmax)
       formData.append('corner', corner)
+      formData.append('zero', zero)
       formData.append('t_min', t_min)
       formData.append('t_max', t_max)
       formData.append('unit', unit)
@@ -179,6 +181,7 @@ export class ObspyAPIService {
     freqmin: string, 
     freqmax: string, 
     corner: string,
+    zero: string, 
     t_min: string, 
     t_max: string,
     unit: string): Observable<any> {
@@ -194,6 +197,7 @@ export class ObspyAPIService {
       formData.append('freq_min', freqmin)
       formData.append('freq_max', freqmax)
       formData.append('corner', corner)
+      formData.append('zero', zero)
       formData.append('t_min', t_min)
       formData.append('t_max', t_max)
       formData.append('unit', unit)

@@ -357,7 +357,7 @@ export class LectorDemoComponent implements OnInit {
     this.ToggleGraph = false
     this.isLoading = true
 
-    this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max, unit).subscribe({
+    this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit).subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -504,6 +504,7 @@ export class LectorDemoComponent implements OnInit {
     let fmin = this.tabs[index].FilterForm.get('freqmin').value
     let fmax = this.tabs[index].FilterForm.get('freqmax').value
     let corn = this.tabs[index].FilterForm.get('order').value
+    let zero = this.tabs[index].FilterForm.get('zero').value
 
     if (this.tabs[index].TrimForm.invalid || !dataToUse) {
       this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
@@ -529,7 +530,7 @@ export class LectorDemoComponent implements OnInit {
     this.isLoading = true
 
 
-    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max, unit).subscribe({
+    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn,zero, min, max, unit).subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -577,17 +578,16 @@ export class LectorDemoComponent implements OnInit {
     }
 
     let base = this.tabs[index].base || ''
-    let unit = this.unitConvertOptions[menuIndex]
+  
+    const unitMap: { [key: string]: string } = {
+      'cm/s2 [GaL]': 'gal',
+      'm/s2': 'm',
+      'G': 'g',
+      'unk': ''
+    };
 
-    if (unit == 'cm/s2 [GaL]') {
-      unit = 'gal'
-    } else if (unit == 'm/s2') {
-      unit = 'm'
-    } else if (unit == 'G') {
-      unit = 'g'
-    } else {
-      unit = ''
-    }
+    let unit = this.unitConvertOptions[menuIndex];
+    unit = unitMap[unit] || '';
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
@@ -821,7 +821,7 @@ export class LectorDemoComponent implements OnInit {
             fill: '#333',
             width: 220,
             overflow: 'break',
-            text: `PGA: ${parseFloat(peakA).toFixed(5)} (m/s2) `,
+            text: `PGA: ${parseFloat(peakA).toFixed(5)} [${value[0].trace_a_unit}]`,
             font: '14px Microsoft YaHei'
           }
         }
@@ -942,7 +942,7 @@ export class LectorDemoComponent implements OnInit {
             fill: '#333',
             width: 220,
             overflow: 'break',
-            text: `PGV: ${parseFloat(peakV).toFixed(5)} (m/s) `,
+            text: `PGV: ${parseFloat(peakV).toFixed(5)} [${value[0].trace_v_unit}] `,
             font: '14px Microsoft YaHei'
           }
         }
@@ -1066,7 +1066,7 @@ export class LectorDemoComponent implements OnInit {
             fill: '#333',
             width: 220,
             overflow: 'break',
-            text: `PGD: ${parseFloat(peakD).toFixed(5)} (m)`,
+            text: `PGD: ${parseFloat(peakD).toFixed(5)} [${value[0].trace_d_unit}]`,
             font: '14px Microsoft YaHei'
           }
         }
