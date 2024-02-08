@@ -60,6 +60,7 @@ export class VisorGraphComponent implements OnInit {
   enproges = false
 
   arch: File[] | any = ''
+  buscarTexto: string = '';
 
   stationInfo: any = {}
 
@@ -88,6 +89,7 @@ export class VisorGraphComponent implements OnInit {
   toogleFilter = false
 
   baseLineOptions = ['constant', 'linear', 'demean', 'simple']
+  unitConvertOptions = ['cm/s2 [GaL]', 'm/s2', 'G', 'unk']
 
   tabs: any = []
   matTabs: MatTab[] = []
@@ -107,7 +109,8 @@ export class VisorGraphComponent implements OnInit {
       type: new FormControl('', [Validators.required]),
       freqmin: new FormControl('', [Validators.required]),
       freqmax: new FormControl('', [Validators.required]),
-      order: new FormControl('', [Validators.required])
+      order: new FormControl('',),
+      zero: new FormControl(false)
     });
 
     this.TrimForm = new FormGroup({
@@ -126,6 +129,8 @@ export class VisorGraphComponent implements OnInit {
     })
   }
 
+  // ! Manipulacion de Archivos 
+
   onFileSelected(event: any) {
     let archivos = event.target.files;
     this.controlForm.get('url').setValue('')
@@ -136,7 +141,6 @@ export class VisorGraphComponent implements OnInit {
       this.btnCancel = false;
       this.controlForm.get('url').disable()
     } else {
-      console.log('No se seleccionó ningún archivo');
       this.btnShow = false;
       this.btnCancel = true;
       this.arch = null;
@@ -231,64 +235,6 @@ export class VisorGraphComponent implements OnInit {
     }
   }
 
-  createTab(e: any, value: any): void {
-    this.ToggleGraph = false;
-
-    const graph = this.graphGenerator(e, value, '(RAWDATA)');
-
-    this.toggleTabs = true;
-
-    const FilterForm = new FormGroup({
-      type: new FormControl('', [Validators.required]),
-      freqmin: new FormControl('', [Validators.required]),
-      freqmax: new FormControl('', [Validators.required]),
-      order: new FormControl('', [Validators.required])
-    })
-
-    const TrimForm = new FormGroup({
-      t_min: new FormControl('', [Validators.required]),
-      t_max: new FormControl('', [Validators.required]),
-    })
-
-    this.tabs.push({
-      label: `${e.station}.${e.channel}`,
-      dataEst: e,
-      sttime: e.starttime,
-      entime: e.endtime,
-      FilterForm,
-      TrimForm,
-      graph,
-    });
-
-    //this.inicializarFormularios()
-
-    this.ToggleGraph = true;
-
-  }
-
-  inicializarFormularios(): void {
-    this.tabs.forEach(() => {
-
-      const FilterForm = new FormGroup({
-        type: new FormControl('', [Validators.required]),
-        freqmin: new FormControl('', [Validators.required]),
-        freqmax: new FormControl('', [Validators.required]),
-        order: new FormControl('', [Validators.required])
-      })
-
-      this.formGroups.push(FilterForm);
-
-      const TrimForm = new FormGroup({
-        t_min: new FormControl('', [Validators.required]),
-        t_max: new FormControl('', [Validators.required]),
-      })
-
-      this.formGroups.push(TrimForm);
-    });
-    console.log(this.formGroups);
-
-  }
-
   leer(e: any) {
 
     for (const elem of this.tabs) {
@@ -319,6 +265,44 @@ export class VisorGraphComponent implements OnInit {
     })
   }
 
+  // ! Creacion de Tabs
+
+  createTab(e: any, value: any): void {
+    this.ToggleGraph = false;
+
+    const graph = this.graphGenerator(e, value, '(RAWDATA)');
+
+    this.toggleTabs = true;
+
+    const FilterForm = new FormGroup({
+      type: new FormControl('', [Validators.required]),
+      freqmin: new FormControl('', [Validators.required]),
+      freqmax: new FormControl('', [Validators.required]),
+      order: new FormControl('', [Validators.required]),
+      zero: new FormControl(false)
+    })
+
+    const TrimForm = new FormGroup({
+      t_min: new FormControl('', [Validators.required]),
+      t_max: new FormControl('', [Validators.required]),
+    })
+
+    this.tabs.push({
+      label: `${e.station}.${e.channel}`,
+      dataEst: e,
+      sttime: e.starttime,
+      entime: e.endtime,
+      FilterForm,
+      TrimForm,
+      graph,
+    });
+
+    this.ToggleGraph = true;
+
+  }
+
+  // ! Herramientas para Ploteo
+
   baseLine(menuIndex: number, index: number) {
 
     const snackBar = new MatSnackBarConfig();
@@ -331,6 +315,7 @@ export class VisorGraphComponent implements OnInit {
     }
 
     let base = this.baseLineOptions[menuIndex]
+    let unit = this.tabs[index].unit || ''
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
@@ -344,6 +329,7 @@ export class VisorGraphComponent implements OnInit {
     let fmin = this.tabs[index].FilterForm.get('freqmin').value
     let fmax = this.tabs[index].FilterForm.get('freqmax').value
     let corn = this.tabs[index].FilterForm.get('order').value
+    let zero = this.tabs[index].FilterForm.get('zero').value
 
     const t_min = parseFloat(this.tabs[index].TrimForm.get('t_min').value);
     const t_max = parseFloat(this.tabs[index].TrimForm.get('t_max').value);
@@ -371,7 +357,7 @@ export class VisorGraphComponent implements OnInit {
     this.ToggleGraph = false
     this.isLoading = true
 
-    this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
+    this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max, unit).subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -418,6 +404,7 @@ export class VisorGraphComponent implements OnInit {
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
     let base = this.tabs[index].base || ''
+    let unit = this.tabs[index].unit || ''
 
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
@@ -427,7 +414,7 @@ export class VisorGraphComponent implements OnInit {
     let fmax = this.tabs[index].FilterForm.get('freqmax').value
     let corn = this.tabs[index].FilterForm.get('order').value
     let zero = this.tabs[index].FilterForm.get('zero').value
-    
+
     if (this.tabs[index].FilterForm.invalid || !dataToUse) {
       this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
       return
@@ -458,7 +445,7 @@ export class VisorGraphComponent implements OnInit {
 
     this.isLoading = true
 
-    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max).subscribe({
+    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit).subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -504,7 +491,8 @@ export class VisorGraphComponent implements OnInit {
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
-    let base = localStorage.getItem('base') || ''
+    let base = this.tabs[index].base || ''
+    let unit = this.tabs[index].unit || ''
 
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
@@ -540,7 +528,8 @@ export class VisorGraphComponent implements OnInit {
 
     this.isLoading = true
 
-    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max).subscribe({
+
+    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, min, max, unit).subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -576,102 +565,107 @@ export class VisorGraphComponent implements OnInit {
     })
   }
 
-  deleteFile() {
+  unitConverter(menuIndex: number, index: number) {
+    
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 3 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
 
-    this.tabs = []
-    this.actApli = []
-
-    this.btnShow = false;
-    this.btnCancel = true;
-
-    this.fileInput.nativeElement.value = ''
-
-    this.groupedData = {}
-    this.arch = ''
-    this.controlForm.get('url').enable()
-  }
-
-  togglePanel() {
-    this.hideStaPanel = !this.hideStaPanel
-  }
-
-  filterData() {
-    if (this.toogleTrim === true) {
-      this.toogleTrim = false
-    }
-    this.toogleFilter = !this.toogleFilter
-  }
-
-  toggleData() {
-    if (this.toogleFilter === true) {
-      this.toogleFilter = false
-    }
-    this.toogleTrim = !this.toogleTrim
-  }
-
-  toggleStaResponsive() {
-    this.showResponsivebar = !this.showResponsivebar;
-  }
-
-  groupedData: { [key: string]: any[] } = {};
-  selectedGroup: string | null = null;
-
-  groupByNetworkAndStation(data: any[], inv: any[]): { [key: string]: any[] } {
-    const groupedD: { [key: string]: any[] } = {};
-
-    data.forEach(item => {
-      const key = `${item.network}.${item.station}`;
-
-      if (!groupedD[key]) {
-        groupedD[key] = [];
-      }
-
-      groupedD[key].push(item);
-    });
-
-    return groupedD;
-  }
-
-  selectGroup(groupKey: string): void {
-    this.selectedGroup = groupKey;
-  }
-
-  getGroupValues(group: any): any[] {
-    return Object.values(group.value);
-  }
-
-  onTabChange(event: MatTabChangeEvent) {
-    if (event.index == -1 || !this.tabs[event.index].dataEst) {
+    if (Object.keys(this.stationInfo).length === 0) {
+      this.snackBar.open('Debe elegir una Estacion', 'cerrar', snackBar)
       return
-    } else {
-      this.stationInfo = this.tabs[event.index].dataEst
     }
+
+    let base = this.tabs[index].base || ''
+    let unit = this.unitConvertOptions[menuIndex]
+
+    if(unit == 'cm/s2 [GaL]'){
+      unit = 'gal'
+    }else if(unit == 'm/s2'){
+      unit = 'm'
+    }else if(unit == 'G'){
+      unit = 'g'
+    }else{
+      unit = ''
+    }
+
+    var dataString: string = localStorage.getItem('urlSearched')!
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
+
+    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+
+    let sta = this.tabs[index].dataEst.station
+    let cha = this.tabs[index].dataEst.channel
+
+    let type = this.tabs[index].FilterForm.get('type').value
+    let fmin = this.tabs[index].FilterForm.get('freqmin').value
+    let fmax = this.tabs[index].FilterForm.get('freqmax').value
+    let corn = this.tabs[index].FilterForm.get('order').value
+    let zero = this.tabs[index].FilterForm.get('zero').value
+
+    const t_min = parseFloat(this.tabs[index].TrimForm.get('t_min').value);
+    const t_max = parseFloat(this.tabs[index].TrimForm.get('t_max').value);
+
+    let utc_min: any
+    let utc_max: any
+
+    let min = ''
+    let max = ''
+
+    if (isNaN(t_min) && isNaN(t_max)) {
+      min = ''
+      max = ''
+    } else {
+      utc_min = new Date(this.tabs[index].sttime);
+      utc_max = new Date(this.tabs[index].sttime);
+
+      utc_min.setUTCSeconds(utc_min.getUTCSeconds() + t_min);
+      utc_max.setUTCSeconds(utc_max.getUTCSeconds() + t_max);
+
+      min = utc_min.toISOString()
+      max = utc_max.toISOString()
+    }
+
+    this.ToggleGraph = false
+    this.isLoading = true
+
+    this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn,zero, min, max, unit).subscribe({
+      next: value => {
+
+        this.ToggleGraph = false
+
+
+        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+
+        if (indx !== -1) {
+
+          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+
+          this.tabs[indx].graph = graph;
+          this.tabs[indx].unit = unit
+
+          this.cdRef.detectChanges();
+        }
+
+
+      },
+      error: err => {
+        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+        this.loadingSpinnerGraph = false
+        console.error('REQUEST API ERROR: ' + err.message)
+      },
+      complete: () => {
+        this.actApli.push(`Linea Base: ${base} a ${sta}.${cha}`)
+        this.loadingSpinnerData = false
+
+        this.ToggleGraph = true
+        this.isLoading = false
+      }
+    })
   }
 
-  getTabLabel(tab: any): string {
-    return tab.label;
-  }
 
-  onCloseTab(index: number) {
-    this.tabs.splice(index, 1);
-  }
-
-  dateConverter(date: string) {
-
-    const fechaHora = new Date(date);
-
-    const año = fechaHora.getFullYear();
-    const mes = fechaHora.getMonth() + 1; // Los meses comienzan desde 0
-    const dia = fechaHora.getDate();
-    const horas = fechaHora.getHours();
-    const minutos = fechaHora.getMinutes();
-    const segundos = fechaHora.getSeconds();
-
-    const formatoFechaHora = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
-
-    return formatoFechaHora
-  }
-
+  // ! Generador de Graficos
   graphGenerator(e: any, value: any, dataformat: any) {
 
     const st = new Date(e.starttime).getTime()
@@ -689,6 +683,28 @@ export class VisorGraphComponent implements OnInit {
     let und = e.und_calib
 
     und ? e.und_calib : 'unk'
+
+    const dataZoomConfig = [
+      {
+        type: 'inside',
+        start: 0,
+        end: 100,
+        zoomLock: true
+      },
+      {
+        start: 0,
+        end: 100,
+        handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
+        handleSize: '100%',
+        handleStyle: {
+          color: '#ddd'
+        }
+      }
+    ]
+
+    let peakA = value[0].peak_a || 0.00
+    let peakV = value[0].peak_v || 0.00
+    let peakD = value[0].peak_d || 0.00
 
     const accel = {
       animationDuration: 5000,
@@ -711,7 +727,31 @@ export class VisorGraphComponent implements OnInit {
           },
           dataView: { readOnly: true },
           restore: {},
-          saveAsImage: {}
+          saveAsImage: {},
+          myDownloadButton: {
+            show: true,
+            title: 'Descargar Datos',
+            icon: "path://M18.344,16.174l-7.98-12.856c-0.172-0.288-0.586-0.288-0.758,0L1.627,16.217c0.339-0.543-0.603,0.668,0.384,0.682h15.991C18.893,16.891,18.167,15.961,18.344,16.174 M2.789,16.008l7.196-11.6l7.224,11.6H2.789z M10.455,7.552v3.561c0,0.244-0.199,0.445-0.443,0.445s-0.443-0.201-0.443-0.445V7.552c0-0.245,0.199-0.445,0.443-0.445S10.455,7.307,10.455,7.552M10.012,12.439c-0.733,0-1.33,0.6-1.33,1.336s0.597,1.336,1.33,1.336c0.734,0,1.33-0.6,1.33-1.336S10.746,12.439,10.012,12.439M10.012,14.221c-0.244,0-0.443-0.199-0.443-0.445c0-0.244,0.199-0.445,0.443-0.445s0.443,0.201,0.443,0.445C10.455,14.021,10.256,14.221,10.012,14.221",
+            onclick: function () {
+
+              const dataX = value[0].tiempo_a;
+              const dataY = value[0].traces_a;
+
+              let dataText = '';
+
+              for (let i = 0; i < dataX.length; i++) {
+                dataText += dataX[i] + '     ' + dataY[i] + '\n';
+              }
+
+              const downloadLink = document.createElement('a');
+              downloadLink.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(dataText);
+              downloadLink.download = `DATA_ACELERACION_${e.network}.${e.station}.${e.location}.${e.channel}.txt`;
+
+              document.body.appendChild(downloadLink);
+              downloadLink.click();
+              document.body.removeChild(downloadLink);
+            }
+          }
         }
       },
       grid: {
@@ -757,20 +797,35 @@ export class VisorGraphComponent implements OnInit {
           animationDelay: (idx: number) => idx * 10,
         },
       ],
-      graphic: [{
-        type: 'image',
-        id: 'logo',
-        left: 'center',
-        top: 'center',
-        z: -10,
-        bounding: 'all',
-        style: {
-          image: 'assets/ncnLogoColor.png',
-          width: 300,
-          height: 300,
-          opacity: 0.2
+      graphic: [
+        {
+          type: 'image',
+          id: 'logo',
+          left: 'center',
+          top: 'center',
+          z: -10,
+          bounding: 'all',
+          style: {
+            image: 'assets/ncnLogoColor.png',
+            width: 300,
+            height: 300,
+            opacity: 0.2
+          }
+        },
+        {
+          type: 'text',
+          z: 100,
+          right: 0,
+          top: 50,
+          style: {
+            fill: '#333',
+            width: 220,
+            overflow: 'break',
+            text: `PGA: ${parseFloat(peakA).toFixed(5)} (m/s2) `,
+            font: '14px Microsoft YaHei'
+          }
         }
-      }],
+      ],
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx: number) => idx * 5,
     };
@@ -793,7 +848,31 @@ export class VisorGraphComponent implements OnInit {
           },
           dataView: { readOnly: true },
           restore: {},
-          saveAsImage: {}
+          saveAsImage: {},
+          myDownloadButton: {
+            show: true,
+            title: 'Descargar Datos',
+            icon: "path://M18.344,16.174l-7.98-12.856c-0.172-0.288-0.586-0.288-0.758,0L1.627,16.217c0.339-0.543-0.603,0.668,0.384,0.682h15.991C18.893,16.891,18.167,15.961,18.344,16.174 M2.789,16.008l7.196-11.6l7.224,11.6H2.789z M10.455,7.552v3.561c0,0.244-0.199,0.445-0.443,0.445s-0.443-0.201-0.443-0.445V7.552c0-0.245,0.199-0.445,0.443-0.445S10.455,7.307,10.455,7.552M10.012,12.439c-0.733,0-1.33,0.6-1.33,1.336s0.597,1.336,1.33,1.336c0.734,0,1.33-0.6,1.33-1.336S10.746,12.439,10.012,12.439M10.012,14.221c-0.244,0-0.443-0.199-0.443-0.445c0-0.244,0.199-0.445,0.443-0.445s0.443,0.201,0.443,0.445C10.455,14.021,10.256,14.221,10.012,14.221",
+            onclick: function () {
+
+              const dataX = value[0].tiempo_a;
+              const dataY = value[0].traces_v;
+
+              let dataText = '';
+
+              for (let i = 0; i < dataX.length; i++) {
+                dataText += dataX[i] + '     ' + dataY[i] + '\n';
+              }
+
+              const downloadLink = document.createElement('a');
+              downloadLink.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(dataText);
+              downloadLink.download = `DATA_VELOCIDAD_${e.network}.${e.station}.${e.location}.${e.channel}.txt`;
+
+              document.body.appendChild(downloadLink);
+              downloadLink.click();
+              document.body.removeChild(downloadLink);
+            }
+          }
         }
       },
       grid: {
@@ -839,20 +918,35 @@ export class VisorGraphComponent implements OnInit {
           animationDelay: (idx: number) => idx * 10,
         },
       ],
-      graphic: [{
-        type: 'image',
-        id: 'logo2',
-        left: 'center',
-        top: 'center',
-        z: -10,
-        bounding: 'all',
-        style: {
-          image: 'assets/ncnLogoColor.png',
-          width: 300,
-          height: 300,
-          opacity: 0.2
+      graphic: [
+        {
+          type: 'image',
+          id: 'logo2',
+          left: 'center',
+          top: 'center',
+          z: -10,
+          bounding: 'all',
+          style: {
+            image: 'assets/ncnLogoColor.png',
+            width: 300,
+            height: 300,
+            opacity: 0.2
+          }
+        },
+        {
+          type: 'text',
+          z: 100,
+          right: 0,
+          top: 50,
+          style: {
+            fill: '#333',
+            width: 220,
+            overflow: 'break',
+            text: `PGV: ${parseFloat(peakV).toFixed(5)} (m/s) `,
+            font: '14px Microsoft YaHei'
+          }
         }
-      }],
+      ],
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx: number) => idx * 5,
     };
@@ -878,7 +972,31 @@ export class VisorGraphComponent implements OnInit {
           },
           dataView: { readOnly: true },
           restore: {},
-          saveAsImage: {}
+          saveAsImage: {},
+          myDownloadButton: {
+            show: true,
+            title: 'Descargar Datos',
+            icon: "path://M18.344,16.174l-7.98-12.856c-0.172-0.288-0.586-0.288-0.758,0L1.627,16.217c0.339-0.543-0.603,0.668,0.384,0.682h15.991C18.893,16.891,18.167,15.961,18.344,16.174 M2.789,16.008l7.196-11.6l7.224,11.6H2.789z M10.455,7.552v3.561c0,0.244-0.199,0.445-0.443,0.445s-0.443-0.201-0.443-0.445V7.552c0-0.245,0.199-0.445,0.443-0.445S10.455,7.307,10.455,7.552M10.012,12.439c-0.733,0-1.33,0.6-1.33,1.336s0.597,1.336,1.33,1.336c0.734,0,1.33-0.6,1.33-1.336S10.746,12.439,10.012,12.439M10.012,14.221c-0.244,0-0.443-0.199-0.443-0.445c0-0.244,0.199-0.445,0.443-0.445s0.443,0.201,0.443,0.445C10.455,14.021,10.256,14.221,10.012,14.221",
+            onclick: function () {
+
+              const dataX = value[0].tiempo_a;
+              const dataY = value[0].traces_d;
+
+              let dataText = '';
+
+              for (let i = 0; i < dataX.length; i++) {
+                dataText += dataX[i] + '     ' + dataY[i] + '\n';
+              }
+
+              const downloadLink = document.createElement('a');
+              downloadLink.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(dataText);
+              downloadLink.download = `DATA_DESPLAZAMIENTO_${e.network}.${e.station}.${e.location}.${e.channel}.txt`;
+
+              document.body.appendChild(downloadLink);
+              downloadLink.click();
+              document.body.removeChild(downloadLink);
+            }
+          }
         }
       },
       grid: {
@@ -924,20 +1042,35 @@ export class VisorGraphComponent implements OnInit {
           animationDelay: (idx: number) => idx * 10,
         },
       ],
-      graphic: [{
-        type: 'image',
-        id: 'logo3',
-        left: 'center',
-        top: 'center',
-        z: -10,
-        bounding: 'all',
-        style: {
-          image: 'assets/ncnLogoColor.png',
-          width: 300,
-          height: 300,
-          opacity: 0.2
+      graphic: [
+        {
+          type: 'image',
+          id: 'logo3',
+          left: 'center',
+          top: 'center',
+          z: -10,
+          bounding: 'all',
+          style: {
+            image: 'assets/ncnLogoColor.png',
+            width: 300,
+            height: 300,
+            opacity: 0.2
+          }
+        },
+        {
+          type: 'text',
+          z: 100,
+          right: 0,
+          top: 50,
+          style: {
+            fill: '#333',
+            width: 220,
+            overflow: 'break',
+            text: `PGD: ${parseFloat(peakD).toFixed(5)} (m)`,
+            font: '14px Microsoft YaHei'
+          }
         }
-      }],
+      ],
       animationEasing: 'elasticOut',
       animationDelayUpdate: (idx: number) => idx * 5,
     };
@@ -948,6 +1081,170 @@ export class VisorGraphComponent implements OnInit {
 
     return graphArr
 
+  }
+
+  // ? Clasificacion de Estaciones
+
+  groupedData: { [key: string]: any[] } = {};
+  selectedGroup: string | null = null;
+
+  groupByNetworkAndStation(data: any[], inv: any[]): { [key: string]: any[] } {
+    const groupedD: { [key: string]: any[] } = {};
+
+    data.forEach(item => {
+      const key = `${item.network}.${item.station}`;
+
+      if (!groupedD[key]) {
+        groupedD[key] = [];
+      }
+
+      groupedD[key].push(item);
+    });
+
+    return groupedD;
+  }
+
+  selectGroup(groupKey: string): void {
+    this.selectedGroup = groupKey;
+  }
+
+  getGroupValues(group: any): any[] {
+    return Object.values(group.value);
+  }
+
+  // TODO: Eliminar si no se vuelve usar
+  clearData() {
+    localStorage.clear
+
+    this.tabs = []
+    this.actApli = []
+
+    this.groupedData = {}
+  }
+
+  // ? Toggle Panels o Bars
+  deleteFile() {
+
+    this.tabs = []
+    this.actApli = []
+
+    this.btnShow = false;
+    this.btnCancel = true;
+
+    this.fileInput.nativeElement.value = ''
+
+    this.groupedData = {}
+    this.arch = ''
+    this.controlForm.get('url').enable()
+  }
+
+  togglePanel() {
+    this.hideStaPanel = !this.hideStaPanel
+  }
+
+  filterData() {
+    if (this.toogleTrim === true) {
+      this.toogleTrim = false
+    }
+    this.toogleFilter = !this.toogleFilter
+  }
+
+  toggleData() {
+    if (this.toogleFilter === true) {
+      this.toogleFilter = false
+    }
+    this.toogleTrim = !this.toogleTrim
+  }
+
+  toggleStaResponsive() {
+    this.showResponsivebar = !this.showResponsivebar;
+  }
+
+
+  // * Control de Tabs
+  showtabs(bol: any): any {
+    if (bol == true) {
+      return { 'display': 'block' }
+    } else {
+      return { 'display': 'none' }
+    }
+  }
+
+  onTabChange(event: MatTabChangeEvent) {
+    if (event.index == -1 || !this.tabs[event.index].dataEst) {
+      return
+    } else {
+      this.stationInfo = this.tabs[event.index].dataEst
+    }
+  }
+
+  getTabLabel(tab: any): string {
+    return tab.label;
+  }
+
+  onCloseTab(index: number) {
+    this.tabs.splice(index, 1);
+    if (this.tabs.length == 0) {
+      this.hideStaPanel = true
+    }
+  }
+
+  // ? Utilidades
+
+  dateConverter(date: string) {
+
+    const fechaHora = new Date(date);
+
+    const año = fechaHora.getFullYear();
+    const mes = fechaHora.getMonth() + 1; // Los meses comienzan desde 0
+    const dia = fechaHora.getDate();
+    const horas = fechaHora.getHours();
+    const minutos = fechaHora.getMinutes();
+    const segundos = fechaHora.getSeconds();
+
+    const formatoFechaHora = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+
+    return formatoFechaHora
+  }
+
+  resetGraph(tabInfo: any) {
+
+    var dataString: string = localStorage.getItem('urlSearched')!
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
+
+    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+
+    this.isLoading = true
+
+    this.obsApi.getTraceData(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel).subscribe({
+      next: value => {
+
+        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`);
+
+        if (indx !== -1) {
+
+          const graph = this.graphGenerator(this.stationInfo, value, '(RAWDATA)')
+
+          this.tabs[indx].graph = graph;
+
+          this.cdRef.detectChanges();
+        }
+      },
+      error: err => { this.isLoading = false },
+      complete: () => {
+        this.loadingSpinnerGraph = false
+        this.ToggleGraph = true
+        this.isLoading = false
+      }
+    })
+
+  }
+
+  filterDataT(data: any): boolean {
+    const searchLower = this.buscarTexto.toLowerCase();
+    return data.network.toLowerCase().includes(searchLower) ||
+      data.station.toLowerCase().includes(searchLower) ||
+      data.channel.toLowerCase().includes(searchLower);
   }
 
   setColorStationChannel(value: string): any {
@@ -964,23 +1261,5 @@ export class VisorGraphComponent implements OnInit {
       return { 'background-color': 'black' }
     }
   }
-
-  showtabs(bol: any): any {
-    if (bol == true) {
-      return { 'display': 'block' }
-    } else {
-      return { 'display': 'none' }
-    }
-  }
-
-  clearData() {
-    localStorage.clear
-
-    this.tabs = []
-    this.actApli = []
-
-    this.groupedData = {}
-  }
-
 
 }

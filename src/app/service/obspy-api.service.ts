@@ -100,7 +100,8 @@ export class ObspyAPIService {
     freqmax: string, 
     corner: string, 
     t_min: string, 
-    t_max: string): Observable<any> {
+    t_max: string,
+    unit: string): Observable<any> {
     const formData = new FormData();
     const url = 'trace_baseline_data/'
 
@@ -115,6 +116,7 @@ export class ObspyAPIService {
       formData.append('corner', corner)
       formData.append('t_min', t_min)
       formData.append('t_max', t_max)
+      formData.append('unit', unit)
     } else {
       throw new Error('SREV-GET-03: Se espera un archivo datos para Lectura');
     }
@@ -138,7 +140,8 @@ export class ObspyAPIService {
     corner: string, 
     zero: string, 
     t_min: string, 
-    t_max: string): Observable<any> {
+    t_max: string,
+    unit: string): Observable<any> {
     const formData = new FormData();
     const url = 'trace_filter_data/'
 
@@ -154,9 +157,7 @@ export class ObspyAPIService {
       formData.append('zero', zero)
       formData.append('t_min', t_min)
       formData.append('t_max', t_max)
-
-      console.log(formData.get("zero"));
-      
+      formData.append('unit', unit)
     } else {
       throw new Error('SREV-GET-04: Se espera un archivo datos para Lectura');
     }
@@ -179,7 +180,8 @@ export class ObspyAPIService {
     freqmax: string, 
     corner: string,
     t_min: string, 
-    t_max: string): Observable<any> {
+    t_max: string,
+    unit: string): Observable<any> {
     const formData = new FormData();
     const url = 'trace_trim_data/'
 
@@ -194,8 +196,51 @@ export class ObspyAPIService {
       formData.append('corner', corner)
       formData.append('t_min', t_min)
       formData.append('t_max', t_max)
+      formData.append('unit', unit)
     } else {
       throw new Error('SREV-GET-05: Se espera un archivo datos para Lectura');
+    }
+
+    return this.http.post<any>(url, formData).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    );
+
+  }
+
+  unitConvertion(
+    data: string, 
+    station_selected: string, 
+    channel_selected: string, 
+    base_line: string, 
+    filter: string, 
+    freqmin: string, 
+    freqmax: string, 
+    corner: string, 
+    zero: string, 
+    t_min: string, 
+    t_max: string,
+    unit: string
+    ): Observable<any> {
+    const formData = new FormData();
+    const url = 'convert-unit/'
+
+    if (typeof data === 'string') {
+      formData.append('data', data);
+      formData.append('station_selected', station_selected)
+      formData.append('channel_selected', channel_selected)
+      formData.append('base_line', base_line)
+      formData.append('filter_type', filter)
+      formData.append('freq_min', freqmin)
+      formData.append('freq_max', freqmax)
+      formData.append('corner', corner)
+      formData.append('zero', zero)
+      formData.append('t_min', t_min)
+      formData.append('t_max', t_max)
+      formData.append('unit', unit)
+    } else {
+      throw new Error('SREV-GET-03: Se espera un archivo datos para Lectura');
     }
 
     return this.http.post<any>(url, formData).pipe(
