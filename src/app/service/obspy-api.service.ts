@@ -70,7 +70,11 @@ export class ObspyAPIService {
 
   }
 
-  getTraceData(data: string, station_selected: string, channel_selected: string): Observable<any> {
+  getTraceData(
+    data: string, 
+    station_selected: string, 
+    channel_selected: string
+    ): Observable<any> {
     const formData = new FormData();
     const url = 'trace_data/'
 
@@ -255,4 +259,7 @@ export class ObspyAPIService {
 
   }
 
+  convertToStream(){
+    
+  }
 }

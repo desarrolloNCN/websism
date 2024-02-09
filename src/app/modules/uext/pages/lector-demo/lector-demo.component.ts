@@ -1,10 +1,12 @@
 import { trigger, transition, style, animate } from '@angular/animations';
 import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
 import { EChartsOption } from 'echarts';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
+import { ArchivoTXTComponent } from '../../componentes/archivo-txt/archivo-txt.component';
 
 @Component({
   selector: 'app-lector-demo',
@@ -103,6 +105,7 @@ export class LectorDemoComponent implements OnInit {
     private obsApi: ObspyAPIService,
     private snackBar: MatSnackBar,
     private cdRef: ChangeDetectorRef,
+    private matDialog: MatDialog
   ) {
 
     this.FilterForm = new FormGroup({
@@ -186,40 +189,55 @@ export class LectorDemoComponent implements OnInit {
           this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
         },
         complete: () => {
+          let valorNoVacio_recived: any = this.urlFile || this.stringdata
+          let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+          let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
           if (this.urlFile == null) {
-            this.obsApi.getData(this.stringdata).subscribe({
-              next: value => {
-                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-              },
-              error: err => {
-                this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                this.loadingSpinner = false
-                this.loadingSpinnerStaInfo = false
-              },
-              complete: () => {
-                this.loadingSpinner = false
-                this.loadingSpinnerStaInfo = false
-              }
-            })
+
+            if (extension == 'txt') {
+              this.leerTxt(valorNoVacio_recived)
+
+            } else {
+              this.obsApi.getData(this.stringdata).subscribe({
+                next: value => {
+                  this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                },
+                error: err => {
+                  this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                  this.loadingSpinner = false
+                  this.loadingSpinnerStaInfo = false
+                },
+                complete: () => {
+                  this.loadingSpinner = false
+                  this.loadingSpinnerStaInfo = false
+                }
+              })
+            }
 
           } else if (this.stringdata == null) {
-            this.obsApi.getData(this.urlFile).subscribe({
-              next: value => {
+            if (extension == 'txt') {
+              this.leerTxt(valorNoVacio_recived)
+            } else {
+              this.obsApi.getData(this.urlFile).subscribe({
+                next: value => {
 
-                this.toggleTabs = true
-                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-              },
-              error: err => {
-                this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                this.loadingSpinner = false
-                this.loadingSpinnerStaInfo = false
-              },
-              complete: () => {
-                this.loadingSpinner = false
-                this.loadingSpinnerStaInfo = false
-              }
-            })
+                  this.toggleTabs = true
+                  this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                },
+                error: err => {
+                  this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                  this.loadingSpinner = false
+                  this.loadingSpinnerStaInfo = false
+                },
+                complete: () => {
+                  this.loadingSpinner = false
+                  this.loadingSpinnerStaInfo = false
+                }
+              })
+
+            }
+
           } else {
             this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
             this.loadingSpinner = false
@@ -233,6 +251,31 @@ export class LectorDemoComponent implements OnInit {
       this.loadingSpinner = false
       this.loadingSpinnerStaInfo = false
     }
+  }
+
+  async leerTxt(url: string) {
+    const matDialogConfig = new MatDialogConfig()
+    matDialogConfig.disableClose = true;
+    matDialogConfig.data = url
+
+    this.matDialog.open(ArchivoTXTComponent, matDialogConfig).afterClosed()
+      .subscribe({
+        next: value => {
+          this.toggleTabs = true
+
+        },
+        error: err => {
+          this.loadingSpinner = false
+          this.loadingSpinnerStaInfo = false
+        },
+        complete: () => {
+          this.loadingSpinner = false
+          this.loadingSpinnerStaInfo = false
+        }
+      }
+
+      )
+
   }
 
   leer(e: any) {
@@ -530,7 +573,7 @@ export class LectorDemoComponent implements OnInit {
     this.isLoading = true
 
 
-    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn,zero, min, max, unit).subscribe({
+    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit).subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -578,7 +621,7 @@ export class LectorDemoComponent implements OnInit {
     }
 
     let base = this.tabs[index].base || ''
-  
+
     const unitMap: { [key: string]: string } = {
       'cm/s2 [GaL]': 'gal',
       'm/s2': 'm',

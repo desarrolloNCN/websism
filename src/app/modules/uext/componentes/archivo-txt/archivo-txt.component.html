@@ -1,0 +1,70 @@
+<mat-dialog-content>
+
+    <div fxLayout="column" style="padding-bottom: 10px;">
+        <h2>Archivo txt</h2>
+        <mat-divider></mat-divider>
+    </div>
+
+    <div fxLayout="row" fxLayoutGap="10">
+
+        <pre contenteditable="false" (click)="onPreClick($event)" #myPre class="txtContainer">
+            {{infoText}} 
+        </pre>
+
+
+        <form [formGroup]="controlForm" fxLayout="column" fxLayoutAlign="start center">
+            <p>Fila: {{ rowNum }}, Columna: {{ colNum }}, Fila-Max: {{maxRows}}</p>
+            <mat-form-field appearance="outline">
+                <mat-label>Primera Linea</mat-label>
+                <input matInput formControlName="fr_line">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Ultima Linea</mat-label>
+                <input matInput formControlName="ls_line">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Paso de Tiempo (delta)</mat-label>
+                <input matInput formControlName="delta">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Unidad</mat-label>
+                <mat-icon class="colorIconSubBar" matPrefix>query_stats</mat-icon>
+                <mat-select formControlName="separador">
+                    <mat-option value="gal">cm/s2 [GAL]</mat-option>
+                    <mat-option value="m">m/s2</mat-option>
+                    <mat-option value="g" disabled>G</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+
+
+            <button type="submit" class="sendInfo" mat-raised-button color="primary" (click)="splitCols()">
+                <mat-icon>query_stats</mat-icon>
+                LEER DATOS
+            </button>
+        </form>
+
+
+
+
+    </div>
+
+    <div *ngFor="let itm of columnDetector; let i = index">
+        <div *ngFor="let it of itm">
+            {{it}}
+        </div>
+    </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions>
+    <div>
+        <button mat-flat-button color="warn" (click)="Close()">
+            Cerrar
+        </button>
+    </div>
+
+</mat-dialog-actions>
