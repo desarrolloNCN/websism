@@ -2,6 +2,7 @@
 
     <div fxLayout="column" style="padding-bottom: 10px;">
         <h2>Archivo txt</h2>
+        <h4>Seleccione la Fila con los datos de la Estacion</h4>
         <mat-divider></mat-divider>
     </div>
 
@@ -20,7 +21,7 @@
                     <mat-label>Network</mat-label>
                     <input matInput formControlName="network">
                 </mat-form-field>
-    
+
                 <mat-form-field appearance="outline" class="mtff">
                     <mat-label>Estacion</mat-label>
                     <input matInput formControlName="station">
@@ -39,7 +40,7 @@
                     <mat-label>Primera Linea</mat-label>
                     <input matInput formControlName="fr_line">
                 </mat-form-field>
-    
+
                 <mat-form-field appearance="outline" class="mtff">
                     <mat-label>Ultima Linea</mat-label>
                     <input matInput formControlName="ls_line">
@@ -51,7 +52,7 @@
                     <mat-label>Muestreo (delta)</mat-label>
                     <input matInput formControlName="delta">
                 </mat-form-field>
-    
+
                 <mat-form-field appearance="outline" class="mtff">
                     <mat-label>Unidad</mat-label>
                     <mat-icon class="colorIconSubBar" matPrefix>straighten</mat-icon>
@@ -63,23 +64,36 @@
                 </mat-form-field>
             </div>
 
+            <mat-divider></mat-divider>
 
+            <div class="columGen">
+                <div *ngFor="let itm of columnDetector;let i = index">
 
-            <div *ngFor="let itm of columnDetector;let i = index" style="padding-bottom: 10px;">
-                <mat-form-field appearance="outline">
-                    <mat-label>Columna {{i+1}}</mat-label>
-                    <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
-                    <mat-select formControlName='c_{{i}}'>
-                        <mat-option value="T">Tiempo</mat-option>
-                        <mat-option *ngFor="let opt of columnDetector; let ind = index" [value]="opt">
-                            <ng-container *ngIf="ind === 0">Z</ng-container>
-                            <ng-container *ngIf="ind === 1">N</ng-container>
-                            <ng-container *ngIf="ind === 2">E</ng-container>
-                            <ng-container *ngIf="ind > 2">C{{ind+3}}</ng-container>
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
+                    <mat-form-field appearance="outline" class="mtff">
+                        <mat-label>Columna {{i+1}}</mat-label>
+                        <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
+                        <mat-select formControlName='c_{{i}}'>
+                            <mat-option value="T">Tiempo</mat-option>
+                            <mat-option *ngFor="let opt of columnDetector; let ind = index" [value]="opt">
+                                <ng-container *ngIf="ind === 0">Z</ng-container>
+                                <ng-container *ngIf="ind === 1">N</ng-container>
+                                <ng-container *ngIf="ind === 2">E</ng-container>
+                                <ng-container *ngIf="ind > 2">C{{ind+3}}</ng-container>
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    
+                    <!-- <mat-form-field appearance="outline" class="mtfs">
+                        <mat-label>C {{i+1}}</mat-label>
+                        <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
+                        <input matInput formControlName='cc_{{i}}' type="number">
+                    </mat-form-field> -->
+
+                </div>
             </div>
+
+
+
 
             <!-- <div *ngFor="let itm of columnDetector;let i = index" style="padding-bottom: 10px;">
                 <mat-form-field appearance="outline">
@@ -93,7 +107,7 @@
                     </mat-select>
                 </mat-form-field>
             </div> -->
-            
+
             <button type="submit" class="sendInfo" mat-raised-button color="primary">
                 <mat-icon>query_stats</mat-icon>
                 LEER DATOS

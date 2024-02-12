@@ -14,8 +14,10 @@ export class ArchivoTXTComponent implements OnInit {
 
   infoText = ''
   maxRows = 0
+
   controlForm: FormGroup | any
   controlForm_2: FormGroup | any
+  
   columnDetector: any = []
   columHead: any = []
   channels:any = []
@@ -31,9 +33,9 @@ export class ArchivoTXTComponent implements OnInit {
       ls_line: new FormControl('', Validators.required),
       delta: new FormControl('', Validators.required),
       unidad: new FormControl('', Validators.required),
-      network: new FormControl(''),
-      station: new FormControl('', Validators.required),
-      location: new FormControl('', Validators.required),
+      network: new FormControl('NC'),
+      station: new FormControl('NCN01', Validators.required),
+      location: new FormControl('00', Validators.required),
     })
 
     this.controlForm_2 = new FormGroup({
@@ -56,6 +58,7 @@ export class ArchivoTXTComponent implements OnInit {
             const lineas = value.split('\n')
             this.infoText = value
             this.maxRows = lineas.length
+            this.controlForm.controls['ls_line'].setValue(lineas.length);
           },
           error: err => {
             this.snackBar.open('⚠️ Error GET-CP', 'cerrar', snackBar)
@@ -94,7 +97,7 @@ export class ArchivoTXTComponent implements OnInit {
       this.colNum = col;
 
       this.controlForm.controls['fr_line'].setValue(row);
-      this.controlForm.controls['ls_line'].setValue(this.maxRows - row);
+      this.controlForm.controls['ls_line'].setValue(this.maxRows);
 
       this.splitCols()
     }
@@ -103,7 +106,7 @@ export class ArchivoTXTComponent implements OnInit {
   splitCols() {
 
     const lineas = this.infoText.trim().split('\n');
-
+    // -?\d+\.\d+\s+-?\d+\.\d+\s+-?\d+\.\d+(?![^\n]*\n\n)
     let indiceInicioDatos = parseInt(this.controlForm.get('fr_line').value) - 1;
 
     const datosPrimeraLinea = lineas[indiceInicioDatos].trim().split(/[,;]\s*|\s+/).filter(Boolean);
@@ -127,6 +130,7 @@ export class ArchivoTXTComponent implements OnInit {
     this.columnDetector = valoresAgrupados
 
     // TODO:Pendiente indicar Canales
+
     // this.columnDetector.forEach((item: any, index: number) => {
     //   if (index === 0) {
     //     this.channels.push('Z');
@@ -139,10 +143,18 @@ export class ArchivoTXTComponent implements OnInit {
     //   }
     // });
 
+
+    Object.keys(this.controlForm.controls).forEach(key => {
+      if (key.startsWith('c_')) {
+        this.controlForm.removeControl(key);
+      }
+    });
+    
     this.columnDetector.forEach((columna: any, index: string) => {
       this.controlForm.addControl('c_' + index, new FormControl('', Validators.required));
+      // this.controlForm.addControl('cc_' + index, new FormControl('', Validators.required));
     });
-
+    
   }
 
   crearSteam() {
@@ -159,7 +171,7 @@ export class ArchivoTXTComponent implements OnInit {
   }
 
   Close() {
-    this.matDialogRef.close()
+    this.matDialogRef.close('')
   }
 
 }

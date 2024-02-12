@@ -22,6 +22,19 @@
     color: #c5c5c5;
 }
 
-.mtff{
+.mtff {
     width: 160px;
+}
+
+.mtfs {
+    width: 60px;
+}
+
+
+.columGen {
+    padding-bottom: 10px;
+    column-count: 2;
+    column-gap: 10px;
+    column-count: 2;
+    column-gap: 10px;
 }

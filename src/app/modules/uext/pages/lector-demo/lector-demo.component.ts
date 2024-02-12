@@ -273,35 +273,45 @@ export class LectorDemoComponent implements OnInit {
     this.matDialog.open(ArchivoTXTComponent, matDialogConfig).afterClosed()
       .subscribe({
         next: value => {
+
           this.toggleTabs = true
+          console.log(value);
+          
+          if (value == '') {
+            this.loadingSpinner = false
+            this.loadingSpinnerStaInfo = false
+            return
+          } else {
+            this.obsApi.convertToStream(value).subscribe({
+              next: value => {
+                this.toggleTabs = true
 
-          this.obsApi.convertToStream(value).subscribe({
-            next: value => {
-              this.toggleTabs = true
+                localStorage.setItem('urlFileUpload', value.url)
 
-              localStorage.setItem('urlFileUpload', value.url)
+                this.obsApi.getData(value.url).subscribe({
+                  next: value => {
+                    this.toggleTabs = true
+                    this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                  },
+                  error: err => {
+                    this.snackBar.open('⚠️ Error CTS-DT', 'cerrar', snackBar)
+                    this.loadingSpinner = false
+                    this.loadingSpinnerStaInfo = false
+                  },
+                  complete: () => {
+                    this.loadingSpinner = false
+                    this.loadingSpinnerStaInfo = false
+                  }
+                })
 
-              this.obsApi.getData(value.url).subscribe({
-                next: value => {
-                  this.toggleTabs = true
-                  this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                },
-                error: err => {
-                  this.snackBar.open('Error GDT', 'cerrar', snackBar)
-                  this.loadingSpinner = false
-                  this.loadingSpinnerStaInfo = false
-                },
-                complete: () => {
-                  this.loadingSpinner = false
-                  this.loadingSpinnerStaInfo = false
-                }
-              })
-
-            },
-            error: err => {
-              this.snackBar.open('⚠️ Error CTS', 'cerrar', snackBar)
-            }
-          })
+              },
+              error: err => {
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+                this.snackBar.open('⚠️ Error CTS', 'cerrar', snackBar)
+              }
+            })
+          }
 
         },
       }
@@ -549,7 +559,7 @@ export class LectorDemoComponent implements OnInit {
 
         this.loadingSpinnerData = false
         this.ToggleGraph = true
-
+        this.toogleFilter = false
         this.isLoading = false
       }
     })
@@ -637,6 +647,8 @@ export class LectorDemoComponent implements OnInit {
         this.ToggleGraph = true
 
         this.isLoading = false
+
+        this.toogleFilter = false
       }
     })
   }
@@ -739,6 +751,67 @@ export class LectorDemoComponent implements OnInit {
     })
   }
 
+  autoAjuste(index: number) {
+
+    console.log(this.tabs[index]);
+    
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 3 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    var dataString: string = localStorage.getItem('urlSearched')!
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
+
+    this.tabs[index].base = 'linear'
+    this.tabs[index].unit = 'gal'
+
+    this.tabs[index].FilterForm.controls['type'].setValue('bandpass')
+    this.tabs[index].FilterForm.controls['freqmin'].setValue(0.1)
+    this.tabs[index].FilterForm.controls['freqmax'].setValue(25)
+    this.tabs[index].FilterForm.controls['order'].setValue(2)
+    this.tabs[index].FilterForm.controls['zero'].setValue(true)
+
+    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+
+    let sta = this.tabs[index].dataEst.station
+    let cha = this.tabs[index].dataEst.channel
+
+    this.isLoading = true
+
+    this.obsApi.autoAdjust(dataToUse, sta, cha).subscribe({
+      next: value => {
+
+        this.ToggleGraph = false
+        this.loadingSpinnerData = true
+
+        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+
+        if (indx !== -1) {
+
+          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+
+          this.tabs[indx].graph = graph;
+
+          // Manualmente activar la detección de cambios para la pestaña actualizada
+          this.cdRef.detectChanges();
+        }
+
+      },
+      error: err => {
+        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+        this.loadingSpinnerGraph = false
+        console.error('REQUEST API ERROR: ' + err.message)
+      },
+      complete: () => {
+        this.actApli.push(`AutoAjuste a ${sta}.${cha}`)
+
+        this.loadingSpinnerData = false
+        this.ToggleGraph = true
+        this.toogleFilter = false
+        this.isLoading = false
+      }
+    })
+  }
 
   // ! Generador de Graficos
   graphGenerator(e: any, value: any, dataformat: any) {
@@ -1202,6 +1275,7 @@ export class LectorDemoComponent implements OnInit {
 
     this.tabs = []
     this.actApli = []
+    this.stationInfo = []
 
     this.btnShow = false;
     this.btnCancel = true;
