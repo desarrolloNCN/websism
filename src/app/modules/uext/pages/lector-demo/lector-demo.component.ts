@@ -196,6 +196,7 @@ export class LectorDemoComponent implements OnInit {
           if (this.urlFile == null) {
 
             if (extension == 'txt') {
+
               this.leerTxt(valorNoVacio_recived)
 
             } else {
@@ -216,9 +217,13 @@ export class LectorDemoComponent implements OnInit {
             }
 
           } else if (this.stringdata == null) {
+
             if (extension == 'txt') {
+
               this.leerTxt(valorNoVacio_recived)
+
             } else {
+
               this.obsApi.getData(this.urlFile).subscribe({
                 next: value => {
 
@@ -254,24 +259,51 @@ export class LectorDemoComponent implements OnInit {
   }
 
   async leerTxt(url: string) {
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 5 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
     matDialogConfig.data = url
+
+    this.loadingSpinnerStaInfo = true
 
     this.matDialog.open(ArchivoTXTComponent, matDialogConfig).afterClosed()
       .subscribe({
         next: value => {
           this.toggleTabs = true
 
+          this.obsApi.convertToStream(value).subscribe({
+            next: value => {
+              this.toggleTabs = true
+
+              localStorage.setItem('urlFileUpload', value.url)
+
+              this.obsApi.getData(value.url).subscribe({
+                next: value => {
+                  this.toggleTabs = true
+                  this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                },
+                error: err => {
+                  this.snackBar.open('Error GDT', 'cerrar', snackBar)
+                  this.loadingSpinner = false
+                  this.loadingSpinnerStaInfo = false
+                },
+                complete: () => {
+                  this.loadingSpinner = false
+                  this.loadingSpinnerStaInfo = false
+                }
+              })
+
+            },
+            error: err => {
+              this.snackBar.open('⚠️ Error CTS', 'cerrar', snackBar)
+            }
+          })
+
         },
-        error: err => {
-          this.loadingSpinner = false
-          this.loadingSpinnerStaInfo = false
-        },
-        complete: () => {
-          this.loadingSpinner = false
-          this.loadingSpinnerStaInfo = false
-        }
       }
 
       )
@@ -794,7 +826,7 @@ export class LectorDemoComponent implements OnInit {
               downloadLink.click();
               document.body.removeChild(downloadLink);
             }
-          }
+          },
         }
       },
       grid: {

@@ -342,6 +342,14 @@
                                             <mat-divider class="separator" vertical="true"></mat-divider>
                                         </div>
 
+                                        <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
+                                            <button mat-icon-button type="button">
+                                                <mat-icon class="colorIconBar"
+                                                    title="Calibracion Automatica">hdr_auto</mat-icon>
+                                            </button>
+                                            <mat-divider class="separator" vertical="true"></mat-divider>
+                                        </div>
+
                                         <button mat-icon-button type="button" [matMenuTriggerFor]="menuBaseLine">
                                             <mat-icon class="colorIconBar"
                                                 title="Correccion por Linea Base">monitor_heart</mat-icon>
@@ -370,13 +378,13 @@
                                             </mat-menu>
                                         </button>
 
+                                        <button mat-icon-button type="button" (click)="filterData()">
+                                            <mat-icon class="colorIconBar" title="Filtro">filter_alt</mat-icon>
+                                        </button>
+
                                         <button mat-icon-button type="button" (click)="toggleData()">
                                             <mat-icon class="colorIconBar"
                                                 title="Trim (Recorte de Traza)">content_cut</mat-icon>
-                                        </button>
-
-                                        <button mat-icon-button type="button" (click)="filterData()">
-                                            <mat-icon class="colorIconBar" title="Filtro">filter_alt</mat-icon>
                                         </button>
 
                                         <div class="spacer"></div>

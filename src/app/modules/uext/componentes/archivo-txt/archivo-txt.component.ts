@@ -2,7 +2,8 @@ import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core'
 import { LectorDemoComponent } from '../../pages/lector-demo/lector-demo.component';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-archivo-txt',
@@ -14,27 +15,37 @@ export class ArchivoTXTComponent implements OnInit {
   infoText = ''
   maxRows = 0
   controlForm: FormGroup | any
-  columnDetector: any = [ ['a','b'], ['c','d']]
+  controlForm_2: FormGroup | any
+  columnDetector: any = []
   columHead: any = []
+  channels:any = []
 
-  
   constructor(
     private matDialogRef: MatDialogRef<LectorDemoComponent>,
     private http: HttpClient,
+    private snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public url: any
   ) {
     this.controlForm = new FormGroup({
-      fr_line: new FormControl(''),
-      ls_line: new FormControl(''),
-      delta: new FormControl(''),
-      separador: new FormControl(''),
+      fr_line: new FormControl('', Validators.required),
+      ls_line: new FormControl('', Validators.required),
+      delta: new FormControl('', Validators.required),
+      unidad: new FormControl('', Validators.required),
+      network: new FormControl(''),
+      station: new FormControl('', Validators.required),
+      location: new FormControl('', Validators.required),
+    })
+
+    this.controlForm_2 = new FormGroup({
+
     })
   }
 
   ngOnInit(): void {
 
-    console.log(this.columnDetector);
-    
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 5 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
 
     const headers = new HttpHeaders().set('No-Interceptor', 'true');
 
@@ -45,14 +56,12 @@ export class ArchivoTXTComponent implements OnInit {
             const lineas = value.split('\n')
             this.infoText = value
             this.maxRows = lineas.length
-
           },
           error: err => {
-            console.log(err);
+            this.snackBar.open('⚠️ Error GET-CP', 'cerrar', snackBar)
           },
           complete: () => {
-            console.log('Completo');
-
+            this.snackBar.open('✅ Archivo Cargado con Exito', 'cerrar', snackBar)
           }
         }
       )
@@ -86,6 +95,8 @@ export class ArchivoTXTComponent implements OnInit {
 
       this.controlForm.controls['fr_line'].setValue(row);
       this.controlForm.controls['ls_line'].setValue(this.maxRows - row);
+
+      this.splitCols()
     }
   }
 
@@ -93,32 +104,57 @@ export class ArchivoTXTComponent implements OnInit {
 
     const lineas = this.infoText.trim().split('\n');
 
-    let indiceInicioDatos = parseInt(this.controlForm.get('fr_line').value)-1; 
+    let indiceInicioDatos = parseInt(this.controlForm.get('fr_line').value) - 1;
 
     const datosPrimeraLinea = lineas[indiceInicioDatos].trim().split(/[,;]\s*|\s+/).filter(Boolean);
     const numeroColumnas = datosPrimeraLinea.length;
-    const encabezado = Array.from({ length: numeroColumnas }, (_, i) => `C${i + 1}`);
-    const valoresAgrupados: any = [];
 
-    encabezado.forEach((columna: string | number) => {
-      valoresAgrupados[columna] = [];
-    });
+    const valoresAgrupados: any[] = [];
 
+    for (let j = 0; j < numeroColumnas; j++) {
+      valoresAgrupados.push([]);
+    }
 
-    for (let i = indiceInicioDatos ; i < lineas.length; i++) {
+    for (let i = indiceInicioDatos; i < lineas.length; i++) {
       const valoresLinea = lineas[i].trim().split(/[,;]\s*|\s+/).filter(Boolean);
       if (valoresLinea.length === numeroColumnas) {
         for (let j = 0; j < numeroColumnas; j++) {
-          valoresAgrupados[encabezado[j]].push(parseFloat(valoresLinea[j]));
+          valoresAgrupados[j].push(parseFloat(valoresLinea[j]));
         }
       }
     }
 
     this.columnDetector = valoresAgrupados
 
-    console.log(valoresAgrupados);
-    console.log(this.columnDetector);
+    // TODO:Pendiente indicar Canales
+    // this.columnDetector.forEach((item: any, index: number) => {
+    //   if (index === 0) {
+    //     this.channels.push('Z');
+    //   } else if (index === 1) {
+    //     this.channels.push('N');
+    //   } else if (index === 2) {
+    //     this.channels.push('E');
+    //   } else {
+    //     this.channels.push('C' + (index + 3)); 
+    //   }
+    // });
+
+    this.columnDetector.forEach((columna: any, index: string) => {
+      this.controlForm.addControl('c_' + index, new FormControl('', Validators.required));
+    });
+
+  }
+
+  crearSteam() {
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 5 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
     
+    if (this.controlForm.valid) {
+      this.matDialogRef.close(this.controlForm.value)
+    } else {
+      this.snackBar.open('⚠️ Error CS-CP', 'cerrar', snackBar)
+    }
 
   }
 

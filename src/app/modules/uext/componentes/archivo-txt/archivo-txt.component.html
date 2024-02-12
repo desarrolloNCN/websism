@@ -5,58 +5,104 @@
         <mat-divider></mat-divider>
     </div>
 
-    <div fxLayout="row" fxLayoutGap="10">
+    <div fxLayout="row" fxLayoutGap="10" fxLayout.lt-sm="column">
 
         <pre contenteditable="false" (click)="onPreClick($event)" #myPre class="txtContainer">
             {{infoText}} 
         </pre>
 
+        <form [formGroup]="controlForm" fxLayout="column" fxLayoutAlign="start center" (submit)="crearSteam()">
 
-        <form [formGroup]="controlForm" fxLayout="column" fxLayoutAlign="start center">
             <p>Fila: {{ rowNum }}, Columna: {{ colNum }}, Fila-Max: {{maxRows}}</p>
-            <mat-form-field appearance="outline">
-                <mat-label>Primera Linea</mat-label>
-                <input matInput formControlName="fr_line">
-            </mat-form-field>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Ultima Linea</mat-label>
-                <input matInput formControlName="ls_line">
-            </mat-form-field>
+            <div fxLayout="row" fxLayoutGap="5">
+                <mat-form-field appearance="outline" class="mtff">
+                    <mat-label>Network</mat-label>
+                    <input matInput formControlName="network">
+                </mat-form-field>
+    
+                <mat-form-field appearance="outline" class="mtff">
+                    <mat-label>Estacion</mat-label>
+                    <input matInput formControlName="station">
+                </mat-form-field>
+            </div>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Paso de Tiempo (delta)</mat-label>
-                <input matInput formControlName="delta">
-            </mat-form-field>
+            <div fxLayout="row" fxLayoutGap="5">
+                <mat-form-field appearance="outline" class="mtff">
+                    <mat-label>Location</mat-label>
+                    <input matInput formControlName="location">
+                </mat-form-field>
+            </div>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Unidad</mat-label>
-                <mat-icon class="colorIconSubBar" matPrefix>query_stats</mat-icon>
-                <mat-select formControlName="separador">
-                    <mat-option value="gal">cm/s2 [GAL]</mat-option>
-                    <mat-option value="m">m/s2</mat-option>
-                    <mat-option value="g" disabled>G</mat-option>
-                </mat-select>
-            </mat-form-field>
+            <div fxLayout="row" fxLayoutGap="5">
+                <mat-form-field appearance="outline" class="mtff">
+                    <mat-label>Primera Linea</mat-label>
+                    <input matInput formControlName="fr_line">
+                </mat-form-field>
+    
+                <mat-form-field appearance="outline" class="mtff">
+                    <mat-label>Ultima Linea</mat-label>
+                    <input matInput formControlName="ls_line">
+                </mat-form-field>
+            </div>
+
+            <div fxLayout="row" fxLayoutGap="5">
+                <mat-form-field appearance="outline" class="mtff">
+                    <mat-label>Muestreo (delta)</mat-label>
+                    <input matInput formControlName="delta">
+                </mat-form-field>
+    
+                <mat-form-field appearance="outline" class="mtff">
+                    <mat-label>Unidad</mat-label>
+                    <mat-icon class="colorIconSubBar" matPrefix>straighten</mat-icon>
+                    <mat-select formControlName="unidad">
+                        <mat-option value="gal">cm/s2 [GAL]</mat-option>
+                        <mat-option value="m">m/s2</mat-option>
+                        <mat-option value="g" disabled>G</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
 
 
 
-            <button type="submit" class="sendInfo" mat-raised-button color="primary" (click)="splitCols()">
+            <div *ngFor="let itm of columnDetector;let i = index" style="padding-bottom: 10px;">
+                <mat-form-field appearance="outline">
+                    <mat-label>Columna {{i+1}}</mat-label>
+                    <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
+                    <mat-select formControlName='c_{{i}}'>
+                        <mat-option value="T">Tiempo</mat-option>
+                        <mat-option *ngFor="let opt of columnDetector; let ind = index" [value]="opt">
+                            <ng-container *ngIf="ind === 0">Z</ng-container>
+                            <ng-container *ngIf="ind === 1">N</ng-container>
+                            <ng-container *ngIf="ind === 2">E</ng-container>
+                            <ng-container *ngIf="ind > 2">C{{ind+3}}</ng-container>
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <!-- <div *ngFor="let itm of columnDetector;let i = index" style="padding-bottom: 10px;">
+                <mat-form-field appearance="outline">
+                    <mat-label>Columna {{i+1}}</mat-label>
+                    <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
+                    <mat-select formControlName='c_{{i}}'>
+                        <mat-option value="T">Tiempo</mat-option>
+                        <mat-option *ngFor="let opt of channels; let ind = index" [value]="opt">
+                            {{ opt }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div> -->
+            
+            <button type="submit" class="sendInfo" mat-raised-button color="primary">
                 <mat-icon>query_stats</mat-icon>
                 LEER DATOS
             </button>
+
         </form>
 
-
-
-
     </div>
 
-    <div *ngFor="let itm of columnDetector; let i = index">
-        <div *ngFor="let it of itm">
-            {{it}}
-        </div>
-    </div>
 
 </mat-dialog-content>
 

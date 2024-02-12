@@ -259,7 +259,14 @@ export class ObspyAPIService {
 
   }
 
-  convertToStream(){
-    
+  convertToStream(data : any){
+    const url = 'convert_stream/'
+    const sendData = {data} 
+
+    return this.http.post<any>(url, sendData).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    );
   }
 }
