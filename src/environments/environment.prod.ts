@@ -1,4 +1,4 @@
 export const environment = {
-  baseUrl : 'http://pedro.ncn.pe:8000/',
+  baseUrl : `https://apiqs.ncn.pe/`,
   production: true
 };

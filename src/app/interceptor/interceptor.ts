@@ -10,11 +10,14 @@ import {
   HttpResponse
 } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 @Injectable()
 export class HttpHeadersInterceptor implements HttpInterceptor {
   private user = 'admin'
   private pass = 'admin'
+
+  private baseUrl = environment.baseUrl
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
@@ -25,7 +28,7 @@ export class HttpHeadersInterceptor implements HttpInterceptor {
     }
 
     //const newUrl = `https://apiqs.ncn.pe/${req.url}`;
-    const newUrl = `http://localhost:8000/${req.url}`;
+    const newUrl = `${this.baseUrl}${req.url}`;
 
     let modifiedReq = req.clone({ url: newUrl });
 
