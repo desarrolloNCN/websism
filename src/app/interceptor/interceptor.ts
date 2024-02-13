@@ -28,7 +28,8 @@ export class HttpHeadersInterceptor implements HttpInterceptor {
     }
 
     //const newUrl = `https://apiqs.ncn.pe/${req.url}`;
-    const newUrl = `${this.baseUrl}${req.url}`;
+    const newUrl = `http://localhost:8000/${req.url}`;
+    //const newUrl = `${this.baseUrl}${req.url}`;
 
     let modifiedReq = req.clone({ url: newUrl });
 

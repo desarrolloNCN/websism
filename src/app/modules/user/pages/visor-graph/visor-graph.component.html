@@ -1,502 +1,528 @@
 <div *ngIf="hideStaPanel" [@enterAnimation2] class="winTitle">
-    <h2><b>Lector de Archivos Acelerográficos</b></h2>
-    <h4 fxHide.lt-sm>Puede cargar archivos de diferentes dispositivos acelerograficos para la leectura, edicion y
-        exportacion de
-        datos, o tambien puede ingresar una direccion URL valida</h4>
+            <h2><b>(DEMO) - Lector de Archivos Acelerográficos</b></h2>
+            <h4 fxHide.lt-sm>Podras manipular archivos de diferentes acelerografos y aplicar las diferentes herramientas
+                que ofrecemos </h4>
+        </div>
 
-</div>
+        <div *ngIf="hideStaPanel" [@enterAnimation2] class="dndZoneContainer">
 
-<div *ngIf="hideStaPanel" [@enterAnimation2] class="dndZoneContainer">
+            <div class="dndZone" fxLayout="row" fxLayoutAlign="center start">
 
-    <div class="dndZone" fxLayout="row" fxLayoutAlign="center start">
+                <form [formGroup]="controlForm" fxLayout="row" fxLayout.lt-md="column" fxLayoutAlign="center center"
+                    fxLayoutGap="10" (submit)="leerArchivo()">
 
-        <form [formGroup]="controlForm" fxLayout="row" fxLayout.lt-md="column" fxLayoutAlign="center center"
-            fxLayoutGap="10" (submit)="leerArchivo()">
+                    <div class="inputUrl" [ngStyle.lt-sm]="{'width': '250px'}" fxLayout="row" fxLayoutGap="5">
+                        <mat-icon class="colorIcon">link</mat-icon>
+                        <input matInput type="text" formControlName="url"
+                            placeholder="Ejm: http://examples.obspy.org/RJOB_061005_072159.ehz.new">
+                    </div>
 
-            <div class="inputUrl" [ngStyle.lt-sm]="{'width': '250px'}" fxLayout="row" fxLayoutGap="5">
-                <mat-icon class="colorIcon">link</mat-icon>
-                <input matInput type="text" formControlName="url"
-                    placeholder="Ejm: http://examples.obspy.org/RJOB_061005_072159.ehz.new">
+                    <p fxHide.lt-md>O</p>
+
+                    <div>
+                        <div [hidden]="btnShow">
+                            <div class="uploadbtn" fxLayout="row" fxLayoutAlign="center center">
+                                <button type="button" mat-button (click)="fileInput.click()">
+                                    SUBIR UN ARCHIVO
+                                </button>
+
+                                <button type="button" mat-icon-button [matMenuTriggerFor]="menuFile">
+                                    <mat-icon inline="true">expand_more</mat-icon>
+                                </button>
+                                <mat-menu #menuFile>
+                                    <button type="button" mat-menu-item>
+                                        <mat-icon>add_to_drive</mat-icon>
+                                        Google Drive
+                                    </button>
+                                    <button type="button" mat-menu-item>
+                                        <mat-icon>add_to_drive</mat-icon>
+                                        DropBox
+                                    </button>
+                                </mat-menu>
+                            </div>
+                        </div>
+
+                        <div [hidden]="btnCancel">
+                            <div class="uploadbtnComplete" fxLayout="row" fxLayoutAlign="center center">
+                                <h3 style="margin: 0; padding-left: 10px;"> {{arch?.name}} </h3>
+                                <button mat-icon-button type="button" (click)="deleteFile()">
+                                    <mat-icon inline="true">cancel</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <input hidden (change)="onFileSelected($event)" #fileInput type="file" id="file">
+                    </div>
+
+                    <mat-divider fxHide.lt-md class="separator" vertical="true"></mat-divider>
+
+                    <button type="submit" class="sendInfo" mat-raised-button color="primary">
+                        <mat-icon>query_stats</mat-icon>
+                        LEER DATOS
+                    </button>
+
+                    <div *ngIf="loadingSpinner" fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
+                        <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
+                            [diameter]="30"></mat-progress-spinner>
+                    </div>
+
+                </form>
+
             </div>
 
-            <p fxHide.lt-md>O</p>
+        </div>
 
-            <div>
-                <div [hidden]="btnShow">
-                    <div class="uploadbtn" fxLayout="row" fxLayoutAlign="center center">
-                        <button type="button" mat-button (click)="fileInput.click()">
-                            SUBIR UN ARCHIVO
-                        </button>
+        <div fxHide.lt-sm style="padding-top: 10px;" fxLayout="row" fxLayout.lt-lg="column" fxLayoutGap="10">
 
-                        <button type="button" mat-icon-button [matMenuTriggerFor]="menuFile">
-                            <mat-icon inline="true">expand_more</mat-icon>
-                        </button>
-                        <mat-menu #menuFile>
-                            <button type="button" mat-menu-item>
-                                <mat-icon>add_to_drive</mat-icon>
-                                Google Drive
-                            </button>
-                            <button type="button" mat-menu-item>
-                                <mat-icon>add_to_drive</mat-icon>
-                                DropBox
-                            </button>
-                        </mat-menu>
+            <div class="toggleStaInfoCon" fxLayout="row" fxLayoutAlign="center center" fxShow="false" fxShow.lt-lg>
+                <button type="button" mat-flat-button (click)="toggleStaResponsive()">
+                    <mat-icon>visibility</mat-icon>
+                    <span>Mostrar</span>
+                </button>
+            </div>
+
+            <div *ngIf="hideStaPanel" [@enterAnimation] class="stInfo" fxLayout="column" fxLayout.lt-lg="row"
+                fxLayoutGap="10" fxFlex="23">
+
+                <div fxLayout="column" [fxHide.lt-lg]="showResponsivebar" fxLayoutGap="5" fxFlex.lt-lg="33">
+                    <div style="padding-left: 10px;">
+                        <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>ESTACIONES ENCONTRADAS</b></h2>
+                        <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Busque y eliga la estacion que quiera consultar</h4>
+                    </div>
+                    <div class="listSt" fxLayout="column" fxLayoutGap="5">
+                        <div class="inputUrl" fxLayout="row" fxLayoutGap="5">
+                            <mat-icon class="colorIcon">search</mat-icon>
+                            <input matInput type="text" placeholder="Ejm: Station, Network, Channels , etc"
+                                [(ngModel)]="buscarTexto">
+                        </div>
+
+                        <div class="scrlSta" fxLayout="column">
+
+                            <div *ngIf="loadingSpinnerStaInfo" fxLayout="column" fxLayoutGap="10"
+                                fxLayoutAlign="center center" style="padding-top: 20%;">
+                                <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
+                                    [diameter]="50"></mat-progress-spinner>
+                                <h3> <b>Cargando Datos ....</b> </h3>
+                            </div>
+
+                            <!-- <div style="width: 100%;" *ngFor="let sta of groupedData | keyvalue; let i = index">
+
+                                <div [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
+                                    (click)="selectGroup(sta.key)" fxLayout="column" fxLayoutGap="3"
+                                    fxLayoutAlign="space-around">
+
+                                    <div *ngFor="let item of getGroupValues(sta)" fxLayout="row"
+                                        fxLayoutAlign="space-around center" (click)="leer(item)"
+                                        style="cursor: pointer; padding: 2px;">
+                                        <mat-icon style="color: white;">router</mat-icon>
+                                        <p> {{item.network}} </p>
+                                        <p> {{item.station}} </p>
+                                        <p style="padding: 1px 4px 1px 4px; border-radius: 3px;"
+                                            [ngStyle]="setColorStationChannel(item.channel)">
+                                            {{item.channel}} </p>
+                                    </div>
+
+                                </div>
+
+                                <div style="height: 5px;"></div>
+
+                            </div> -->
+
+                            <ng-container style="width: 100%;"
+                                *ngFor="let sta of groupedData | keyvalue; let i = index">
+                                <div style="width: 100%;"
+                                    [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
+                                    (click)="selectGroup(sta.key)" fxLayout="column" fxLayoutGap="3"
+                                    fxLayoutAlign="space-around">
+                                    <ng-container *ngFor="let item of getGroupValues(sta)">
+                                        <div fxLayout="row" fxLayoutAlign="space-around center" (click)="leer(item)"
+                                            style="cursor: pointer; padding: 3px;" *ngIf="filterDataT(item)">
+                                            <mat-icon style="color: white;">router</mat-icon>
+                                            <p> {{item.network}} </p>
+                                            <p> {{item.station}} </p>
+                                            <p> {{item.location || '-'}}</p>
+                                            <p style="padding: 1px 4px 1px 4px; border-radius: 3px;"
+                                                [ngStyle]="setColorStationChannel(item.channel)">
+                                                {{item.channel}} </p>
+                                        </div>
+                                    </ng-container>
+                                </div>
+
+                            </ng-container>
+
+                        </div>
+
+                    </div>
+                </div>
+                <div fxLayout="column" [fxHide.lt-lg]="showResponsivebar" fxLayoutGap="5" fxFlex.lt-lg="33">
+                    <div style="padding-left: 10px;">
+                        <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>INFORMACION DE ESTACION</b></h2>
+                        <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Datos relevantes de la estacion seleccionada</h4>
+                    </div>
+                    <div class="infListSt" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
+
+                        <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                                <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                                <p> NETWORK:</p>
+                            </div>
+                            <P><b>{{stationInfo.network || '-'}} </b></P>
+                        </div>
+
+                        <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                                <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                                <p> STATION:</p>
+                            </div>
+                            <P><b>{{stationInfo.station}} </b></P>
+                        </div>
+
+                        <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                                <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                                <p> LOCATION:</p>
+                            </div>
+                            <P><b>{{stationInfo.location || '-'}} </b></P>
+                        </div>
+
+                        <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                                <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                                <p> CHANNEL:</p>
+                            </div>
+                            <P><b>{{stationInfo.channel}} </b></P>
+                        </div>
+
+                        <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                                <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                                <p> SAMPLING RATE:</p>
+                            </div>
+                            <P><b>{{stationInfo.sampling_rate}} </b></P>
+                        </div>
+
+                        <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                                <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                                <p> START TIME:</p>
+                            </div>
+                            <P><b>{{stationInfo.starttime | date: 'short'}} </b></P>
+                        </div>
+
+                        <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                                <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                                <p> END TIME:</p>
+                            </div>
+                            <P><b>{{stationInfo.endtime | date: 'short'}} </b></P>
+                        </div>
+
+                        <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                                <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                                <p> DELTA:</p>
+                            </div>
+                            <P><b>{{stationInfo.delta}} </b></P>
+                        </div>
+
+                        <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                                <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                                <p> NPTS</p>
+                            </div>
+                            <P><b>{{stationInfo.npts}} </b></P>
+                        </div>
+
+                        <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                                <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                                <p> CALIB:</p>
+                            </div>
+                            <P><b>{{stationInfo.calib}} </b></P>
+                        </div>
+
+                        <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                                <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                                <p> SENS.:</p>
+                            </div>
+                            <P><b>{{stationInfo.f_calib || '-'}} </b></P>
+                        </div>
+
+                        <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                                <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
+                                <p> UNIDAD:</p>
+                            </div>
+                            <P><b>{{stationInfo.und_calib || '-'}} </b></P>
+                        </div>
+
+                    </div>
+                </div>
+                <div fxLayout="column" [fxHide.lt-lg]="showResponsivebar" fxLayoutGap="5" fxFlex.lt-lg="33">
+                    <div style="padding-left: 10px;">
+                        <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>ACTIVIDADES APLICADAS</b></h2>
+                        <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Lista de actividades aplicada a los datos</h4>
+                    </div>
+                    <div class="listAct" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
+
+                        <div *ngFor="let item of actApli; let i = index" style="width: 100%;">
+
+                            <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
+                                <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
+                                    <mat-icon class="iconstainfo">commit</mat-icon>
+                                    <p> Act. {{i+1}}: </p>
+                                </div>
+                                <div>
+                                    <P><b>{{item}}</b></P>
+                                </div>
+                            </div>
+
+                        </div>
+
                     </div>
                 </div>
 
-                <div [hidden]="btnCancel">
-                    <div class="uploadbtnComplete" fxLayout="row" fxLayoutAlign="center center">
-                        <h3 style="margin: 0; padding-left: 10px;"> {{arch?.name}} </h3>
-                        <button mat-icon-button type="button" (click)="deleteFile()">
-                            <mat-icon inline="true">cancel</mat-icon>
-                        </button>
-                    </div>
-                </div>
-
-                <input hidden (change)="onFileSelected($event)" #fileInput type="file" id="file">
             </div>
 
-            <mat-divider fxHide.lt-md class="separator" vertical="true"></mat-divider>
+            <div [@enterAnimation3] class="stGraph" fxLayout="column" fxLayoutGap="10" fxFlex>
 
-            <button type="submit" class="sendInfo" mat-raised-button color="primary">
-                <mat-icon>query_stats</mat-icon>
-                LEER DATOS
-            </button>
+                <div class="graphContainer" fxLayout="column" fxLayoutAlign="center center">
 
-            <div *ngIf="loadingSpinner" fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
-                <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
-                    [diameter]="30"></mat-progress-spinner>
-            </div>
-
-        </form>
-
-    </div>
-
-</div>
-
-<div fxHide.lt-sm style="padding-top: 10px;" fxLayout="row" fxLayout.lt-lg="column" fxLayoutGap="10">
-
-    <div class="toggleStaInfoCon" fxLayout="row" fxLayoutAlign="center center" fxShow="false" fxShow.lt-lg>
-        <button type="button" mat-flat-button (click)="toggleStaResponsive()">
-            <mat-icon>visibility</mat-icon>
-            <span>Mostrar</span>
-        </button>
-    </div>
-
-    <div *ngIf="hideStaPanel" [@enterAnimation] class="stInfo" fxLayout="column" fxLayout.lt-lg="row"
-        fxLayoutGap="10" fxFlex="23">
-
-        <div fxLayout="column" [fxHide.lt-lg]="showResponsivebar" fxLayoutGap="5" fxFlex.lt-lg="33">
-            <div style="padding-left: 10px;">
-                <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>ESTACIONES ENCONTRADAS</b></h2>
-                <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Busque y eliga la estacion que quiera consultar</h4>
-            </div>
-            <div class="listSt" fxLayout="column" fxLayoutGap="5">
-                <div class="inputUrl" fxLayout="row" fxLayoutGap="5">
-                    <mat-icon class="colorIcon">search</mat-icon>
-                    <input matInput type="text" placeholder="Ejm: Station, Network, Channels , etc">
-                </div>
-
-                <div class="scrlSta" fxLayout="column" fxLayoutAlign="center center">
-
-                    <div *ngIf="loadingSpinnerStaInfo" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+                    <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
                         <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                             [diameter]="50"></mat-progress-spinner>
                         <h3> <b>Cargando Datos ....</b> </h3>
                     </div>
 
-                    <div style="width: 100%;" *ngFor="let sta of groupedData | keyvalue; let i = index">
+                    <mat-tab-group (selectedTabChange)="onTabChange($event)" #tabGroup style="width: 100%;"
+                        [ngStyle]="showtabs(toggleTabs)">
 
-                        <div [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
-                            (click)="selectGroup(sta.key)" fxLayout="column" fxLayoutGap="3"
-                            fxLayoutAlign="space-around">
+                        <mat-tab *ngFor="let tab of tabs; let i = index" [label]="getTabLabel(tab)">
 
-                            <div *ngFor="let item of getGroupValues(sta)" fxLayout="row"
-                                fxLayoutAlign="space-around center" (click)="leer(item)"
-                                style="cursor: pointer; padding: 2px;">
-                                <mat-icon style="color: white;">router</mat-icon>
-                                <p> {{item.network}} </p>
-                                <p> {{item.station}} </p>
-                                <p style="padding: 1px 4px 1px 4px; border-radius: 3px;"
-                                    [ngStyle]="setColorStationChannel(item.channel)">
-                                    {{item.channel}} </p>
-                            </div>
-
-                        </div>
-
-                        <div style="height: 5px;"></div>
-
-                    </div>
-
-                </div>
-
-            </div>
-        </div>
-        <div fxLayout="column" [fxHide.lt-lg]="showResponsivebar" fxLayoutGap="5" fxFlex.lt-lg="33">
-            <div style="padding-left: 10px;">
-                <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>INFORMACION DE ESTACION</b></h2>
-                <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Datos relevantes de la estacion seleccionada</h4>
-            </div>
-            <div class="infListSt" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
-
-                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
-                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
-                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
-                        <p> NETWORK:</p>
-                    </div>
-                    <P><b>{{stationInfo.network || '-'}} </b></P>
-                </div>
-
-                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
-                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
-                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
-                        <p> STATION:</p>
-                    </div>
-                    <P><b>{{stationInfo.station}} </b></P>
-                </div>
-
-                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
-                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
-                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
-                        <p> LOCATION:</p>
-                    </div>
-                    <P><b>{{stationInfo.location || '-'}} </b></P>
-                </div>
-
-                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
-                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
-                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
-                        <p> CHANNEL:</p>
-                    </div>
-                    <P><b>{{stationInfo.channel}} </b></P>
-                </div>
-
-                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
-                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
-                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
-                        <p> SAMPLING RATE:</p>
-                    </div>
-                    <P><b>{{stationInfo.sampling_rate}} </b></P>
-                </div>
-
-                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
-                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
-                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
-                        <p> START TIME:</p>
-                    </div>
-                    <P><b>{{stationInfo.starttime | date: 'short'}} </b></P>
-                </div>
-
-                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
-                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
-                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
-                        <p> END TIME:</p>
-                    </div>
-                    <P><b>{{stationInfo.endtime | date: 'short'}} </b></P>
-                </div>
-
-                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
-                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
-                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
-                        <p> DELTA:</p>
-                    </div>
-                    <P><b>{{stationInfo.delta}} </b></P>
-                </div>
-
-                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
-                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
-                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
-                        <p> NPTS</p>
-                    </div>
-                    <P><b>{{stationInfo.npts}} </b></P>
-                </div>
-
-                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
-                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
-                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
-                        <p> CALIB:</p>
-                    </div>
-                    <P><b>{{stationInfo.calib}} </b></P>
-                </div>
-
-                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
-                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
-                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
-                        <p> SENS.:</p>
-                    </div>
-                    <P><b>{{stationInfo.f_calib || '-'}} </b></P>
-                </div>
-
-                <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
-                    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
-                        <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
-                        <p> UNIDAD:</p>
-                    </div>
-                    <P><b>{{stationInfo.und_calib || '-'}} </b></P>
-                </div>
-
-            </div>
-        </div>
-        <div fxLayout="column" [fxHide.lt-lg]="showResponsivebar" fxLayoutGap="5" fxFlex.lt-lg="33">
-            <div style="padding-left: 10px;">
-                <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>ACTIVIDADES APLICADAS</b></h2>
-                <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Lista de actividades aplicada a los datos</h4>
-            </div>
-            <div class="listAct" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
-
-                <div *ngFor="let item of actApli; let i = index" style="width: 100%;">
-
-                    <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
-                        <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5">
-                            <mat-icon class="iconstainfo">commit</mat-icon>
-                            <p> ACTIVIDAD {{i+1}}: </p>
-                        </div>
-                        <div>
-                            <P><b>{{item}}</b></P>
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-        </div>
-
-    </div>
-
-    <div [@enterAnimation3] class="stGraph" fxLayout="column" fxLayoutGap="10" fxFlex>
-
-        <div class="graphContainer" fxLayout="column" fxLayoutAlign="center center">
-
-            <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
-                <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
-                    [diameter]="50"></mat-progress-spinner>
-                <h3> <b>Cargando Datos ....</b> </h3>
-            </div>
-
-            <mat-tab-group (selectedTabChange)="onTabChange($event)" #tabGroup style="width: 100%;"
-                [ngStyle]="showtabs(toggleTabs)">
-
-                <mat-tab *ngFor="let tab of tabs; let i = index" [label]="getTabLabel(tab)">
-
-                    <ng-template mat-tab-label>
-                        {{ getTabLabel(tab) }}
-                        <button mat-icon-button (click)="onCloseTab(i)">
-                            <mat-icon aria-label="Cerrar pestaña">close</mat-icon>
-                        </button>
-                    </ng-template>
-
-                    <div fxLayout="column" fxLayoutGap="20">
-
-                        <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10"
-                            style="width: 100%; padding: 5px; background-color: rgb(250, 250, 250);">
-
-                            <div class="graphBar" fxLayout="row">
-
-                                <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
-                                    <button mat-icon-button type="button" (click)="togglePanel()">
-                                        <mat-icon class="colorIconBar"
-                                            title="Ocultar Paneles">visibility_off</mat-icon>
-                                    </button>
-                                    <mat-divider class="separator" vertical="true"></mat-divider>
-                                </div>
-
-                                <div fxLayout="row" fxLayoutGap="1" fxLayoutAlign="center center">
-                                    <button mat-icon-button type="button" [matMenuTriggerFor]="cambioUnidad">
-                                        <mat-icon class="colorIconBar" title="Cambio Magnitud">gavel</mat-icon>
-                                        <mat-menu #cambioUnidad>
-                                            <button mat-menu-item>
-                                                <mat-icon>add_to_drive</mat-icon>
-                                                cm/s^2
-                                            </button>
-                                            <button mat-menu-item>
-                                                <mat-icon>add_to_drive</mat-icon>
-                                                m/s^2
-                                            </button>
-                                            <button mat-menu-item>
-                                                <mat-icon>add_to_drive</mat-icon>
-                                                G
-                                            </button>
-                                            <button mat-menu-item>
-                                                <mat-icon>add_to_drive</mat-icon>
-                                                Unk
-                                            </button>
-                                        </mat-menu>
-                                    </button>
-                                    <mat-divider class="separator" vertical="true"></mat-divider>
-                                </div>
-
-                                <button mat-icon-button type="button" [matMenuTriggerFor]="menuBaseLine">
-                                    <mat-icon class="colorIconBar"
-                                        title="Correccion por Linea Base">monitor_heart</mat-icon>
-                                    <mat-menu #menuBaseLine="matMenu">
-                                        <button mat-menu-item
-                                            *ngFor="let item of baseLineOptions; let btni = index"
-                                            (click)="baseLine(btni, i)">
-                                            {{item}}
-                                        </button>
-                                        <!-- <button mat-menu-item (click)="baseLineCorrecion('constant', i)">
-                                            <mat-icon>add_to_drive</mat-icon>
-                                            Constante
-                                        </button>
-                                        <button mat-menu-item (click)="baseLineCorrecion('linear', i)">
-                                            <mat-icon>add_to_drive</mat-icon>
-                                            Linear
-                                        </button>
-                                        <button mat-menu-item (click)="baseLineCorrecion('demean', i)">
-                                            <mat-icon>add_to_drive</mat-icon>
-                                            Demean
-                                        </button>
-                                        <button mat-menu-item (click)="baseLineCorrecion('simple', i)">
-                                            <mat-icon>add_to_drive</mat-icon>
-                                            Simple
-                                        </button> -->
-                                    </mat-menu>
+                            <ng-template mat-tab-label>
+                                {{ getTabLabel(tab) }}
+                                <button mat-icon-button (click)="onCloseTab(i)">
+                                    <mat-icon aria-label="Cerrar pestaña">close</mat-icon>
                                 </button>
+                            </ng-template>
 
-                                <button mat-icon-button type="button" (click)="toggleData()">
-                                    <mat-icon class="colorIconBar"
-                                        title="Trim (Recorte de Traza)">content_cut</mat-icon>
-                                </button>
+                            <div fxLayout="column" fxLayoutGap="20">
 
-                                <button mat-icon-button type="button" (click)="filterData()">
-                                    <mat-icon class="colorIconBar" title="Filtro">filter_alt</mat-icon>
-                                </button>
+                                <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10"
+                                    style="width: 100%; padding: 5px; background-color: rgb(250, 250, 250);">
 
-                                <div class="spacer"></div>
+                                    <div class="graphBar" fxLayout="row">
 
-                                <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
-                                    <mat-divider class="separator" vertical="true"></mat-divider>
-                                    <button mat-icon-button type="button" (click)="leerArchivo()">
-                                        <mat-icon class="colorIconBar"
-                                            title="Reestablecer Datos">refresh</mat-icon>
-                                    </button>
-                                </div>
+                                        <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
+                                            <button mat-icon-button type="button" (click)="togglePanel()">
+                                                <mat-icon class="colorIconBar"
+                                                    title="Ocultar Paneles">open_in_full</mat-icon>
+                                            </button>
+                                            <mat-divider class="separator" vertical="true"></mat-divider>
+                                        </div>
 
-                            </div>
+                                        <div fxLayout="row" fxLayoutGap="1" fxLayoutAlign="center center">
+                                            <button mat-icon-button type="button" [matMenuTriggerFor]="cambioUnidad">
+                                                <mat-icon class="colorIconBar" title="Cambio Magnitud">gavel</mat-icon>
+                                                <mat-menu #cambioUnidad>
+                                                    <button mat-menu-item
+                                                        *ngFor="let item of unitConvertOptions; let btni = index"
+                                                        (click)="unitConverter(btni, i)">
+                                                        {{item}}
+                                                    </button>
+                                                </mat-menu>
+                                            </button>
+                                            <mat-divider class="separator" vertical="true"></mat-divider>
+                                        </div>
 
-                            <div *ngIf="toogleTrim" class="trimContainer">
-                                <form [formGroup]="tab.TrimForm" fxLayout="row" fxLayoutGap="10"
-                                    fxLayoutAlign="center center" (submit)="trim(i)">
+                                        <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
+                                            <button mat-icon-button type="button" (click)="autoAjuste(i)">
+                                                <mat-icon class="colorIconBar"
+                                                    title="Calibracion Automatica">hdr_auto</mat-icon>
+                                            </button>
+                                            <mat-divider class="separator" vertical="true"></mat-divider>
+                                        </div>
 
-                                    <h4 style="padding-bottom: 13px ; padding-left: 10px;">
-                                        <b>Indicar Inicio y Fin: </b>
-                                    </h4>
-
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Tiempo de Inicio (seg.)</mat-label>
-                                        <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
-                                        <input matInput formControlName="t_min">
-                                        <!-- <mat-error *ngIf="TrimForm.get('t_min')?.hasError('required')">
-                                            Ingrese <strong>Tiempo Min. </strong> </mat-error> -->
-                                    </mat-form-field>
-
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Tiempo de Fin (seg.)</mat-label>
-                                        <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
-                                        <input matInput formControlName="t_max">
-                                        <!-- <mat-error *ngIf="TrimForm.get('t_max')?.hasError('required')">
-                                            Ingrese <strong>Tiempo Max. </strong> </mat-error> -->
-                                    </mat-form-field>
-
-                                    <div style="padding-bottom: 16px; padding-left: 15px;">
-                                        <button type="submit" class="sendInfoSubBar" mat-raised-button
-                                            color="primary">
-                                            <mat-icon>query_stats</mat-icon>
-                                            APLICAR
+                                        <button mat-icon-button type="button" [matMenuTriggerFor]="menuBaseLine">
+                                            <mat-icon class="colorIconBar"
+                                                title="Correccion por Linea Base">monitor_heart</mat-icon>
+                                            <mat-menu #menuBaseLine="matMenu">
+                                                <button mat-menu-item
+                                                    *ngFor="let item of baseLineOptions; let btni = index"
+                                                    (click)="baseLine(btni, i)">
+                                                    {{item}}
+                                                </button>
+                                                <!-- <button mat-menu-item (click)="baseLineCorrecion('constant', i)">
+                                                    <mat-icon>add_to_drive</mat-icon>
+                                                    Constante
+                                                </button>
+                                                <button mat-menu-item (click)="baseLineCorrecion('linear', i)">
+                                                    <mat-icon>add_to_drive</mat-icon>
+                                                    Linear
+                                                </button>
+                                                <button mat-menu-item (click)="baseLineCorrecion('demean', i)">
+                                                    <mat-icon>add_to_drive</mat-icon>
+                                                    Demean
+                                                </button>
+                                                <button mat-menu-item (click)="baseLineCorrecion('simple', i)">
+                                                    <mat-icon>add_to_drive</mat-icon>
+                                                    Simple
+                                                </button> -->
+                                            </mat-menu>
                                         </button>
+
+                                        <button mat-icon-button type="button" (click)="filterData()">
+                                            <mat-icon class="colorIconBar" title="Filtro">filter_alt</mat-icon>
+                                        </button>
+
+                                        <button mat-icon-button type="button" (click)="toggleData()">
+                                            <mat-icon class="colorIconBar"
+                                                title="Trim (Recorte de Traza)">content_cut</mat-icon>
+                                        </button>
+
+                                        <div class="spacer"></div>
+
+                                        <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
+                                            <mat-divider class="separator" vertical="true"></mat-divider>
+                                            <button mat-icon-button type="button" (click)="resetGraph(tab)">
+                                                <mat-icon class="colorIconBar"
+                                                    title="Reestablecer Datos">refresh</mat-icon>
+                                            </button>
+                                        </div>
+
                                     </div>
 
-                                </form>
-                            </div>
+                                    <div *ngIf="toogleTrim" class="trimContainer">
+                                        <form [formGroup]="tab.TrimForm" fxLayout="row" fxLayoutGap="10"
+                                            fxLayoutAlign="center center" (submit)="trim(i)">
 
-                            <div *ngIf="toogleFilter" class="filterContainer">
-                                <form [formGroup]="tab.FilterForm" fxLayout="row" fxLayoutGap="10"
-                                    fxLayoutAlign="center center" (submit)="filter(i)">
+                                            <h4 style="padding-bottom: 13px ; padding-left: 10px;">
+                                                <b>Indicar Inicio y Fin: </b>
+                                            </h4>
 
-                                    <h4 style="padding-bottom: 13px ; padding-left: 10px;"><b>Tipo de Filtro
-                                            ButterWorth:</b></h4>
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Tiempo de Inicio (seg.)</mat-label>
+                                                <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
+                                                <input matInput formControlName="t_min">
+                                                <!-- <mat-error *ngIf="TrimForm.get('t_min')?.hasError('required')">
+                                                    Ingrese <strong>Tiempo Min. </strong> </mat-error> -->
+                                            </mat-form-field>
 
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Tipo de Filtro</mat-label>
-                                        <mat-icon class="colorIconSubBar" matPrefix>query_stats</mat-icon>
-                                        <mat-select formControlName="type">
-                                            <mat-option value="">Sin Filtro</mat-option>
-                                            <mat-option value="bandpass">BandPass</mat-option>
-                                            <mat-option value="bandstop">BandStop</mat-option>
-                                            <mat-option value="lowpass">LowPass</mat-option>
-                                            <mat-option value="highpass">HighPass</mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Tiempo de Fin (seg.)</mat-label>
+                                                <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
+                                                <input matInput formControlName="t_max">
+                                                <!-- <mat-error *ngIf="TrimForm.get('t_max')?.hasError('required')">
+                                                    Ingrese <strong>Tiempo Max. </strong> </mat-error> -->
+                                            </mat-form-field>
 
-                                    <mat-divider class="separatorSubBar" vertical="true"></mat-divider>
+                                            <div style="padding-bottom: 16px; padding-left: 15px;">
+                                                <button type="submit" class="sendInfoSubBar" mat-raised-button
+                                                    color="primary">
+                                                    <mat-icon>query_stats</mat-icon>
+                                                    APLICAR
+                                                </button>
+                                            </div>
 
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Frecuencia Min</mat-label>
-                                        <mat-icon class="colorIconSubBar" matPrefix>show_chart</mat-icon>
-                                        <input matInput type="number" formControlName="freqmin">
-                                        <mat-error *ngIf="FilterForm.get('freqmin')?.hasError('required')">
-                                            Ingrese <strong>
-                                                Freq. Min. </strong> </mat-error>
-                                    </mat-form-field>
-
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Frecuencia Max</mat-label>
-                                        <mat-icon class="colorIconSubBar"
-                                            matPrefix>stacked_line_chart</mat-icon>
-                                        <input matInput type="number" formControlName="freqmax">
-                                        <mat-error *ngIf="FilterForm.get('freqmax')?.hasError('required')">
-                                            Ingrese <strong>
-                                                Freq. Max. </strong> </mat-error>
-                                    </mat-form-field>
-
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Corner</mat-label>
-                                        <mat-icon class="colorIconSubBar"
-                                            matPrefix>stacked_line_chart</mat-icon>
-                                        <input matInput type="number" formControlName="order">
-                                        <mat-error *ngIf="FilterForm.get('order')?.hasError('required')">
-                                            Ingrese <strong>
-                                                Corner </strong> </mat-error>
-                                    </mat-form-field>
-
-                                    <div style="padding-bottom: 16px; padding-left: 15px;">
-                                        <button type="submit" class="sendInfoSubBar" mat-raised-button
-                                            color="primary">
-                                            <mat-icon>query_stats</mat-icon>
-                                            APLICAR
-                                        </button>
+                                        </form>
                                     </div>
 
-                                </form>
+                                    <div *ngIf="toogleFilter" class="filterContainer">
+                                        <form [formGroup]="tab.FilterForm" fxLayout="row" fxLayoutGap="10"
+                                            fxLayoutAlign="center center" (submit)="filter(i)">
+
+                                            <h4 style="padding-bottom: 13px ; padding-left: 10px;">
+                                                <b>Tipo de Filtro ButterWorth:</b>
+                                            </h4>
+
+                                            <mat-form-field appearance="outline" style="width: 160px;">
+                                                <mat-label>Tipo de Filtro</mat-label>
+                                                <mat-icon class="colorIconSubBar" matPrefix>query_stats</mat-icon>
+                                                <mat-select formControlName="type">
+                                                    <mat-option value="">Sin Filtro</mat-option>
+                                                    <mat-option value="bandpass">BandPass</mat-option>
+                                                    <mat-option value="bandstop">BandStop</mat-option>
+                                                    <mat-option value="lowpass" disabled>LowPass</mat-option>
+                                                    <mat-option value="highpass" disabled>HighPass</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+
+                                            <mat-divider class="separatorSubBar" vertical="true"></mat-divider>
+
+                                            <mat-form-field appearance="outline" style="width: 160px;">
+                                                <mat-label>Frecuencia Min</mat-label>
+                                                <mat-icon class="colorIconSubBar" matPrefix>show_chart</mat-icon>
+                                                <input matInput type="number" formControlName="freqmin"
+                                                    placeholder="0.1">
+                                                <mat-error *ngIf="FilterForm.get('freqmin')?.hasError('required')">
+                                                    Ingrese <strong>
+                                                        Freq. Min. </strong> </mat-error>
+                                            </mat-form-field>
+
+                                            <mat-form-field appearance="outline" style="width: 160px;">
+                                                <mat-label>Frecuencia Max</mat-label>
+                                                <mat-icon class="colorIconSubBar"
+                                                    matPrefix>stacked_line_chart</mat-icon>
+                                                <input matInput type="number" formControlName="freqmax"
+                                                    placeholder="25">
+                                                <mat-error *ngIf="FilterForm.get('freqmax')?.hasError('required')">
+                                                    Ingrese <strong>
+                                                        Freq. Max. </strong> </mat-error>
+                                            </mat-form-field>
+
+                                            <mat-form-field appearance="outline" style="width: 160px;">
+                                                <mat-label>Corner</mat-label>
+                                                <mat-icon class="colorIconSubBar"
+                                                    matPrefix>stacked_line_chart</mat-icon>
+                                                <input matInput type="number" formControlName="order" placeholder="2">
+                                                <mat-error *ngIf="FilterForm.get('order')?.hasError('required')">
+                                                    Ingrese <strong>Corner</strong>
+                                                </mat-error>
+                                            </mat-form-field>
+
+                                            <div style="padding-bottom: 13px;">
+                                                <mat-checkbox formControlName="zero">Bilinear</mat-checkbox>
+                                            </div>
+
+                                            <div style="padding-bottom: 16px; padding-left: 15px;">
+                                                <button type="submit" class="sendInfoSubBar" mat-raised-button
+                                                    color="primary">
+                                                    <mat-icon>query_stats</mat-icon>
+                                                    APLICAR
+                                                </button>
+                                            </div>
+
+                                        </form>
+                                    </div>
+
+                                </div>
+
+                                <!-- <div *ngIf="loadingSpinnerData" fxLayout="column" fxLayoutGap="10"
+                                    fxLayoutAlign="center center">
+                                    <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
+                                        [diameter]="50"></mat-progress-spinner>
+                                    <h3> <b>Cargando Datos ....</b> </h3>
+                                </div> -->
+
+                                <div fxLayout="column" fxLayoutGap="10">
+                                    <div echarts [options]="tab.graph[0]" [loading]="isLoading" class="divGraph"></div>
+                                    <div echarts [options]="tab.graph[1]" [loading]="isLoading" class="divGraph"></div>
+                                    <div echarts [options]="tab.graph[2]" [loading]="isLoading" class="divGraph"></div>
+                                </div>
                             </div>
 
-                        </div>
+                        </mat-tab>
 
-                        <!-- <div *ngIf="loadingSpinnerData" fxLayout="column" fxLayoutGap="10"
-                            fxLayoutAlign="center center">
-                            <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
-                                [diameter]="50"></mat-progress-spinner>
-                            <h3> <b>Cargando Datos ....</b> </h3>
-                        </div> -->
+                    </mat-tab-group>
 
-                        <div fxLayout="column" fxLayoutGap="10">
-                            <div echarts [options]="tab.graph[0]" [loading]="isLoading" class="divGraph"></div>
-                            <div echarts [options]="tab.graph[1]" [loading]="isLoading" class="divGraph"></div>
-                            <div echarts [options]="tab.graph[2]" [loading]="isLoading" class="divGraph"></div>
-                        </div>
-                    </div>
+                </div>
 
-                </mat-tab>
-
-            </mat-tab-group>
+            </div>
 
         </div>
 
-    </div>
-
-</div>
-
-<div style="height: 100%; padding: 20px; border-radius: 5px; background-color: #31456D;" fxShow="false"
-    fxShow.lt-sm>
-    <h1 style="text-align: center; color: white;"><b>Voltear el Dispositivo, para Mejor Visualizacion</b></h1>
-</div>
+        <div style="height: 100%; padding: 20px; border-radius: 5px; background-color: #31456D;" fxShow="false"
+            fxShow.lt-sm>
+            <h1 style="text-align: center; color: white;"><b>Voltear el Dispositivo, para Mejor Visualizacion</b></h1>
+        </div>

@@ -1,9 +1,13 @@
 import { trigger, transition, style, animate, state } from '@angular/animations';
-import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
+import { NavigationStart, Router } from '@angular/router';
 import { ECharts, EChartsCoreOption, EChartsOption } from 'echarts';
+import { Subscription } from 'rxjs';
+import { ArchivoTXTComponent } from 'src/app/modules/uext/componentes/archivo-txt/archivo-txt.component';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 
 @Component({
@@ -49,6 +53,7 @@ import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 })
 export class VisorGraphComponent implements OnInit {
 
+  private navigationSubscription: Subscription;
   
   accel: EChartsOption | any;
   vel: EChartsOption | any;
@@ -104,6 +109,8 @@ export class VisorGraphComponent implements OnInit {
     private obsApi: ObspyAPIService,
     private snackBar: MatSnackBar,
     private cdRef: ChangeDetectorRef,
+    private matDialog: MatDialog,
+    private router: Router
   ) {
 
     this.FilterForm = new FormGroup({
@@ -119,6 +126,14 @@ export class VisorGraphComponent implements OnInit {
       t_max: new FormControl('', [Validators.required])
     });
 
+    this.navigationSubscription = this.router.events.subscribe((event: any) => {
+      if (event instanceof NavigationStart) {
+        // Aquí puedes ejecutar el código que desees cuando se inicie la navegación.
+        // Por ejemplo, puedes lanzar una advertencia.
+        this.showWarning();
+      }
+    });
+
   }
 
   ngOnInit(): void {
@@ -128,6 +143,27 @@ export class VisorGraphComponent implements OnInit {
       url: new FormControl(''),
 
     })
+  }
+
+  ngOnDestroy() {
+    // Es importante cancelar la suscripción cuando el componente se destruye.
+    if (this.navigationSubscription) {
+      this.navigationSubscription.unsubscribe();
+    }
+  }
+
+  showWarning() {
+    const confirmed = window.confirm('-¿Estás seguro de que deseas abandonar esta página?');
+    if (!confirmed) {
+      this.router.navigate(['/current-route']); 
+    }
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  unloadNotification($event: any) {
+    const confirmationMessage = '¿Estás seguro de que deseas abandonar esta página?';
+    $event.returnValue = confirmationMessage;
+    return confirmationMessage;
   }
 
   // ! Manipulacion de Archivos 
@@ -187,40 +223,60 @@ export class VisorGraphComponent implements OnInit {
           this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
         },
         complete: () => {
+          let valorNoVacio_recived: any = this.urlFile || this.stringdata
+          let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+          let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
           if (this.urlFile == null) {
-            this.obsApi.getData(this.stringdata).subscribe({
-              next: value => {
-                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-              },
-              error: err => {
-                this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                this.loadingSpinner = false
-                this.loadingSpinnerStaInfo = false
-              },
-              complete: () => {
-                this.loadingSpinner = false
-                this.loadingSpinnerStaInfo = false
-              }
-            })
+
+            if (extension == 'txt') {
+
+              this.leerTxt(valorNoVacio_recived)
+
+            } else {
+              this.obsApi.getData(this.stringdata).subscribe({
+                next: value => {
+                  this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                },
+                error: err => {
+                  this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                  this.loadingSpinner = false
+                  this.loadingSpinnerStaInfo = false
+                },
+                complete: () => {
+                  this.loadingSpinner = false
+                  this.loadingSpinnerStaInfo = false
+                }
+              })
+            }
 
           } else if (this.stringdata == null) {
-            this.obsApi.getData(this.urlFile).subscribe({
-              next: value => {
 
-                this.toggleTabs = true
-                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-              },
-              error: err => {
-                this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                this.loadingSpinner = false
-                this.loadingSpinnerStaInfo = false
-              },
-              complete: () => {
-                this.loadingSpinner = false
-                this.loadingSpinnerStaInfo = false
-              }
-            })
+            if (extension == 'txt') {
+
+              this.leerTxt(valorNoVacio_recived)
+
+            } else {
+
+              this.obsApi.getData(this.urlFile).subscribe({
+                next: value => {
+
+                  this.toggleTabs = true
+                  this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                },
+                error: err => {
+                  this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                  this.loadingSpinner = false
+                  this.loadingSpinnerStaInfo = false
+                },
+                complete: () => {
+                  this.loadingSpinner = false
+                  this.loadingSpinnerStaInfo = false
+                }
+              })
+
+            }
+
           } else {
             this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
             this.loadingSpinner = false
@@ -234,6 +290,68 @@ export class VisorGraphComponent implements OnInit {
       this.loadingSpinner = false
       this.loadingSpinnerStaInfo = false
     }
+  }
+
+  async leerTxt(url: string) {
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 5 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    const matDialogConfig = new MatDialogConfig()
+    matDialogConfig.disableClose = true;
+    matDialogConfig.data = url
+
+    this.loadingSpinnerStaInfo = true
+
+    this.matDialog.open(ArchivoTXTComponent, matDialogConfig).afterClosed()
+      .subscribe({
+        next: value => {
+
+          this.toggleTabs = true
+          console.log(value);
+
+          if (value == '') {
+            this.loadingSpinner = false
+            this.loadingSpinnerStaInfo = false
+            return
+          } else {
+            this.obsApi.convertToStream(value).subscribe({
+              next: value => {
+                this.toggleTabs = true
+
+                localStorage.setItem('urlFileUpload', value.url)
+
+                this.obsApi.getData(value.url).subscribe({
+                  next: value => {
+                    this.toggleTabs = true
+                    this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                  },
+                  error: err => {
+                    this.snackBar.open('⚠️ Error CTS-DT', 'cerrar', snackBar)
+                    this.loadingSpinner = false
+                    this.loadingSpinnerStaInfo = false
+                  },
+                  complete: () => {
+                    this.loadingSpinner = false
+                    this.loadingSpinnerStaInfo = false
+                  }
+                })
+
+              },
+              error: err => {
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+                this.snackBar.open('⚠️ Error CTS', 'cerrar', snackBar)
+              }
+            })
+          }
+
+        },
+      }
+
+      )
+
   }
 
   leer(e: any) {
@@ -475,7 +593,7 @@ export class VisorGraphComponent implements OnInit {
 
         this.loadingSpinnerData = false
         this.ToggleGraph = true
-
+        this.toogleFilter = false
         this.isLoading = false
       }
     })
@@ -531,7 +649,7 @@ export class VisorGraphComponent implements OnInit {
     this.isLoading = true
 
 
-    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn,zero, min, max, unit).subscribe({
+    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit).subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -563,6 +681,8 @@ export class VisorGraphComponent implements OnInit {
         this.ToggleGraph = true
 
         this.isLoading = false
+
+        this.toogleFilter = false
       }
     })
   }
@@ -579,7 +699,7 @@ export class VisorGraphComponent implements OnInit {
     }
 
     let base = this.tabs[index].base || ''
-  
+
     const unitMap: { [key: string]: string } = {
       'cm/s2 [GaL]': 'gal',
       'm/s2': 'm',
@@ -665,6 +785,67 @@ export class VisorGraphComponent implements OnInit {
     })
   }
 
+  autoAjuste(index: number) {
+
+    console.log(this.tabs[index]);
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 3 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    var dataString: string = localStorage.getItem('urlSearched')!
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
+
+    this.tabs[index].base = 'linear'
+    this.tabs[index].unit = 'gal'
+
+    this.tabs[index].FilterForm.controls['type'].setValue('bandpass')
+    this.tabs[index].FilterForm.controls['freqmin'].setValue(0.1)
+    this.tabs[index].FilterForm.controls['freqmax'].setValue(25)
+    this.tabs[index].FilterForm.controls['order'].setValue(2)
+    this.tabs[index].FilterForm.controls['zero'].setValue(true)
+
+    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+
+    let sta = this.tabs[index].dataEst.station
+    let cha = this.tabs[index].dataEst.channel
+
+    this.isLoading = true
+
+    this.obsApi.autoAdjust(dataToUse, sta, cha).subscribe({
+      next: value => {
+
+        this.ToggleGraph = false
+        this.loadingSpinnerData = true
+
+        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+
+        if (indx !== -1) {
+
+          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+
+          this.tabs[indx].graph = graph;
+
+          // Manualmente activar la detección de cambios para la pestaña actualizada
+          this.cdRef.detectChanges();
+        }
+
+      },
+      error: err => {
+        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+        this.loadingSpinnerGraph = false
+        console.error('REQUEST API ERROR: ' + err.message)
+      },
+      complete: () => {
+        this.actApli.push(`AutoAjuste a ${sta}.${cha}`)
+
+        this.loadingSpinnerData = false
+        this.ToggleGraph = true
+        this.toogleFilter = false
+        this.isLoading = false
+      }
+    })
+  }
 
   // ! Generador de Graficos
   graphGenerator(e: any, value: any, dataformat: any) {
@@ -752,7 +933,7 @@ export class VisorGraphComponent implements OnInit {
               downloadLink.click();
               document.body.removeChild(downloadLink);
             }
-          }
+          },
         }
       },
       grid: {
@@ -1128,6 +1309,7 @@ export class VisorGraphComponent implements OnInit {
 
     this.tabs = []
     this.actApli = []
+    this.stationInfo = []
 
     this.btnShow = false;
     this.btnCancel = true;

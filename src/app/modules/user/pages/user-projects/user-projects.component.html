@@ -5,15 +5,33 @@
         <h4 fxHide.lt-sm>Aca encontrarás tus projectos</h4>
     </div>
 
-    <button class="newProjectBtn" mat-raised-button type="button">
+    <button class="newProjectBtn" mat-raised-button type="button" (click)="crearProyecto()">
         <mat-icon class="colorIcon">add</mat-icon>
     </button>
 
-    <div class="projectContainer">
-        <div class="newProject" fxLayout="column" fxLayoutAlign="center center">
-            <mat-icon class="colorIcon">add</mat-icon>
+    <div class="projectContainer" fxLayout="row wrap" fxLayoutAlign="center center" fxLayoutGap="10" style="background-color: rebeccapurple;">
+
+        <div *ngFor="let proj of proyectos; let i = index">
+            <div class="newProject" fxLayout="column" fxLayoutAlign="start center">
+                <!-- <mat-icon class="colorIcon">add</mat-icon> -->
+                <h4> {{proj.proyecto.uuid}} </h4>
+                <h4> Fecha: {{proj.proyecto.fecha_creacion | date: 'short'}}</h4>
+
+                <div *ngFor="let item of proj.files" style="width: 100%; padding-bottom: 2px;">
+                    <h5>Filename: <b>{{item.filename}}</b> </h5>
+                    <h6>Filetype: <b>{{item.typeFile}}</b> </h6>
+                </div>
+
+            </div>
         </div>
+
+        <!-- <div *ngIf="loadingSpinner" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center"
+            style="padding-top: 20%;">
+            <mat-progress-spinner mode="indeterminate" style="margin:0 auto;" [diameter]="50"></mat-progress-spinner>
+            <h3> <b>Cargando Datos ....</b> </h3>
+        </div> -->
+
     </div>
-    
+
 
 </div>
