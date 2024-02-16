@@ -1,0 +1,148 @@
+<mat-dialog-content>
+
+    <div fxLayout="column" fxLayoutGap="10">
+
+        <div style="padding-bottom: 5px;">
+            <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>ESTACIONES ENCONTRADAS</b></h2>
+            <mat-divider></mat-divider>
+        </div>
+
+        <div fxLayout="row" fxLayoutGap="10" fxFlex>
+
+            <div class="listSt" fxLayout="column" fxLayoutGap="5" fxFlex="35">
+
+                <div class="scrlSta" fxLayout="column">
+
+                    <div *ngIf="loadingSpinnerStaInfo" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center"
+                        style="padding-top: 20%;">
+                        <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
+                            [diameter]="50"></mat-progress-spinner>
+                        <h3> <b>Cargando Datos ....</b> </h3>
+                    </div>
+
+                    <ng-container style="width: 100%;" *ngFor="let sta of groupedData | keyvalue; let i = index">
+                        <div style="width: 100%;"
+                            [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
+                            (click)="selectGroup(sta.key)" fxLayout="column" fxLayoutGap="3"
+                            fxLayoutAlign="space-around">
+                            <ng-container *ngFor="let item of getGroupValues(sta)">
+                                <div fxLayout="row" fxLayoutAlign="space-around center"
+                                    style="cursor: pointer; padding: 3px;">
+                                    <mat-icon style="color: white;">router</mat-icon>
+                                    <p> {{item.network}} </p>
+                                    <p> {{item.station}} </p>
+                                    <p> {{item.location || '-'}}</p>
+                                    <p style="padding: 1px 4px 1px 4px; border-radius: 3px;"
+                                        [ngStyle]="setColorStationChannel(item.channel)">
+                                        {{item.channel}} </p>
+                                </div>
+                            </ng-container>
+                        </div>
+
+                    </ng-container>
+
+                </div>
+
+            </div>
+
+            <div class="dndZoneContainer" fxFlex="65">
+
+                <div class="dndZone" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center start">
+
+                    <h4>Ingrese URL o Archivo Valido (XML)</h4>
+                    <form [formGroup]="controlForm" style="width: 100%;" fxLayout="row" fxLayoutAlign="center center"
+                        fxLayoutGap="10" (submit)="leerArchivo()">
+
+                        <div class="inputUrl" [ngStyle.lt-sm]="{'width': '250px'}" fxLayout="row"
+                            fxLayoutAlign="center center" fxLayoutGap="2">
+
+                            <input matInput type="text" formControlName="url"
+                                placeholder="Ejm: https://apiqs.ncn.pe/media/uploads/2024_0080_NASC_PE_3SyVHLb.txt">
+
+                            <button type="button" mat-icon-button (click)="fileInput.click()">
+                                <mat-icon class="colorIcon">file_upload</mat-icon>
+                            </button>
+
+                            <input hidden (change)="onFileSelected($event)" #fileInput type="file" id="file">
+                        </div>
+
+                        <button [disabled]="btnDisable" type="submit" mat-flat-button color="primary">
+                            <mat-icon>check</mat-icon>
+                        </button>
+
+                    </form>
+
+                    <div *ngIf="!btnCancel">
+                        <div class="uploadbtnComplete" fxLayout="row" fxLayoutAlign="center center">
+                            <h3 style="margin: 0; padding-left: 10px; font-size: 10px;"> {{arch?.name}} </h3>
+                            <button mat-icon-button type="button" (click)="deleteFile()">
+                                <mat-icon inline="true">close</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <h4>o Ingrese Valores de Calibracion</h4>
+                    <form [formGroup]="controlForm2" (submit)="enviarCalibracion()" fxLayout="column" fxLayoutGap="5"
+                        fxLayoutAlign="center center">
+
+                        <div class="columGen">
+                            <div *ngFor="let itm of tempdata;let i = index">
+
+                                <mat-form-field appearance="outline" class="mtff">
+                                    <mat-label>{{itm.station + '.' + itm.location + '.' + itm.channel ||
+                                        ''}}</mat-label>
+                                    <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
+                                    <input matInput type="number" formControlName='c_{{i}}'>
+                                </mat-form-field>
+
+                                <!-- <mat-form-field appearance="outline" class="mtfs">
+                                    <mat-label>C {{i+1}}</mat-label>
+                                    <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
+                                    <input matInput formControlName='cc_{{i}}' type="number">
+                                </mat-form-field> -->
+
+                            </div>
+                        </div>
+
+                        <mat-form-field appearance="outline" class="mtff">
+                            <mat-label>Unidad de Aceleracion</mat-label>
+                            <mat-icon matPrefix>speed</mat-icon>
+                            <mat-select formControlName="unitst">
+                                <mat-option value="unk">unk</mat-option>
+                                <mat-option value="m">m/s2</mat-option>
+                                <mat-option value="cm">cm/s2</mat-option>
+                                <mat-option value="inch">in/s2</mat-option>
+                                <mat-option value="feet">ft/s2</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <button type="submit" mat-flat-button style="background-color: rgb(67, 160, 67); color: white;">
+                            <mat-icon style="color: white;">check</mat-icon>
+                            Calibrar Trazas
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div>
+            <h3>* Si su archivo ya esta <b>calibrado</b>, cierre esta Ventana</h3>
+        </div>
+
+        <div *ngIf="loadingBarSpinner">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        </div>
+    </div>
+
+
+</mat-dialog-content>
+<mat-dialog-actions>
+    <div>
+        <button mat-flat-button color="warn" (click)="Close()">
+            Cerrar
+        </button>
+    </div>
+
+</mat-dialog-actions>

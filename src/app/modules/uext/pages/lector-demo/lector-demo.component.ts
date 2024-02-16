@@ -7,6 +7,7 @@ import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
 import { EChartsOption } from 'echarts';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 import { ArchivoTXTComponent } from '../../componentes/archivo-txt/archivo-txt.component';
+import { ArchivoMseedComponent } from '../../componentes/archivo-mseed/archivo-mseed.component';
 
 @Component({
   selector: 'app-lector-demo',
@@ -172,84 +173,262 @@ export class LectorDemoComponent implements OnInit {
 
       valorNoVacio = archivoValue || textoValue
 
-      this.obsApi.uploadFile(valorNoVacio).subscribe({
-        next: value => {
-          this.idFile = value.id
-          this.urlFile = value.file
-          this.stringdata = value.string_data
+      console.log(this.urlFile + ' - ' + this.stringdata);
+      
 
-          localStorage.setItem('urlFileUpload', value.file)
-          localStorage.setItem('urlSearched', value.string_data)
+      if(this.urlFile == '' && this.stringdata == ''){
 
-        },
-        error: err => {
-          this.loadingSpinner = false
-          this.loadingSpinnerStaInfo = false
-          // console.error('REQUEST API ERROR: ' + err.message)
-          this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
-        },
-        complete: () => {
-          let valorNoVacio_recived: any = this.urlFile || this.stringdata
-          let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
-          let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+        this.obsApi.uploadFile(valorNoVacio).subscribe({
+          next: value => {
 
-          if (this.urlFile == null) {
-
-            if (extension == 'txt') {
-
-              this.leerTxt(valorNoVacio_recived)
-
-            } else {
-              this.obsApi.getData(this.stringdata).subscribe({
-                next: value => {
-                  this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                },
-                error: err => {
-                  this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                  this.loadingSpinner = false
-                  this.loadingSpinnerStaInfo = false
-                },
-                complete: () => {
-                  this.loadingSpinner = false
-                  this.loadingSpinnerStaInfo = false
-                }
-              })
-            }
-
-          } else if (this.stringdata == null) {
-
-            if (extension == 'txt') {
-
-              this.leerTxt(valorNoVacio_recived)
-
-            } else {
-
-              this.obsApi.getData(this.urlFile).subscribe({
-                next: value => {
-
-                  this.toggleTabs = true
-                  this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                },
-                error: err => {
-                  this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                  this.loadingSpinner = false
-                  this.loadingSpinnerStaInfo = false
-                },
-                complete: () => {
-                  this.loadingSpinner = false
-                  this.loadingSpinnerStaInfo = false
-                }
-              })
-
-            }
-
-          } else {
-            this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+            this.idFile = value.id
+            this.urlFile = value.file
+            this.stringdata = value.string_data
+  
+            localStorage.setItem('urlFileUpload', value.file)
+            localStorage.setItem('urlSearched', value.string_data)
+  
+          },
+          error: err => {
             this.loadingSpinner = false
             this.loadingSpinnerStaInfo = false
+            // console.error('REQUEST API ERROR: ' + err.message)
+            this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
+          },
+          complete: () => {
+            let valorNoVacio_recived: any = this.urlFile || this.stringdata
+            let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+            let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+  
+            if (this.urlFile == null) {
+  
+              if (extension == 'txt') {
+  
+                this.leerTxt(valorNoVacio_recived)
+  
+              } else if (extension == 'mseed') {
+  
+                this.leerMseed(valorNoVacio_recived)
+  
+              } else {
+  
+                this.obsApi.getData(this.stringdata).subscribe({
+                  next: value => {
+                    this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                  },
+                  error: err => {
+                    this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                    this.loadingSpinner = false
+                    this.loadingSpinnerStaInfo = false
+                  },
+                  complete: () => {
+                    this.loadingSpinner = false
+                    this.loadingSpinnerStaInfo = false
+                  }
+                })
+  
+              }
+  
+            } else if (this.stringdata == null) {
+  
+              if (extension == 'txt') {
+  
+                this.leerTxt(valorNoVacio_recived)
+  
+              } else if (extension == 'mseed') {
+  
+                this.leerMseed(valorNoVacio_recived)
+  
+              } else {
+  
+                this.obsApi.getData(this.urlFile).subscribe({
+                  next: value => {
+  
+                    this.toggleTabs = true
+                    this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                  },
+                  error: err => {
+                    this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                    this.loadingSpinner = false
+                    this.loadingSpinnerStaInfo = false
+                  },
+                  complete: () => {
+                    this.loadingSpinner = false
+                    this.loadingSpinnerStaInfo = false
+                  }
+                })
+  
+              }
+  
+            } else {
+              this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+              this.loadingSpinner = false
+              this.loadingSpinnerStaInfo = false
+            }
           }
+        })
+
+      }else{
+
+        let valorNoVacio_recived: any = this.urlFile || this.stringdata
+        let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+        let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+
+        if (this.urlFile == null || '') {
+
+          if (extension == 'txt') {
+
+            this.leerTxt(valorNoVacio_recived)
+
+          } else if (extension == 'mseed') {
+
+            this.leerMseed(valorNoVacio_recived)
+
+          } else {
+
+            this.obsApi.getData(this.stringdata).subscribe({
+              next: value => {
+                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+              },
+              error: err => {
+                this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+              },
+              complete: () => {
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+              }
+            })
+
+          }
+
+        } else if (this.stringdata == null || '') {
+
+          if (extension == 'txt') {
+
+            this.leerTxt(valorNoVacio_recived)
+
+          } else if (extension == 'mseed') {
+
+            this.leerMseed(valorNoVacio_recived)
+
+          } else {
+
+            this.obsApi.getData(this.urlFile).subscribe({
+              next: value => {
+
+                this.toggleTabs = true
+                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+              },
+              error: err => {
+                this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+              },
+              complete: () => {
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+              }
+            })
+
+          }
+
+        } else {
+          this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+          this.loadingSpinner = false
+          this.loadingSpinnerStaInfo = false
         }
-      })
+      }
+
+      // this.obsApi.uploadFile(valorNoVacio).subscribe({
+      //   next: value => {
+      //     this.idFile = value.id
+      //     this.urlFile = value.file
+      //     this.stringdata = value.string_data
+
+      //     localStorage.setItem('urlFileUpload', value.file)
+      //     localStorage.setItem('urlSearched', value.string_data)
+
+      //   },
+      //   error: err => {
+      //     this.loadingSpinner = false
+      //     this.loadingSpinnerStaInfo = false
+      //     // console.error('REQUEST API ERROR: ' + err.message)
+      //     this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
+      //   },
+      //   complete: () => {
+      //     let valorNoVacio_recived: any = this.urlFile || this.stringdata
+      //     let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+      //     let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+
+      //     if (this.urlFile == null) {
+
+      //       if (extension == 'txt') {
+
+      //         this.leerTxt(valorNoVacio_recived)
+
+      //       } else if (extension == 'mseed') {
+
+      //         this.leerMseed(valorNoVacio_recived)
+
+      //       } else {
+
+      //         this.obsApi.getData(this.stringdata).subscribe({
+      //           next: value => {
+      //             this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+      //           },
+      //           error: err => {
+      //             this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+      //             this.loadingSpinner = false
+      //             this.loadingSpinnerStaInfo = false
+      //           },
+      //           complete: () => {
+      //             this.loadingSpinner = false
+      //             this.loadingSpinnerStaInfo = false
+      //           }
+      //         })
+
+      //       }
+
+      //     } else if (this.stringdata == null) {
+
+      //       if (extension == 'txt') {
+
+      //         this.leerTxt(valorNoVacio_recived)
+
+      //       } else if (extension == 'mseed') {
+
+      //         this.leerMseed(valorNoVacio_recived)
+
+      //       } else {
+
+      //         this.obsApi.getData(this.urlFile).subscribe({
+      //           next: value => {
+
+      //             this.toggleTabs = true
+      //             this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+      //           },
+      //           error: err => {
+      //             this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+      //             this.loadingSpinner = false
+      //             this.loadingSpinnerStaInfo = false
+      //           },
+      //           complete: () => {
+      //             this.loadingSpinner = false
+      //             this.loadingSpinnerStaInfo = false
+      //           }
+      //         })
+
+      //       }
+
+      //     } else {
+      //       this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+      //       this.loadingSpinner = false
+      //       this.loadingSpinnerStaInfo = false
+      //     }
+      //   }
+      // })
 
     } else {
       this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
@@ -276,7 +455,7 @@ export class LectorDemoComponent implements OnInit {
 
           this.toggleTabs = true
           console.log(value);
-          
+
           if (value == '') {
             this.loadingSpinner = false
             this.loadingSpinnerStaInfo = false
@@ -309,6 +488,64 @@ export class LectorDemoComponent implements OnInit {
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
                 this.snackBar.open('⚠️ Error CTS', 'cerrar', snackBar)
+              }
+            })
+          }
+
+        },
+      }
+
+      )
+
+  }
+
+  async leerMseed(url: string) {
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 5 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    const matDialogConfig = new MatDialogConfig()
+    matDialogConfig.disableClose = true;
+    matDialogConfig.data = url
+
+    this.loadingSpinnerStaInfo = true
+
+    this.matDialog.open(ArchivoMseedComponent, matDialogConfig).afterClosed()
+      .subscribe({
+        next: valueUrl => {
+
+          // this.toggleTabs = true
+
+          if (valueUrl == '') {
+
+            this.urlFile = valueUrl
+
+            localStorage.setItem('urlFileUpload', valueUrl)
+
+            this.loadingSpinner = false
+            this.loadingSpinnerStaInfo = false
+            return
+
+          } else {
+
+            this.urlFile = valueUrl
+
+            localStorage.setItem('urlFileUpload', valueUrl)
+           
+            this.obsApi.getData(valueUrl).subscribe({
+              next: value => {
+                this.toggleTabs = true
+                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)               
+              },
+              error: err => {
+                this.snackBar.open('⚠️ Error CTS-DT', 'cerrar', snackBar)
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+              },
+              complete: () => {
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
               }
             })
           }
@@ -753,8 +990,6 @@ export class LectorDemoComponent implements OnInit {
 
   autoAjuste(index: number) {
 
-    console.log(this.tabs[index]);
-    
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
@@ -1262,8 +1497,8 @@ export class LectorDemoComponent implements OnInit {
 
   // TODO: Eliminar si no se vuelve usar
   clearData() {
-    localStorage.clear
-
+    // localStorage.clear()
+    
     this.tabs = []
     this.actApli = []
 
@@ -1272,14 +1507,14 @@ export class LectorDemoComponent implements OnInit {
 
   // ? Toggle Panels o Bars
   deleteFile() {
-
+    localStorage.clear()
+    this.urlFile = ''
+    this.stringdata = ''
     this.tabs = []
     this.actApli = []
     this.stationInfo = []
-
     this.btnShow = false;
     this.btnCancel = true;
-
     this.fileInput.nativeElement.value = ''
 
     this.groupedData = {}

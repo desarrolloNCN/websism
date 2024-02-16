@@ -13,6 +13,7 @@ import { NgxEchartsModule } from 'ngx-echarts';
 import { MatTabsModule } from '@angular/material/tabs';
 import { UserLoginComponent } from './pages/user-login/user-login.component';
 import { ArchivoTXTComponent } from './componentes/archivo-txt/archivo-txt.component';
+import { ArchivoMseedComponent } from './componentes/archivo-mseed/archivo-mseed.component';
 
 
 @NgModule({
@@ -22,7 +23,8 @@ import { ArchivoTXTComponent } from './componentes/archivo-txt/archivo-txt.compo
     NavBarComponent,
     FooterBarComponent,
     UserLoginComponent,
-    ArchivoTXTComponent
+    ArchivoTXTComponent,
+    ArchivoMseedComponent
   ],
   imports: [
     CommonModule,

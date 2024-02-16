@@ -327,5 +327,21 @@ export class ObspyAPIService {
 
   }
 
+  addCalibrationMseed(mseed:string, xml:string, dataCal: any){
+    const url = `calibration/`
+
+    const data = {
+      "mseed_file" : mseed ,
+      "xml_file" : xml,
+      "calib_factor": dataCal
+    }
+
+    return this.http.post<any>(url, data).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    );
+  }
+
 }
 
