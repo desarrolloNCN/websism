@@ -78,6 +78,7 @@ export class LectorDemoComponent implements OnInit {
 
   btnShow = false
   btnCancel = true
+  btnDisable = false
 
   hideStaPanel = true
   showResponsivebar = false
@@ -157,6 +158,8 @@ export class LectorDemoComponent implements OnInit {
 
     this.clearData()
 
+    this.btnDisable = true
+
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 5 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
@@ -172,9 +175,6 @@ export class LectorDemoComponent implements OnInit {
     if (archivoValue instanceof File || typeof textoValue === 'string' && textoValue.trim() !== '') {
 
       valorNoVacio = archivoValue || textoValue
-
-      console.log(this.urlFile + ' - ' + this.stringdata);
-      
 
       if(this.urlFile == '' && this.stringdata == ''){
 
@@ -192,6 +192,7 @@ export class LectorDemoComponent implements OnInit {
           error: err => {
             this.loadingSpinner = false
             this.loadingSpinnerStaInfo = false
+            this.btnDisable = false
             // console.error('REQUEST API ERROR: ' + err.message)
             this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
           },
@@ -220,10 +221,12 @@ export class LectorDemoComponent implements OnInit {
                     this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
                     this.loadingSpinner = false
                     this.loadingSpinnerStaInfo = false
+                    this.btnDisable = false
                   },
                   complete: () => {
                     this.loadingSpinner = false
                     this.loadingSpinnerStaInfo = false
+                    this.btnDisable = false
                   }
                 })
   
@@ -251,10 +254,12 @@ export class LectorDemoComponent implements OnInit {
                     this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
                     this.loadingSpinner = false
                     this.loadingSpinnerStaInfo = false
+                    this.btnDisable = false
                   },
                   complete: () => {
                     this.loadingSpinner = false
-                    this.loadingSpinnerStaInfo = false
+                    this.loadingSpinnerStaInfo = 
+                    this.btnDisable = false
                   }
                 })
   
@@ -264,6 +269,7 @@ export class LectorDemoComponent implements OnInit {
               this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
               this.loadingSpinner = false
               this.loadingSpinnerStaInfo = false
+              this.btnDisable = false
             }
           }
         })
@@ -294,10 +300,12 @@ export class LectorDemoComponent implements OnInit {
                 this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
               },
               complete: () => {
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
               }
             })
 
@@ -325,10 +333,12 @@ export class LectorDemoComponent implements OnInit {
                 this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
               },
               complete: () => {
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
               }
             })
 
@@ -338,10 +348,11 @@ export class LectorDemoComponent implements OnInit {
           this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
           this.loadingSpinner = false
           this.loadingSpinnerStaInfo = false
+          this.btnDisable = false
         }
       }
 
-      // this.obsApi.uploadFile(valorNoVacio).subscribe({
+      // this.obsApi.uploadFile(valorNoVacio).subscribe({4
       //   next: value => {
       //     this.idFile = value.id
       //     this.urlFile = value.file
@@ -454,12 +465,13 @@ export class LectorDemoComponent implements OnInit {
         next: value => {
 
           this.toggleTabs = true
-          console.log(value);
 
           if (value == '') {
+
             this.loadingSpinner = false
             this.loadingSpinnerStaInfo = false
             return
+            
           } else {
             this.obsApi.convertToStream(value).subscribe({
               next: value => {
@@ -476,10 +488,12 @@ export class LectorDemoComponent implements OnInit {
                     this.snackBar.open('⚠️ Error CTS-DT', 'cerrar', snackBar)
                     this.loadingSpinner = false
                     this.loadingSpinnerStaInfo = false
+                    this.btnDisable = false
                   },
                   complete: () => {
                     this.loadingSpinner = false
                     this.loadingSpinnerStaInfo = false
+                    this.btnDisable = false
                   }
                 })
 
@@ -487,6 +501,7 @@ export class LectorDemoComponent implements OnInit {
               error: err => {
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
                 this.snackBar.open('⚠️ Error CTS', 'cerrar', snackBar)
               }
             })
@@ -525,6 +540,7 @@ export class LectorDemoComponent implements OnInit {
 
             this.loadingSpinner = false
             this.loadingSpinnerStaInfo = false
+            this.btnDisable = false
             return
 
           } else {
@@ -542,10 +558,12 @@ export class LectorDemoComponent implements OnInit {
                 this.snackBar.open('⚠️ Error CTS-DT', 'cerrar', snackBar)
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
               },
               complete: () => {
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
               }
             })
           }

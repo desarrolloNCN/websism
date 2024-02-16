@@ -62,7 +62,7 @@
 
                     <mat-divider fxHide.lt-md class="separator" vertical="true"></mat-divider>
 
-                    <button type="submit" class="sendInfo" mat-raised-button color="primary">
+                    <button [disabled]="btnDisable" type="submit" class="sendInfo" mat-raised-button color="primary">
                         <mat-icon>query_stats</mat-icon>
                         LEER DATOS
                     </button>

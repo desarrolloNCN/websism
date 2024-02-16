@@ -19,6 +19,7 @@ export class ArchivoMseedComponent implements OnInit {
   btnShow = false
   btnCancel = true
   btnDisable = false
+  btnDisableForm = false
 
   urlFile = ''
   urlXml = ''
@@ -49,7 +50,7 @@ export class ArchivoMseedComponent implements OnInit {
     })
 
     this.controlForm2 = new FormGroup({
-      unitst : new FormControl('')
+      unitst : new FormControl('', Validators.required)
     })
   }
 
@@ -101,6 +102,7 @@ export class ArchivoMseedComponent implements OnInit {
       } else {
         this.arch = archivos[0];
         this.controlForm2.disable()
+        this.btnDisableForm = true
         this.btnShow = true;
         this.btnCancel = false;
         this.controlForm.get('url').disable()
@@ -118,6 +120,7 @@ export class ArchivoMseedComponent implements OnInit {
   leerArchivo() {
 
     // this.clearData()
+    this.btnDisable = true
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 5 * 1000;
@@ -149,6 +152,7 @@ export class ArchivoMseedComponent implements OnInit {
         error: err => {
           this.loadingSpinner = false
           this.loadingBarSpinner = false
+          this.btnDisable = false
           this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
         },
         complete: () => {
@@ -159,10 +163,12 @@ export class ArchivoMseedComponent implements OnInit {
             },
             error: err => {
               this.loadingSpinner = false
+              this.btnDisable = false
               this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
             },
             complete: () => {
               this.loadingBarSpinner = false
+              this.btnDisable = false
 
             }
           })
@@ -175,6 +181,7 @@ export class ArchivoMseedComponent implements OnInit {
       this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
       this.loadingSpinner = false
       this.loadingBarSpinner = false
+      this.btnDisable = false
     }
   }
 
@@ -186,7 +193,8 @@ export class ArchivoMseedComponent implements OnInit {
     this.loadingBarSpinner = true
 
     if (this.controlForm2.invalid) {
-
+      
+      this.loadingBarSpinner = false
       this.snackBar.open('No se Ingresado factor de Calibracion', 'cerrar', snackBar)
 
     } else {
@@ -264,6 +272,7 @@ export class ArchivoMseedComponent implements OnInit {
 
     this.btnShow = false;
     this.btnCancel = true;
+    this.btnDisableForm = false
 
     this.fileInput.nativeElement.value = ''
     this.arch = ''
