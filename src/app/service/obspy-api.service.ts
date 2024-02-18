@@ -112,7 +112,9 @@ export class ObspyAPIService {
     zero: string, 
     t_min: string, 
     t_max: string,
-    unit: string): Observable<any> {
+    unit_from: string,
+    unit_to: string
+    ): Observable<any> {
     const formData = new FormData();
     const url = 'trace_baseline_data/'
 
@@ -128,7 +130,8 @@ export class ObspyAPIService {
       formData.append('zero', zero)
       formData.append('t_min', t_min)
       formData.append('t_max', t_max)
-      formData.append('unit', unit)
+      formData.append('unit_from', unit_from)
+      formData.append('unit_to', unit_to)
     } else {
       throw new Error('SREV-GET-03: Se espera un archivo datos para Lectura');
     }
@@ -235,7 +238,8 @@ export class ObspyAPIService {
     zero: string, 
     t_min: string, 
     t_max: string,
-    unit: string
+    unit_from: string,
+    unit_to: string
     ): Observable<any> {
     const formData = new FormData();
     const url = 'convert-unit/'
@@ -252,7 +256,8 @@ export class ObspyAPIService {
       formData.append('zero', zero)
       formData.append('t_min', t_min)
       formData.append('t_max', t_max)
-      formData.append('unit', unit)
+      formData.append('unit_from', unit_from)
+      formData.append('unit_to', unit_to)
     } else {
       throw new Error('SREV-GET-03: Se espera un archivo datos para Lectura');
     }

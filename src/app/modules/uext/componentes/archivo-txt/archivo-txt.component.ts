@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
+import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 
 @Component({
   selector: 'app-archivo-txt',
@@ -17,15 +18,21 @@ export class ArchivoTXTComponent implements OnInit {
 
   controlForm: FormGroup | any
   controlForm_2: FormGroup | any
-  
+
   columnDetector: any = []
   columHead: any = []
-  channels:any = []
+  channels: any = []
+
+  showTooltip = false
+  showText = true
+
+  loadingSpinnerText = false
 
   constructor(
     private matDialogRef: MatDialogRef<LectorDemoComponent>,
     private http: HttpClient,
     private snackBar: MatSnackBar,
+    private obsApi: ObspyAPIService,
     @Inject(MAT_DIALOG_DATA) public url: any
   ) {
     this.controlForm = new FormGroup({
@@ -50,6 +57,7 @@ export class ArchivoTXTComponent implements OnInit {
     snackBar.panelClass = ['snackBar-validator'];
 
     const headers = new HttpHeaders().set('No-Interceptor', 'true');
+    this.loadingSpinnerText = true
 
     this.http.get(this.url, { responseType: 'text', headers })
       .subscribe(
@@ -62,9 +70,14 @@ export class ArchivoTXTComponent implements OnInit {
           },
           error: err => {
             this.snackBar.open('⚠️ Error GET-CP', 'cerrar', snackBar)
+            this.loadingSpinnerText = false
+            this.showText = false
           },
           complete: () => {
             this.snackBar.open('✅ Archivo Cargado con Exito', 'cerrar', snackBar)
+            this.loadingSpinnerText = false
+            this.showText = false
+            this.buscarCoincidencia()
           }
         }
       )
@@ -149,29 +162,69 @@ export class ArchivoTXTComponent implements OnInit {
         this.controlForm.removeControl(key);
       }
     });
-    
+
     this.columnDetector.forEach((columna: any, index: string) => {
       this.controlForm.addControl('c_' + index, new FormControl('', Validators.required));
       // this.controlForm.addControl('cc_' + index, new FormControl('', Validators.required));
     });
-    
+
   }
 
   crearSteam() {
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 5 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
-    
+
     if (this.controlForm.valid) {
-      this.matDialogRef.close(this.controlForm.value)
+
+      this.obsApi.convertToStream(this.controlForm.value).subscribe({
+        next: value => {
+          let respData = {
+            "url" : value.url,
+            "unit" : this.controlForm.get('unidad').value
+          }
+          this.matDialogRef.close(respData)
+        },
+        error: err => {
+          this.snackBar.open('⚠️ Error CTS', 'cerrar', snackBar)
+        }
+      })
+
+
     } else {
-      this.snackBar.open('⚠️ Error CS-CP', 'cerrar', snackBar)
+      this.snackBar.open('⚠️ Llene los Campos Necesarios', 'cerrar', snackBar)
     }
 
   }
 
+  // ^\s*-?\d*\.?\d+\s+-?\d*\.?\d+\s+-?\d*\.?\d+\s*$
+
+  buscarCoincidencia(): void {
+    const regex = /^\s*-?\d*\.?\d+\s+-?\d*\.?\d+\s+-?\d*\.?\d+\s*$/;
+
+    const lineas = this.infoText.split(/\r?\n/);
+    let fila = 0;
+
+    for (let i = 0; i < lineas.length; i++) {
+      if (regex.test(lineas[i])) {
+        fila = i + 1;
+        break;
+      }
+    }
+    if (fila !== 0) {
+      this.controlForm.controls['fr_line'].setValue(fila);
+      this.splitCols()
+    } else {
+      return
+    }
+  }
+
   Close() {
-    this.matDialogRef.close('')
+    let respData = {
+      "url" : '',
+      "unit" : ''
+    }
+    this.matDialogRef.close(respData)
   }
 
 }

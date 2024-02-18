@@ -159,7 +159,13 @@ export class ArchivoMseedComponent implements OnInit {
 
           this.obsApi.addCalibrationMseed(this.url, this.urlXml, '').subscribe({
             next: value => {
-              this.matDialogRef.close(value.url)
+
+              let sendData = {
+                "url": value.url,
+                "unit": value.unit
+              }
+
+              this.matDialogRef.close(sendData)
             },
             error: err => {
               this.loadingSpinner = false
@@ -205,7 +211,12 @@ export class ArchivoMseedComponent implements OnInit {
 
       this.obsApi.addCalibrationMseed(this.url, '', data).subscribe({
         next: value => {
-          this.matDialogRef.close(value.url)
+          let sendData = {
+            "url": value.url,
+            "unit": this.controlForm2.get('unitst').value
+          }
+
+          this.matDialogRef.close(sendData)
         },
         error: err => {
           this.loadingSpinner = false
@@ -287,8 +298,11 @@ export class ArchivoMseedComponent implements OnInit {
 
   Close() {
     this.disableForm()
-
-    this.matDialogRef.close(this.url)
+    let sendData = {
+      "url": this.url,
+      "unit": ''
+    }
+    this.matDialogRef.close(sendData)
   }
 
 }

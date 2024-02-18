@@ -1,40 +1,29 @@
 <mat-dialog-content>
 
     <div fxLayout="column" style="padding-bottom: 10px;">
-        <h2>Archivo txt</h2>
+        <h2>Edicion del Archivo (.txt)</h2>
         <h4>Seleccione la Fila con los datos de la Estacion</h4>
         <mat-divider></mat-divider>
     </div>
 
     <div fxLayout="row" fxLayoutGap="10" fxLayout.lt-sm="column">
 
-        <pre contenteditable="false" (click)="onPreClick($event)" #myPre class="txtContainer">
-            {{infoText}} 
-        </pre>
+        <div fxLayout="column" fxLayoutAlign="center center">
+            
+            <div *ngIf="loadingSpinnerText" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+                <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
+                    [diameter]="50"></mat-progress-spinner>
+                <h3> <b>Cargando Texto ....</b> </h3>
+            </div>
+
+            <pre [hidden]="showText" contenteditable="false" (click)="onPreClick($event)" #myPre class="txtContainer">
+                {{infoText}} 
+            </pre>
+        </div>
 
         <form [formGroup]="controlForm" fxLayout="column" fxLayoutAlign="start center" (submit)="crearSteam()">
 
-            <p>Fila: {{ rowNum }}, Columna: {{ colNum }}, Fila-Max: {{maxRows}}</p>
-
-            <div fxLayout="row" fxLayoutGap="5">
-                <mat-form-field appearance="outline" class="mtff">
-                    <mat-label>Network</mat-label>
-                    <input matInput formControlName="network">
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="mtff">
-                    <mat-label>Estacion</mat-label>
-                    <input matInput formControlName="station">
-                </mat-form-field>
-            </div>
-
-            <div fxLayout="row" fxLayoutGap="5">
-                <mat-form-field appearance="outline" class="mtff">
-                    <mat-label>Location</mat-label>
-                    <input matInput formControlName="location">
-                </mat-form-field>
-            </div>
-
+            <h4> Localizacion de Datos </h4>
             <div fxLayout="row" fxLayoutGap="5">
                 <mat-form-field appearance="outline" class="mtff">
                     <mat-label>Primera Linea</mat-label>
@@ -47,6 +36,27 @@
                 </mat-form-field>
             </div>
 
+            <h4> Datos del Acelerografo </h4>
+            <div fxLayout="row" fxLayoutGap="5">
+                <mat-form-field appearance="outline" class="mtff">
+                    <mat-label>Network</mat-label>
+                    <input matInput formControlName="network">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="mtff">
+                    <mat-label>Station</mat-label>
+                    <input matInput formControlName="station">
+                </mat-form-field>
+            </div>
+
+            <div fxLayout="row">
+                <mat-form-field appearance="outline">
+                    <mat-label>Location</mat-label>
+                    <input matInput formControlName="location">
+                </mat-form-field>
+            </div>
+
+            <h4> Muestreo y Unidad </h4>
             <div fxLayout="row" fxLayoutGap="5">
                 <mat-form-field appearance="outline" class="mtff">
                     <mat-label>Muestreo (delta)</mat-label>
@@ -64,35 +74,44 @@
                 </mat-form-field>
             </div>
 
-            <mat-divider></mat-divider>
+            <span fxLayout="row" fxLayoutGap="3">
+                <h4> Asignacion de Columnas</h4>
+                <mat-icon style="color: rgb(155, 155, 155); font-size: 15px;">help_outline</mat-icon>
+            </span>
 
-            <div class="columGen">
-                <div *ngFor="let itm of columnDetector;let i = index">
+            <div>
 
-                    <mat-form-field appearance="outline" class="mtff">
-                        <mat-label>Columna {{i+1}}</mat-label>
-                        <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
-                        <mat-select formControlName='c_{{i}}'>
-                            <mat-option value="T">Tiempo</mat-option>
-                            <mat-option *ngFor="let opt of columnDetector; let ind = index" [value]="opt">
-                                <ng-container *ngIf="ind === 0">Z</ng-container>
-                                <ng-container *ngIf="ind === 1">N</ng-container>
-                                <ng-container *ngIf="ind === 2">E</ng-container>
-                                <ng-container *ngIf="ind > 2">C{{ind+3}}</ng-container>
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    
-                    <!-- <mat-form-field appearance="outline" class="mtfs">
-                        <mat-label>C {{i+1}}</mat-label>
-                        <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
-                        <input matInput formControlName='cc_{{i}}' type="number">
-                    </mat-form-field> -->
+                <div *ngIf="loadingSpinnerText" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+                    <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
+                        [diameter]="50"></mat-progress-spinner>
+                    <h3> <b>Cargando Columnas ....</b> </h3>
+                </div>
 
+                <div class="columGen">
+                    <div *ngFor="let itm of columnDetector;let i = index">
+                        <mat-form-field appearance="outline" class="mtff">
+                            <mat-label>Columna {{i+1}}</mat-label>
+                            <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
+                            <mat-select formControlName='c_{{i}}'>
+                                <mat-option value="T">Tiempo</mat-option>
+                                <mat-option *ngFor="let opt of columnDetector; let ind = index" [value]="opt">
+                                    <ng-container *ngIf="ind === 0">Z</ng-container>
+                                    <ng-container *ngIf="ind === 1">N</ng-container>
+                                    <ng-container *ngIf="ind === 2">E</ng-container>
+                                    <ng-container *ngIf="ind > 2">C{{ind+3}}</ng-container>
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <!-- <mat-form-field appearance="outline" class="mtfs">
+                            <mat-label>C {{i+1}}</mat-label>
+                            <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
+                            <input matInput formControlName='cc_{{i}}' type="number">
+                        </mat-form-field> -->
+
+                    </div>
                 </div>
             </div>
-
-
 
 
             <!-- <div *ngFor="let itm of columnDetector;let i = index" style="padding-bottom: 10px;">
@@ -107,7 +126,7 @@
                     </mat-select>
                 </mat-form-field>
             </div> -->
-
+            <br>
             <button type="submit" class="sendInfo" mat-raised-button color="primary">
                 <mat-icon>query_stats</mat-icon>
                 LEER DATOS
@@ -116,7 +135,6 @@
         </form>
 
     </div>
-
 
 </mat-dialog-content>
 

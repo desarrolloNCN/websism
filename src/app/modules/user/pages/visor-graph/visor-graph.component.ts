@@ -7,6 +7,7 @@ import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
 import { NavigationStart, Router } from '@angular/router';
 import { ECharts, EChartsCoreOption, EChartsOption } from 'echarts';
 import { Subscription } from 'rxjs';
+import { ArchivoMseedComponent } from 'src/app/modules/uext/componentes/archivo-mseed/archivo-mseed.component';
 import { ArchivoTXTComponent } from 'src/app/modules/uext/componentes/archivo-txt/archivo-txt.component';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 
@@ -81,11 +82,13 @@ export class VisorGraphComponent implements OnInit {
 
   btnShow = false
   btnCancel = true
+  btnDisable = false
 
   hideStaPanel = true
   showResponsivebar = false
 
   urlFile = ''
+  original_unit = ''
   idFile = ''
   stringdata = ''
 
@@ -190,6 +193,8 @@ export class VisorGraphComponent implements OnInit {
 
     this.clearData()
 
+    this.btnDisable = true
+
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 5 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
@@ -206,84 +211,270 @@ export class VisorGraphComponent implements OnInit {
 
       valorNoVacio = archivoValue || textoValue
 
-      this.obsApi.uploadFile(valorNoVacio).subscribe({
-        next: value => {
-          this.idFile = value.id
-          this.urlFile = value.file
-          this.stringdata = value.string_data
+      if (this.urlFile == '' && this.stringdata == '') {
 
-          localStorage.setItem('urlFileUpload', value.file)
-          localStorage.setItem('urlSearched', value.string_data)
+        this.obsApi.uploadFile(valorNoVacio).subscribe({
+          next: value => {
 
-        },
-        error: err => {
-          this.loadingSpinner = false
-          this.loadingSpinnerStaInfo = false
-          // console.error('REQUEST API ERROR: ' + err.message)
-          this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
-        },
-        complete: () => {
-          let valorNoVacio_recived: any = this.urlFile || this.stringdata
-          let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
-          let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+            this.idFile = value.id
+            this.urlFile = value.file
+            this.stringdata = value.string_data
 
-          if (this.urlFile == null) {
+            localStorage.setItem('urlFileUpload', value.file)
+            localStorage.setItem('urlSearched', value.string_data)
 
-            if (extension == 'txt') {
-
-              this.leerTxt(valorNoVacio_recived)
-
-            } else {
-              this.obsApi.getData(this.stringdata).subscribe({
-                next: value => {
-                  this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                },
-                error: err => {
-                  this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                  this.loadingSpinner = false
-                  this.loadingSpinnerStaInfo = false
-                },
-                complete: () => {
-                  this.loadingSpinner = false
-                  this.loadingSpinnerStaInfo = false
-                }
-              })
-            }
-
-          } else if (this.stringdata == null) {
-
-            if (extension == 'txt') {
-
-              this.leerTxt(valorNoVacio_recived)
-
-            } else {
-
-              this.obsApi.getData(this.urlFile).subscribe({
-                next: value => {
-
-                  this.toggleTabs = true
-                  this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                },
-                error: err => {
-                  this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                  this.loadingSpinner = false
-                  this.loadingSpinnerStaInfo = false
-                },
-                complete: () => {
-                  this.loadingSpinner = false
-                  this.loadingSpinnerStaInfo = false
-                }
-              })
-
-            }
-
-          } else {
-            this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+          },
+          error: err => {
             this.loadingSpinner = false
             this.loadingSpinnerStaInfo = false
+            this.btnDisable = false
+            // console.error('REQUEST API ERROR: ' + err.message)
+            this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
+          },
+          complete: () => {
+            let valorNoVacio_recived: any = this.urlFile || this.stringdata
+            let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+            let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+
+            if (this.urlFile == null) {
+
+              if (extension == 'txt') {
+
+                this.leerTxt(valorNoVacio_recived)
+
+              } else if (extension == 'mseed') {
+
+                this.leerMseed(valorNoVacio_recived)
+
+              } else {
+
+                this.obsApi.getData(this.stringdata).subscribe({
+                  next: value => {
+                    this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                  },
+                  error: err => {
+                    this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                    this.loadingSpinner = false
+                    this.loadingSpinnerStaInfo = false
+                    this.btnDisable = false
+                  },
+                  complete: () => {
+                    this.loadingSpinner = false
+                    this.loadingSpinnerStaInfo = false
+                    this.btnDisable = false
+                  }
+                })
+
+              }
+
+            } else if (this.stringdata == null) {
+
+              if (extension == 'txt') {
+
+                this.leerTxt(valorNoVacio_recived)
+
+              } else if (extension == 'mseed') {
+
+                this.leerMseed(valorNoVacio_recived)
+
+              } else {
+
+                this.obsApi.getData(this.urlFile).subscribe({
+                  next: value => {
+
+                    this.toggleTabs = true
+                    this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                  },
+                  error: err => {
+                    this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                    this.loadingSpinner = false
+                    this.loadingSpinnerStaInfo = false
+                    this.btnDisable = false
+                  },
+                  complete: () => {
+                    this.loadingSpinner = false
+                    this.loadingSpinnerStaInfo =
+                      this.btnDisable = false
+                  }
+                })
+
+              }
+
+            } else {
+              this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+              this.loadingSpinner = false
+              this.loadingSpinnerStaInfo = false
+              this.btnDisable = false
+            }
           }
+        })
+
+      } else {
+
+        let valorNoVacio_recived: any = this.urlFile || this.stringdata
+        let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+        let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+
+        if (this.urlFile == null || '') {
+
+          if (extension == 'txt') {
+
+            this.leerTxt(valorNoVacio_recived)
+
+          } else if (extension == 'mseed') {
+
+            this.leerMseed(valorNoVacio_recived)
+
+          } else {
+
+            this.obsApi.getData(this.stringdata).subscribe({
+              next: value => {
+                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+              },
+              error: err => {
+                this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
+              },
+              complete: () => {
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
+              }
+            })
+
+          }
+
+        } else if (this.stringdata == null || '') {
+
+          if (extension == 'txt') {
+
+            this.leerTxt(valorNoVacio_recived)
+
+          } else if (extension == 'mseed') {
+
+            this.leerMseed(valorNoVacio_recived)
+
+          } else {
+
+            this.obsApi.getData(this.urlFile).subscribe({
+              next: value => {
+
+                this.toggleTabs = true
+                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+              },
+              error: err => {
+                this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
+              },
+              complete: () => {
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
+              }
+            })
+
+          }
+
+        } else {
+          this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+          this.loadingSpinner = false
+          this.loadingSpinnerStaInfo = false
+          this.btnDisable = false
         }
-      })
+      }
+
+      // this.obsApi.uploadFile(valorNoVacio).subscribe({4
+      //   next: value => {
+      //     this.idFile = value.id
+      //     this.urlFile = value.file
+      //     this.stringdata = value.string_data
+
+      //     localStorage.setItem('urlFileUpload', value.file)
+      //     localStorage.setItem('urlSearched', value.string_data)
+
+      //   },
+      //   error: err => {
+      //     this.loadingSpinner = false
+      //     this.loadingSpinnerStaInfo = false
+      //     // console.error('REQUEST API ERROR: ' + err.message)
+      //     this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
+      //   },
+      //   complete: () => {
+      //     let valorNoVacio_recived: any = this.urlFile || this.stringdata
+      //     let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+      //     let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+
+      //     if (this.urlFile == null) {
+
+      //       if (extension == 'txt') {
+
+      //         this.leerTxt(valorNoVacio_recived)
+
+      //       } else if (extension == 'mseed') {
+
+      //         this.leerMseed(valorNoVacio_recived)
+
+      //       } else {
+
+      //         this.obsApi.getData(this.stringdata).subscribe({
+      //           next: value => {
+      //             this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+      //           },
+      //           error: err => {
+      //             this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+      //             this.loadingSpinner = false
+      //             this.loadingSpinnerStaInfo = false
+      //           },
+      //           complete: () => {
+      //             this.loadingSpinner = false
+      //             this.loadingSpinnerStaInfo = false
+      //           }
+      //         })
+
+      //       }
+
+      //     } else if (this.stringdata == null) {
+
+      //       if (extension == 'txt') {
+
+      //         this.leerTxt(valorNoVacio_recived)
+
+      //       } else if (extension == 'mseed') {
+
+      //         this.leerMseed(valorNoVacio_recived)
+
+      //       } else {
+
+      //         this.obsApi.getData(this.urlFile).subscribe({
+      //           next: value => {
+
+      //             this.toggleTabs = true
+      //             this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+      //           },
+      //           error: err => {
+      //             this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+      //             this.loadingSpinner = false
+      //             this.loadingSpinnerStaInfo = false
+      //           },
+      //           complete: () => {
+      //             this.loadingSpinner = false
+      //             this.loadingSpinnerStaInfo = false
+      //           }
+      //         })
+
+      //       }
+
+      //     } else {
+      //       this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+      //       this.loadingSpinner = false
+      //       this.loadingSpinnerStaInfo = false
+      //     }
+      //   }
+      // })
 
     } else {
       this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
@@ -308,41 +499,105 @@ export class VisorGraphComponent implements OnInit {
       .subscribe({
         next: value => {
 
-          this.toggleTabs = true
           console.log(value);
+          console.log(value.url);
+          
+          this.toggleTabs = true
 
-          if (value == '') {
+          if (value.url == '') {
+
             this.loadingSpinner = false
             this.loadingSpinnerStaInfo = false
+            this.btnDisable = false
             return
+
           } else {
-            this.obsApi.convertToStream(value).subscribe({
+
+            this.urlFile = value.url
+            this.original_unit = value.unit
+
+            localStorage.setItem('urlFileUpload', value.url)
+            localStorage.setItem('ogUnit', value.unit)
+
+            this.obsApi.getData(value.url).subscribe({
               next: value => {
                 this.toggleTabs = true
-
-                localStorage.setItem('urlFileUpload', value.url)
-
-                this.obsApi.getData(value.url).subscribe({
-                  next: value => {
-                    this.toggleTabs = true
-                    this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                  },
-                  error: err => {
-                    this.snackBar.open('⚠️ Error CTS-DT', 'cerrar', snackBar)
-                    this.loadingSpinner = false
-                    this.loadingSpinnerStaInfo = false
-                  },
-                  complete: () => {
-                    this.loadingSpinner = false
-                    this.loadingSpinnerStaInfo = false
-                  }
-                })
-
+                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
               },
               error: err => {
+                this.snackBar.open('⚠️ Error CTS-DT', 'cerrar', snackBar)
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
-                this.snackBar.open('⚠️ Error CTS', 'cerrar', snackBar)
+                this.btnDisable = false
+              },
+              complete: () => {
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
+              }
+            })
+
+            
+          }
+
+        },
+      }
+
+      )
+
+  }
+
+  async leerMseed(url: string) {
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 5 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    const matDialogConfig = new MatDialogConfig()
+    matDialogConfig.disableClose = true;
+    matDialogConfig.data = url
+
+    this.loadingSpinnerStaInfo = true
+
+    this.matDialog.open(ArchivoMseedComponent, matDialogConfig).afterClosed()
+      .subscribe({
+        next: valueUrl => {
+
+          // this.toggleTabs = true
+          console.log(valueUrl);
+          
+          if (valueUrl.url == '') {
+
+            this.urlFile = valueUrl.url
+
+            localStorage.setItem('urlFileUpload', valueUrl.url)
+
+            this.loadingSpinner = false
+            this.loadingSpinnerStaInfo = false
+            this.btnDisable = false
+            return
+
+          } else {
+
+            this.urlFile = valueUrl.url
+
+            localStorage.setItem('urlFileUpload', valueUrl.url)
+
+            this.obsApi.getData(valueUrl.url).subscribe({
+              next: value => {
+                this.toggleTabs = true
+                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+              },
+              error: err => {
+                this.snackBar.open('⚠️ Error CTS-DT', 'cerrar', snackBar)
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
+              },
+              complete: () => {
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
               }
             })
           }
@@ -371,10 +626,11 @@ export class VisorGraphComponent implements OnInit {
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
+    var og_unit: string = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
-    this.obsApi.getTraceData(dataToUse, e.station, e.channel).subscribe({
+    this.obsApi.getTraceData(dataToUse, e.station, e.channel, og_unit).subscribe({
       next: value => { this.createTab(e, value) },
       error: err => console.error('REQUEST API ERROR: ' + err.message),
       complete: () => {
@@ -436,8 +692,9 @@ export class VisorGraphComponent implements OnInit {
     let base = this.baseLineOptions[menuIndex]
     let unit = this.tabs[index].unit || ''
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
+    let dataString: string = localStorage.getItem('urlSearched')!
+    let dataFile: string = localStorage.getItem('urlFileUpload')!
+    let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -476,7 +733,7 @@ export class VisorGraphComponent implements OnInit {
     this.ToggleGraph = false
     this.isLoading = true
 
-    this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit).subscribe({
+    this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -707,8 +964,10 @@ export class VisorGraphComponent implements OnInit {
       'unk': ''
     };
 
-    let unit = this.unitConvertOptions[menuIndex];
-    unit = unitMap[unit] || '';
+    let unit_to = this.unitConvertOptions[menuIndex];
+    unit_to = unitMap[unit_to] || '';
+    
+    let unit_from = localStorage.getItem('ogUnit')!
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
@@ -750,7 +1009,7 @@ export class VisorGraphComponent implements OnInit {
     this.ToggleGraph = false
     this.isLoading = true
 
-    this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit).subscribe({
+    this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to).subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -763,7 +1022,7 @@ export class VisorGraphComponent implements OnInit {
           const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
 
           this.tabs[indx].graph = graph;
-          this.tabs[indx].unit = unit
+          this.tabs[indx].unit = unit_to
 
           this.cdRef.detectChanges();
         }
@@ -786,8 +1045,6 @@ export class VisorGraphComponent implements OnInit {
   }
 
   autoAjuste(index: number) {
-
-    console.log(this.tabs[index]);
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
@@ -1296,7 +1553,10 @@ export class VisorGraphComponent implements OnInit {
 
   // TODO: Eliminar si no se vuelve usar
   clearData() {
-    localStorage.clear
+    localStorage.clear()
+
+    this.urlFile = ''
+    this.stringdata = ''
 
     this.tabs = []
     this.actApli = []
@@ -1306,6 +1566,10 @@ export class VisorGraphComponent implements OnInit {
 
   // ? Toggle Panels o Bars
   deleteFile() {
+    localStorage.clear()
+
+    this.urlFile = ''
+    this.stringdata = ''
 
     this.tabs = []
     this.actApli = []
@@ -1313,7 +1577,6 @@ export class VisorGraphComponent implements OnInit {
 
     this.btnShow = false;
     this.btnCancel = true;
-
     this.fileInput.nativeElement.value = ''
 
     this.groupedData = {}
@@ -1445,5 +1708,4 @@ export class VisorGraphComponent implements OnInit {
       return { 'background-color': 'black' }
     }
   }
-
 }
