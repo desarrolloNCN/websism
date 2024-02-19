@@ -87,12 +87,17 @@
                 </button>
             </div>
 
-            <div *ngIf="hideStaPanel" [@enterAnimation] class="stInfo" fxLayout="column" fxLayout.lt-lg="row"
+            <div *ngIf="hideStaPanel2" [@enterAnimation] class="stInfo" fxLayout="column" fxLayout.lt-lg="row"
                 fxLayoutGap="10" fxFlex="23">
 
                 <div fxLayout="column" [fxHide.lt-lg]="showResponsivebar" fxLayoutGap="5" fxFlex.lt-lg="33">
                     <div style="padding-left: 10px;">
-                        <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>ESTACIONES ENCONTRADAS</b></h2>
+                        <div fxLayout="row" fxLayoutAlign="space-between">
+                            <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>ESTACIONES ENCONTRADAS</b></h2>
+                            <button mat-icon-button (click)="toggleButton()">
+                                <mat-icon>{{ isButtonActive ? 'expand_more' :  'expand_less' }}</mat-icon>
+                              </button>
+                        </div>
                         <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Busque y eliga la estacion que quiera consultar</h4>
                     </div>
                     <div class="listSt" fxLayout="column" fxLayoutGap="5">
@@ -391,14 +396,14 @@
                                             <mat-divider class="separator" vertical="true"></mat-divider>
                                             <button mat-icon-button type="button" (click)="showRegisterDialog('Amplitud de Fourier')">
                                                 <mat-icon class="colorIconBar"
-                                                    title="Ocultar Paneles">area_chart</mat-icon>
+                                                    title="Amplitud de Fourier">area_chart</mat-icon>
                                             </button>
                                         </div>
 
                                         <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                                             <button mat-icon-button type="button" (click)="showRegisterDialog('Aceleracion Espectral')">
                                                 <mat-icon class="colorIconBar"
-                                                title="Ocultar Paneles">settings_input_component</mat-icon>
+                                                title="Espectro de Fourier">settings_input_component</mat-icon>
                                             </button>
                                             <mat-divider class="separator" vertical="true"></mat-divider>
                                         </div>

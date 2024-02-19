@@ -80,8 +80,10 @@ export class LectorDemoComponent implements OnInit {
   btnShow = false
   btnCancel = true
   btnDisable = false
+  isButtonActive = false
 
   hideStaPanel = true
+  hideStaPanel2 = true
   showResponsivebar = false
 
   urlFile = ''
@@ -93,6 +95,8 @@ export class LectorDemoComponent implements OnInit {
 
   toogleTrim = false
   toogleFilter = false
+
+  hideToolTip = false
 
   baseLineOptions = ['constant', 'linear', 'demean', 'simple']
   unitConvertOptions = ['cm/s2 [GaL]', 'm/s2', 'G', 'unk']
@@ -1183,7 +1187,8 @@ export class LectorDemoComponent implements OnInit {
         trigger: 'axis',
         axisPointer: {
           type: 'cross'
-        }
+        },
+        triggerOn: 'click'
       },
       toolbox: {
         show: true,
@@ -1219,6 +1224,7 @@ export class LectorDemoComponent implements OnInit {
               document.body.removeChild(downloadLink);
             }
           },
+
         }
       },
       grid: {
@@ -1305,6 +1311,10 @@ export class LectorDemoComponent implements OnInit {
       },
       tooltip: {
         trigger: 'axis',
+        axisPointer: {
+          type: 'cross'
+        },
+        triggerOn: 'click'
       },
       toolbox: {
         show: true,
@@ -1428,7 +1438,8 @@ export class LectorDemoComponent implements OnInit {
         trigger: 'axis',
         axisPointer: {
           type: 'cross'
-        }
+        },
+        triggerOn: 'click'
       },
       toolbox: {
         show: true,
@@ -1614,6 +1625,7 @@ export class LectorDemoComponent implements OnInit {
 
   togglePanel() {
     this.hideStaPanel = !this.hideStaPanel
+    this.hideStaPanel2 = !this.hideStaPanel2
   }
 
   filterData() {
@@ -1680,8 +1692,8 @@ export class LectorDemoComponent implements OnInit {
     return formatoFechaHora
   }
 
-  showRegisterDialog(opcion: String){
-    
+  showRegisterDialog(opcion: String) {
+
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
     matDialogConfig.data = opcion
@@ -1744,6 +1756,11 @@ export class LectorDemoComponent implements OnInit {
     } else {
       return { 'background-color': 'black' }
     }
+  }
+
+  toggleButton() {
+    this.isButtonActive = !this.isButtonActive;
+    this.hideStaPanel = !this.hideStaPanel
   }
 
 } 
