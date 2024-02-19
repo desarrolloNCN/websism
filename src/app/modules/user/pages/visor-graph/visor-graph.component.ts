@@ -1339,7 +1339,7 @@ export class VisorGraphComponent implements OnInit {
 
     this.isLoading = true
 
-    this.obsApi.autoAdjust(dataToUse, sta, cha).subscribe({
+    this.obsApi.autoAdjust(dataToUse, sta, cha,'').subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -1530,7 +1530,7 @@ export class VisorGraphComponent implements OnInit {
             fill: '#333',
             width: 220,
             overflow: 'break',
-            text: `PGA: ${parseFloat(peakA).toFixed(5)} [${value[0].trace_a_unit}]`,
+            text: `PGA: ${parseFloat(peakA).toFixed(7)} [${value[0].trace_a_unit}]`,
             font: '14px Microsoft YaHei'
           }
         }
@@ -1651,7 +1651,7 @@ export class VisorGraphComponent implements OnInit {
             fill: '#333',
             width: 220,
             overflow: 'break',
-            text: `PGV: ${parseFloat(peakV).toFixed(5)} [${value[0].trace_v_unit}] `,
+            text: `PGV: ${parseFloat(peakV).toFixed(7)} [${value[0].trace_v_unit}] `,
             font: '14px Microsoft YaHei'
           }
         }
@@ -1775,7 +1775,7 @@ export class VisorGraphComponent implements OnInit {
             fill: '#333',
             width: 220,
             overflow: 'break',
-            text: `PGD: ${parseFloat(peakD).toFixed(5)} [${value[0].trace_d_unit}]`,
+            text: `PGD: ${parseFloat(peakD).toFixed(7)} [${value[0].trace_d_unit}]`,
             font: '14px Microsoft YaHei'
           }
         }

@@ -1079,6 +1079,7 @@ export class LectorDemoComponent implements OnInit {
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
+    let unit_from = localStorage.getItem('ogUnit')!
 
     this.tabs[index].base = 'linear'
     this.tabs[index].unit = 'gal'
@@ -1096,7 +1097,7 @@ export class LectorDemoComponent implements OnInit {
 
     this.isLoading = true
 
-    this.obsApi.autoAdjust(dataToUse, sta, cha).subscribe({
+    this.obsApi.autoAdjust(dataToUse, sta, cha, unit_from).subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -1287,7 +1288,7 @@ export class LectorDemoComponent implements OnInit {
             fill: '#333',
             width: 220,
             overflow: 'break',
-            text: `PGA: ${parseFloat(peakA).toFixed(5)} [${value[0].trace_a_unit}]`,
+            text: `PGA: ${parseFloat(peakA).toFixed(7)} [${value[0].trace_a_unit}]`,
             font: '14px Microsoft YaHei'
           }
         }
@@ -1408,7 +1409,7 @@ export class LectorDemoComponent implements OnInit {
             fill: '#333',
             width: 220,
             overflow: 'break',
-            text: `PGV: ${parseFloat(peakV).toFixed(5)} [${value[0].trace_v_unit}] `,
+            text: `PGV: ${parseFloat(peakV).toFixed(7)} [${value[0].trace_v_unit}] `,
             font: '14px Microsoft YaHei'
           }
         }
@@ -1532,7 +1533,7 @@ export class LectorDemoComponent implements OnInit {
             fill: '#333',
             width: 220,
             overflow: 'break',
-            text: `PGD: ${parseFloat(peakD).toFixed(5)} [${value[0].trace_d_unit}]`,
+            text: `PGD: ${parseFloat(peakD).toFixed(7)} [${value[0].trace_d_unit}]`,
             font: '14px Microsoft YaHei'
           }
         }
@@ -1692,12 +1693,13 @@ export class LectorDemoComponent implements OnInit {
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
+    let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
     this.isLoading = true
 
-    this.obsApi.getTraceData(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel)
+    this.obsApi.getTraceData(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel, unit_from)
       .subscribe({
         next: value => {
 

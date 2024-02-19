@@ -284,7 +284,8 @@ export class ObspyAPIService {
   autoAdjust( 
     data: string, 
     station_selected: string, 
-    channel_selected: string, 
+    channel_selected: string,
+    unit: string,
     base_line?: string, 
     filter?: string, 
     freqmin?: string, 
@@ -292,8 +293,8 @@ export class ObspyAPIService {
     corner?: string, 
     zero?: string, 
     t_min?: string, 
-    t_max?: string,
-    unit?: string): Observable<any> {
+    t_max?: string
+    ): Observable<any> {
     const formData = new FormData();
     const url = 'auto-adjust/'
 
@@ -304,8 +305,7 @@ export class ObspyAPIService {
     corner    = '', 
     zero      = '', 
     t_min     = '', 
-    t_max     = '',
-    unit      = ''
+    t_max     = ''
 
     if (typeof data === 'string') {
       formData.append('data', data);
@@ -319,7 +319,7 @@ export class ObspyAPIService {
       formData.append('zero', zero)
       formData.append('t_min', t_min)
       formData.append('t_max', t_max)
-      formData.append('unit', unit)
+      formData.append('unit_from', unit)
     } else {
       throw new Error('SREV-GET-04: Se espera un archivo datos para Lectura');
     }
