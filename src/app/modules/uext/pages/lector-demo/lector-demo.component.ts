@@ -8,6 +8,7 @@ import { EChartsOption } from 'echarts';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 import { ArchivoTXTComponent } from '../../componentes/archivo-txt/archivo-txt.component';
 import { ArchivoMseedComponent } from '../../componentes/archivo-mseed/archivo-mseed.component';
+import { RegisterDialogComponent } from '../../componentes/register-dialog/register-dialog.component';
 
 @Component({
   selector: 'app-lector-demo',
@@ -212,17 +213,13 @@ export class LectorDemoComponent implements OnInit {
 
                 this.leerMseed(valorNoVacio_recived)
 
-              } else if (extension == 'evt') {
-
-                localStorage.setItem('ogUnit', 'gal')
-
               } else {
 
                 this.obsApi.getData(this.stringdata).subscribe({
                   next: value => {
                     if (value.data[0].und_calib == 'M/S**2') {
                       localStorage.setItem('ogUnit', 'm')
-                    } else if (value.data[0].und_calib == 'CM/S**2') {
+                    } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt') {
                       localStorage.setItem('ogUnit', 'gal')
                     } else if (value.data[0].und_calib == 'G') {
                       localStorage.setItem('ogUnit', 'g')
@@ -256,17 +253,13 @@ export class LectorDemoComponent implements OnInit {
 
                 this.leerMseed(valorNoVacio_recived)
 
-              } else if (extension == 'evt') {
-
-                localStorage.setItem('ogUnit', 'gal')
-
               } else {
 
                 this.obsApi.getData(this.urlFile).subscribe({
                   next: value => {
                     if (value.data[0].und_calib == 'M/S**2') {
                       localStorage.setItem('ogUnit', 'm')
-                    } else if (value.data[0].und_calib == 'CM/S**2') {
+                    } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt') {
                       localStorage.setItem('ogUnit', 'gal')
                     } else if (value.data[0].und_calib == 'G') {
                       localStorage.setItem('ogUnit', 'g')
@@ -316,11 +309,6 @@ export class LectorDemoComponent implements OnInit {
 
             this.leerMseed(valorNoVacio_recived)
 
-          }
-          else if (extension == 'evt') {
-
-            localStorage.setItem('ogUnit', 'gal')
-
           } else {
 
             this.obsApi.getData(this.stringdata).subscribe({
@@ -328,7 +316,7 @@ export class LectorDemoComponent implements OnInit {
 
                 if (value.data[0].und_calib == 'M/S**2') {
                   localStorage.setItem('ogUnit', 'm')
-                } else if (value.data[0].und_calib == 'CM/S**2') {
+                } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt') {
                   localStorage.setItem('ogUnit', 'gal')
                 } else if (value.data[0].und_calib == 'G') {
                   localStorage.setItem('ogUnit', 'g')
@@ -363,10 +351,6 @@ export class LectorDemoComponent implements OnInit {
 
             this.leerMseed(valorNoVacio_recived)
 
-          } else if (extension == 'evt') {
-
-            localStorage.setItem('ogUnit', 'gal')
-
           } else {
 
             this.obsApi.getData(this.urlFile).subscribe({
@@ -374,7 +358,7 @@ export class LectorDemoComponent implements OnInit {
 
                 if (value.data[0].und_calib == 'M/S**2') {
                   localStorage.setItem('ogUnit', 'm')
-                } else if (value.data[0].und_calib == 'CM/S**2') {
+                } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt') {
                   localStorage.setItem('ogUnit', 'gal')
                 } else if (value.data[0].und_calib == 'G') {
                   localStorage.setItem('ogUnit', 'g')
@@ -559,6 +543,17 @@ export class LectorDemoComponent implements OnInit {
           }
 
         },
+        error: err => {
+          this.snackBar.open('⚠️ Error ', 'cerrar', snackBar)
+          this.loadingSpinner = false
+          this.loadingSpinnerStaInfo = false
+          this.btnDisable = false
+        },
+        complete: () => {
+          this.loadingSpinner = false
+          this.loadingSpinnerStaInfo = false
+          this.btnDisable = false
+        }
       }
 
       )
@@ -590,7 +585,7 @@ export class LectorDemoComponent implements OnInit {
 
             localStorage.setItem('urlFileUpload', valueUrl.url)
             localStorage.setItem('ogUnit', valueUrl.unit)
-            
+
             this.loadingSpinner = false
             this.loadingSpinnerStaInfo = false
             this.btnDisable = false
@@ -624,6 +619,17 @@ export class LectorDemoComponent implements OnInit {
           }
 
         },
+        error: err => {
+          this.snackBar.open('⚠️ Error ', 'cerrar', snackBar)
+          this.loadingSpinner = false
+          this.loadingSpinnerStaInfo = false
+          this.btnDisable = false
+        },
+        complete: () => {
+          this.loadingSpinner = false
+          this.loadingSpinnerStaInfo = false
+          this.btnDisable = false
+        }
       }
 
       )
@@ -1656,7 +1662,6 @@ export class LectorDemoComponent implements OnInit {
     }
   }
 
-  // ? Utilidades
 
   dateConverter(date: string) {
 
@@ -1674,6 +1679,15 @@ export class LectorDemoComponent implements OnInit {
     return formatoFechaHora
   }
 
+  showRegisterDialog(opcion: String){
+    
+    const matDialogConfig = new MatDialogConfig()
+    matDialogConfig.disableClose = true;
+    matDialogConfig.data = opcion
+
+    this.matDialog.open(RegisterDialogComponent, matDialogConfig)
+  }
+
   resetGraph(tabInfo: any) {
 
     var dataString: string = localStorage.getItem('urlSearched')!
@@ -1683,28 +1697,28 @@ export class LectorDemoComponent implements OnInit {
 
     this.isLoading = true
 
-    this.obsApi.getTraceData(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel).subscribe({
-      next: value => {
+    this.obsApi.getTraceData(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel)
+      .subscribe({
+        next: value => {
 
-        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`);
+          const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`)
+          if (indx !== -1) {
 
-        if (indx !== -1) {
+            const graph = this.graphGenerator(this.stationInfo, value, '(RAWDATA)')
 
-          const graph = this.graphGenerator(this.stationInfo, value, '(RAWDATA)')
-
-          this.tabs[indx].graph = graph
-          this.tabs[indx].base = ''
-          this.tabs[indx].unit = ''
-          this.cdRef.detectChanges()
+            this.tabs[indx].graph = graph
+            this.tabs[indx].base = ''
+            this.tabs[indx].unit = ''
+            this.cdRef.detectChanges()
+          }
+        },
+        error: err => { this.isLoading = false },
+        complete: () => {
+          this.loadingSpinnerGraph = false
+          this.ToggleGraph = true
+          this.isLoading = false
         }
-      },
-      error: err => { this.isLoading = false },
-      complete: () => {
-        this.loadingSpinnerGraph = false
-        this.ToggleGraph = true
-        this.isLoading = false
-      }
-    })
+      })
 
   }
 

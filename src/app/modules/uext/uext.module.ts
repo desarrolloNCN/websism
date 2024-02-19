@@ -14,6 +14,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { UserLoginComponent } from './pages/user-login/user-login.component';
 import { ArchivoTXTComponent } from './componentes/archivo-txt/archivo-txt.component';
 import { ArchivoMseedComponent } from './componentes/archivo-mseed/archivo-mseed.component';
+import { RegisterDialogComponent } from './componentes/register-dialog/register-dialog.component';
 
 
 @NgModule({
@@ -24,7 +25,8 @@ import { ArchivoMseedComponent } from './componentes/archivo-mseed/archivo-mseed
     FooterBarComponent,
     UserLoginComponent,
     ArchivoTXTComponent,
-    ArchivoMseedComponent
+    ArchivoMseedComponent,
+    RegisterDialogComponent
   ],
   imports: [
     CommonModule,

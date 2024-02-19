@@ -55,7 +55,7 @@ import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 export class VisorGraphComponent implements OnInit {
 
   private navigationSubscription: Subscription;
-  
+
   accel: EChartsOption | any;
   vel: EChartsOption | any;
   dsp: EChartsOption | any;
@@ -104,6 +104,9 @@ export class VisorGraphComponent implements OnInit {
   matTabs: MatTab[] = []
   tabIndex = 0
 
+  four: any = []
+  four_es : any = []
+  
   actApli: any = []
 
   formGroups: FormGroup[] = [];
@@ -158,7 +161,7 @@ export class VisorGraphComponent implements OnInit {
   showWarning() {
     const confirmed = window.confirm('-¿Estás seguro de que deseas abandonar esta página?');
     if (!confirmed) {
-      this.router.navigate(['/current-route']); 
+      this.router.navigate(['/current-route']);
     }
   }
 
@@ -501,7 +504,7 @@ export class VisorGraphComponent implements OnInit {
 
           console.log(value);
           console.log(value.url);
-          
+
           this.toggleTabs = true
 
           if (value.url == '') {
@@ -537,7 +540,7 @@ export class VisorGraphComponent implements OnInit {
               }
             })
 
-            
+
           }
 
         },
@@ -565,7 +568,7 @@ export class VisorGraphComponent implements OnInit {
 
           // this.toggleTabs = true
           console.log(valueUrl);
-          
+
           if (valueUrl.url == '') {
 
             this.urlFile = valueUrl.url
@@ -944,6 +947,273 @@ export class VisorGraphComponent implements OnInit {
     })
   }
 
+  fourier(index: number) {
+
+    this.four = {}
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 3 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    var dataString: string = localStorage.getItem('urlSearched')!
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
+
+    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+
+    let sta = this.tabs[index].dataEst.station
+    let cha = this.tabs[index].dataEst.channel
+
+    console.log(dataToUse);
+    console.log(sta + ' - ' + cha);
+    
+
+    this.obsApi.createFourier(dataToUse, sta, cha).subscribe({
+      next: value => {
+        this.ToggleGraph = false
+        this.loadingSpinnerData = true
+
+        console.log(value);
+        console.log(value.periodo);
+        console.log(value.amplitud);
+        
+        this.four = {
+          animationDuration: 5000,
+          title: {
+            text: 'Amplitud de Fourier',
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'cross'
+            }
+          },
+          toolbox: {
+            show: true,
+            itemSize: 25,
+            feature: {
+              dataZoom: {
+                yAxisIndex: 'none'
+              },
+              dataView: { readOnly: true },
+              restore: {},
+              saveAsImage: {},
+            },
+          },
+          grid: {
+            top: 100
+          },
+          xAxis: {
+            type: 'category',
+            data: value.periodo,
+            name: "Periodo",
+            silent: false,
+            minorSplitLine: {
+              show: true
+            },
+            splitLine: {
+              show: false,
+            },
+            axisLabel: {
+              hideOverlap: true,
+            },
+          },
+          yAxis: {
+            min: 0.01,
+            type: 'log',
+            name: "Amplitud",
+            axisLabel: {
+              hideOverlap: true,
+              formatter: function (value: number) {
+                return value.toExponential();
+              }
+            },
+          },
+          dataZoom: [
+            {
+              type: 'inside',
+              start: 0,
+              end: 100,
+              zoomLock: true
+            },
+            {
+              start: 0,
+              end: 100,
+              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
+              handleSize: '100%',
+              handleStyle: {
+                color: '#ddd'
+              }
+            }
+          ],
+          series: [
+            {
+              type: 'line',
+              showSymbol: false,
+              data: value.amplitud,
+              animationDelay: (idx: number) => idx * 10,
+            },
+          ],
+          graphic: [
+            {
+              type: 'image',
+              id: 'logo3',
+              left: 'center',
+              top: 'center',
+              z: -10,
+              bounding: 'all',
+              style: {
+                image: 'assets/ncnLogoColor.png',
+                width: 300,
+                height: 300,
+                opacity: 0.2
+              }
+            },
+          ],
+          animationEasing: 'elasticOut',
+          animationDelayUpdate: (idx: number) => idx * 5,
+        };
+      },
+      error: err => {
+        console.log('error fourier');
+        
+      },
+      complete: () => {
+        console.log('complete fourier');
+        
+      }
+    })
+
+  }
+
+  espectroFourier(index: number) {
+
+    this.four_es = {}
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 3 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    var dataString: string = localStorage.getItem('urlSearched')!
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
+
+    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+
+    let sta = this.tabs[index].dataEst.station
+    let cha = this.tabs[index].dataEst.channel
+
+    console.log(dataToUse);
+    console.log(sta + ' - ' + cha);
+    
+
+    this.obsApi.createFourierEspc(dataToUse, sta, cha).subscribe({
+      next: value => {
+        this.ToggleGraph = false
+        this.loadingSpinnerData = true
+
+        console.log(value);
+        console.log(value.periodo);
+        console.log(value.amplitud);
+        
+        this.four_es = {
+          animationDuration: 5000,
+          title: {
+            text: 'Aceleracion Espectral 5% Amortiguamiento',
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'cross'
+            }
+          },
+          toolbox: {
+            show: true,
+            itemSize: 25,
+            feature: {
+              dataZoom: {
+                yAxisIndex: 'none'
+              },
+              dataView: { readOnly: true },
+              restore: {},
+              saveAsImage: {},
+            },
+          },
+          grid: {
+            top: 100
+          },
+          xAxis: {
+            data: value.periodo,
+            name: "Periodo",
+            silent: false,
+            minorSplitLine: {
+              show: true
+            },
+            splitLine: {
+              show: false,
+            },
+            axisLabel: {
+              hideOverlap: true,
+            },
+          },
+          yAxis: {
+            name: "Amplitud",
+          },
+          dataZoom: [
+            {
+              type: 'inside',
+              start: 0,
+              end: 100,
+              zoomLock: true
+            },
+            {
+              start: 0,
+              end: 100,
+              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
+              handleSize: '100%',
+              handleStyle: {
+                color: '#ddd'
+              }
+            }
+          ],
+          series: [
+            {
+              type: 'line',
+              showSymbol: false,
+              data: value.amplitud,
+              animationDelay: (idx: number) => idx * 10,
+            },
+          ],
+          graphic: [
+            {
+              type: 'image',
+              id: 'logo3',
+              left: 'center',
+              top: 'center',
+              z: -10,
+              bounding: 'all',
+              style: {
+                image: 'assets/ncnLogoColor.png',
+                width: 300,
+                height: 300,
+                opacity: 0.2
+              }
+            },
+          ],
+          animationEasing: 'elasticOut',
+          animationDelayUpdate: (idx: number) => idx * 5,
+        };
+      },
+      error: err => {
+        console.log('error fourier');
+        
+      },
+      complete: () => {
+        console.log('complete fourier');
+        
+      }
+    })
+
+  }
+
   unitConverter(menuIndex: number, index: number) {
 
     const snackBar = new MatSnackBarConfig();
@@ -966,7 +1236,7 @@ export class VisorGraphComponent implements OnInit {
 
     let unit_to = this.unitConvertOptions[menuIndex];
     unit_to = unitMap[unit_to] || '';
-    
+
     let unit_from = localStorage.getItem('ogUnit')!
 
     var dataString: string = localStorage.getItem('urlSearched')!

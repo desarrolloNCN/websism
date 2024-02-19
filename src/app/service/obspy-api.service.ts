@@ -348,5 +348,48 @@ export class ObspyAPIService {
     );
   }
 
+  createFourier(
+    data: string,
+    station: string,
+    channel: string
+  ){
+
+    const url = 'fourier/'
+
+    let senData = {
+      "data" : data,
+      "station_selected": station,
+      "channel_selected": channel
+    }
+
+    return this.http.post<any>(url, senData).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    );
+
+  }
+
+  createFourierEspc(
+    data: string,
+    station: string,
+    channel: string
+  ){
+
+    const url = 'espectro-fourier/'
+
+    let senData = {
+      "data" : data,
+      "station_selected": station,
+      "channel_selected": channel
+    }
+
+    return this.http.post<any>(url, senData).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    );
+
+  }
 }
 

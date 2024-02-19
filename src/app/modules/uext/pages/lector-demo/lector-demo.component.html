@@ -323,7 +323,7 @@
                                         <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                                             <button mat-icon-button type="button" (click)="togglePanel()">
                                                 <mat-icon class="colorIconBar"
-                                                    title="Ocultar Paneles">open_in_full</mat-icon>
+                                                    title="Ocultar Paneles">fit_screen</mat-icon>
                                             </button>
                                             <mat-divider class="separator" vertical="true"></mat-divider>
                                         </div>
@@ -386,6 +386,22 @@
                                             <mat-icon class="colorIconBar"
                                                 title="Trim (Recorte de Traza)">content_cut</mat-icon>
                                         </button>
+
+                                        <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
+                                            <mat-divider class="separator" vertical="true"></mat-divider>
+                                            <button mat-icon-button type="button" (click)="showRegisterDialog('Amplitud de Fourier')">
+                                                <mat-icon class="colorIconBar"
+                                                    title="Ocultar Paneles">area_chart</mat-icon>
+                                            </button>
+                                        </div>
+
+                                        <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
+                                            <button mat-icon-button type="button" (click)="showRegisterDialog('Aceleracion Espectral')">
+                                                <mat-icon class="colorIconBar"
+                                                title="Ocultar Paneles">settings_input_component</mat-icon>
+                                            </button>
+                                            <mat-divider class="separator" vertical="true"></mat-divider>
+                                        </div>
 
                                         <div class="spacer"></div>
 
