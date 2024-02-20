@@ -297,7 +297,9 @@
             </div>
 
             <div [@enterAnimation3] class="stGraph" fxLayout="column" fxLayoutGap="10" fxFlex>
-
+                <div *ngIf="loadingSpinnerGraph" style="padding: 2px;">
+                    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                </div>
                 <div class="graphContainer" fxLayout="column" fxLayoutAlign="center center">
 
                     <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
@@ -306,7 +308,7 @@
                         <h3> <b>Cargando Datos ....</b> </h3>
                     </div>
 
-                    <mat-tab-group (selectedTabChange)="onTabChange($event)" #tabGroup style="width: 100%;"
+                    <mat-tab-group  [selectedIndex]="lastIndexTab" (selectedTabChange)="onTabChange($event)" #tabGroup style="width: 100%;"
                         [ngStyle]="showtabs(toggleTabs)">
 
                         <mat-tab *ngFor="let tab of tabs; let i = index" [label]="getTabLabel(tab)">

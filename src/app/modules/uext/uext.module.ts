@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 
 import { UextRoutingModule } from './uext-routing.module';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -36,6 +36,9 @@ import { RegisterDialogComponent } from './componentes/register-dialog/register-
     ReactiveFormsModule,
     FormsModule,
     NgxEchartsModule.forChild(),
-  ]
+  ],
+  providers: [
+    DecimalPipe,
+  ],
 })
 export class UextModule { }

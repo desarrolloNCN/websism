@@ -9,6 +9,7 @@ import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 import { ArchivoTXTComponent } from '../../componentes/archivo-txt/archivo-txt.component';
 import { ArchivoMseedComponent } from '../../componentes/archivo-mseed/archivo-mseed.component';
 import { RegisterDialogComponent } from '../../componentes/register-dialog/register-dialog.component';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-lector-demo',
@@ -104,6 +105,7 @@ export class LectorDemoComponent implements OnInit {
   tabs: any = []
   matTabs: MatTab[] = []
   tabIndex = 0
+  lastIndexTab = 0
 
   actApli: any = []
 
@@ -113,7 +115,8 @@ export class LectorDemoComponent implements OnInit {
     private obsApi: ObspyAPIService,
     private snackBar: MatSnackBar,
     private cdRef: ChangeDetectorRef,
-    private matDialog: MatDialog
+    private matDialog: MatDialog,
+    private decimalPipe : DecimalPipe,
   ) {
 
     this.FilterForm = new FormGroup({
@@ -233,6 +236,8 @@ export class LectorDemoComponent implements OnInit {
                     }
 
                     this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+
+                    this.leer(value.data[0])
                   },
                   error: err => {
                     this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
@@ -241,6 +246,7 @@ export class LectorDemoComponent implements OnInit {
                     this.btnDisable = false
                   },
                   complete: () => {
+                      
                     this.loadingSpinner = false
                     this.loadingSpinnerStaInfo = false
                     this.btnDisable = false
@@ -274,6 +280,7 @@ export class LectorDemoComponent implements OnInit {
                     }
                     this.toggleTabs = true
                     this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                    this.leer(value.data[0])
                   },
                   error: err => {
                     this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
@@ -374,6 +381,7 @@ export class LectorDemoComponent implements OnInit {
 
                 this.toggleTabs = true
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                this.leer(value.data[0])
               },
               error: err => {
                 this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
@@ -531,6 +539,7 @@ export class LectorDemoComponent implements OnInit {
               next: value => {
                 this.toggleTabs = true
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                this.leer(value.data[0])
               },
               error: err => {
                 this.snackBar.open('⚠️ Error CTS-DT', 'cerrar', snackBar)
@@ -598,6 +607,7 @@ export class LectorDemoComponent implements OnInit {
               next: value => {
                 this.toggleTabs = true
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                this.leer(value.data[0])
               },
               error: err => {
                 this.snackBar.open('⚠️ Error CTS-DT', 'cerrar', snackBar)
@@ -691,6 +701,8 @@ export class LectorDemoComponent implements OnInit {
       TrimForm,
       graph,
     });
+
+    this.lastIndexTab = this.tabs.length - 1
 
     this.ToggleGraph = true;
 
@@ -1133,7 +1145,6 @@ export class LectorDemoComponent implements OnInit {
     const st = new Date(e.starttime).getTime()
     const et = new Date(e.endtime).getTime()
 
-
     const diff = et - st;
     const h = Math.floor(diff / (1000 * 60 * 60));
     const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -1143,30 +1154,37 @@ export class LectorDemoComponent implements OnInit {
     const graphArr: any = []
 
     let und = e.und_calib
-
     und ? e.und_calib : 'unk'
 
-    const dataZoomConfig = [
-      {
-        type: 'inside',
-        start: 0,
-        end: 100,
-        zoomLock: true
-      },
-      {
-        start: 0,
-        end: 100,
-        handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
-        handleSize: '100%',
-        handleStyle: {
-          color: '#ddd'
-        }
-      }
-    ]
+    let peakA = value[0].peak_a || 0.00;
+    let peakV = value[0].peak_v || 0.00;
+    let peakD = value[0].peak_d || 0.00;
 
-    let peakA = value[0].peak_a || 0.00
-    let peakV = value[0].peak_v || 0.00
-    let peakD = value[0].peak_d || 0.00
+    let peakAFormated = this.decimalPipe.transform(peakA, '1.3-3');
+    let peakVFormated = this.decimalPipe.transform(peakV, '1.3-3');
+    let peakDFormated = this.decimalPipe.transform(peakD, '1.3-3');
+
+    let peakaff;
+    let peakvff;
+    let peakdff;
+
+    if (peakAFormated!.endsWith('.000')) {
+      peakaff = this.decimalPipe.transform(peakA, '1.6-6');
+    } else {
+      peakaff = peakAFormated;
+    }
+
+    if (peakVFormated!.endsWith('.000')) {
+      peakvff = this.decimalPipe.transform(peakV, '1.6-6');
+    } else {
+      peakvff = peakVFormated;
+    }
+
+    if (peakDFormated!.endsWith('.000')) {
+      peakdff = this.decimalPipe.transform(peakD, '1.6-6');
+    } else {
+      peakdff = peakDFormated;
+    }
 
     let fechaIn = this.dateConverter(e.starttime)
     let fechaFn = this.dateConverter(e.endtime)
@@ -1288,7 +1306,7 @@ export class LectorDemoComponent implements OnInit {
             fill: '#333',
             width: 220,
             overflow: 'break',
-            text: `PGA: ${parseFloat(peakA).toFixed(7)} [${value[0].trace_a_unit}]`,
+            text: `PGA: ${peakaff} [${value[0].trace_a_unit}]`,
             font: '14px Microsoft YaHei'
           }
         }
@@ -1413,7 +1431,7 @@ export class LectorDemoComponent implements OnInit {
             fill: '#333',
             width: 220,
             overflow: 'break',
-            text: `PGV: ${parseFloat(peakV).toFixed(7)} [${value[0].trace_v_unit}] `,
+            text: `PGV: ${peakvff} [${value[0].trace_v_unit}] `,
             font: '14px Microsoft YaHei'
           }
         }
@@ -1538,7 +1556,7 @@ export class LectorDemoComponent implements OnInit {
             fill: '#333',
             width: 220,
             overflow: 'break',
-            text: `PGD: ${parseFloat(peakD).toFixed(7)} [${value[0].trace_d_unit}]`,
+            text: `PGD: ${peakdff} [${value[0].trace_d_unit}]`,
             font: '14px Microsoft YaHei'
           }
         }
