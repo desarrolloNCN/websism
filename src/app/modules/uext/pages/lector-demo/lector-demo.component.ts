@@ -221,15 +221,17 @@ export class LectorDemoComponent implements OnInit {
 
                 this.obsApi.getData(this.stringdata).subscribe({
                   next: value => {
-                    if (value.data[0].und_calib == 'M/S**2') {
+
+                    if (value.data[0].und_calib == 'M/S**2' ) {
                       localStorage.setItem('ogUnit', 'm')
-                    } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt') {
+                    } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130' ) {
                       localStorage.setItem('ogUnit', 'gal')
                     } else if (value.data[0].und_calib == 'G') {
                       localStorage.setItem('ogUnit', 'g')
                     } else {
                       localStorage.setItem('ogUnit', '')
                     }
+
                     this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
                   },
                   error: err => {
@@ -261,9 +263,9 @@ export class LectorDemoComponent implements OnInit {
 
                 this.obsApi.getData(this.urlFile).subscribe({
                   next: value => {
-                    if (value.data[0].und_calib == 'M/S**2') {
+                    if (value.data[0].und_calib == 'M/S**2'  ) {
                       localStorage.setItem('ogUnit', 'm')
-                    } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt') {
+                    } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
                       localStorage.setItem('ogUnit', 'gal')
                     } else if (value.data[0].und_calib == 'G') {
                       localStorage.setItem('ogUnit', 'g')
@@ -318,9 +320,9 @@ export class LectorDemoComponent implements OnInit {
             this.obsApi.getData(this.stringdata).subscribe({
               next: value => {
 
-                if (value.data[0].und_calib == 'M/S**2') {
+                if (value.data[0].und_calib == 'M/S**2' ) {
                   localStorage.setItem('ogUnit', 'm')
-                } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt') {
+                } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
                   localStorage.setItem('ogUnit', 'gal')
                 } else if (value.data[0].und_calib == 'G') {
                   localStorage.setItem('ogUnit', 'g')
@@ -360,9 +362,9 @@ export class LectorDemoComponent implements OnInit {
             this.obsApi.getData(this.urlFile).subscribe({
               next: value => {
 
-                if (value.data[0].und_calib == 'M/S**2') {
+                if (value.data[0].und_calib == 'M/S**2' ) {
                   localStorage.setItem('ogUnit', 'm')
-                } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt') {
+                } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
                   localStorage.setItem('ogUnit', 'gal')
                 } else if (value.data[0].und_calib == 'G') {
                   localStorage.setItem('ogUnit', 'g')
@@ -508,7 +510,7 @@ export class LectorDemoComponent implements OnInit {
       .subscribe({
         next: value => {
 
-          this.toggleTabs = true
+          // this.toggleTabs = true
 
           if (value.url == '') {
 
@@ -545,7 +547,6 @@ export class LectorDemoComponent implements OnInit {
 
 
           }
-
         },
         error: err => {
           this.snackBar.open('⚠️ Error ', 'cerrar', snackBar)
@@ -555,8 +556,6 @@ export class LectorDemoComponent implements OnInit {
         },
         complete: () => {
           this.loadingSpinner = false
-          this.loadingSpinnerStaInfo = false
-          this.btnDisable = false
         }
       }
 
@@ -579,16 +578,8 @@ export class LectorDemoComponent implements OnInit {
     this.matDialog.open(ArchivoMseedComponent, matDialogConfig).afterClosed()
       .subscribe({
         next: valueUrl => {
-
           // this.toggleTabs = true
-
           if (valueUrl.url == '') {
-
-            this.urlFile = valueUrl.url
-            this.original_unit = valueUrl.unit
-
-            localStorage.setItem('urlFileUpload', valueUrl.url)
-            localStorage.setItem('ogUnit', valueUrl.unit)
 
             this.loadingSpinner = false
             this.loadingSpinnerStaInfo = false
@@ -631,8 +622,6 @@ export class LectorDemoComponent implements OnInit {
         },
         complete: () => {
           this.loadingSpinner = false
-          this.loadingSpinnerStaInfo = false
-          this.btnDisable = false
         }
       }
 
@@ -807,7 +796,8 @@ export class LectorDemoComponent implements OnInit {
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
-
+    let unit_from = localStorage.getItem('ogUnit')!
+    
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
     let base = this.tabs[index].base || ''
@@ -852,7 +842,7 @@ export class LectorDemoComponent implements OnInit {
 
     this.isLoading = true
 
-    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit).subscribe({
+    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -895,6 +885,7 @@ export class LectorDemoComponent implements OnInit {
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
+    let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -937,7 +928,7 @@ export class LectorDemoComponent implements OnInit {
     this.isLoading = true
 
 
-    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit).subscribe({
+    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
       next: value => {
 
         this.ToggleGraph = false

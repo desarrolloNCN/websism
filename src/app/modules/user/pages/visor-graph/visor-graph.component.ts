@@ -824,7 +824,7 @@ export class VisorGraphComponent implements OnInit {
 
     this.isLoading = true
 
-    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit).subscribe({
+    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit, '').subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -909,7 +909,7 @@ export class VisorGraphComponent implements OnInit {
     this.isLoading = true
 
 
-    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit).subscribe({
+    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit, '').subscribe({
       next: value => {
 
         this.ToggleGraph = false
