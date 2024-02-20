@@ -1177,11 +1177,14 @@ export class LectorDemoComponent implements OnInit {
     let peakV = value[0].peak_v || 0.00
     let peakD = value[0].peak_d || 0.00
 
+    let fechaIn = this.dateConverter(e.starttime)
+    let fechaFn = this.dateConverter(e.endtime)
+
     const accel = {
       animationDuration: 5000,
       title: {
         text: `${dataformat} - Aceleracion | ${e.network}.${e.station}.${e.location}.${e.channel}`,
-        subtext: `Inicio: ${e.starttime} || Fin: ${e.endtime} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
+        subtext: `Inicio: ${fechaIn} || Fin: ${fechaFn} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
       },
       tooltip: {
         trigger: 'axis',
@@ -1307,7 +1310,7 @@ export class LectorDemoComponent implements OnInit {
       animationDuration: 5000,
       title: {
         text: `${dataformat} - Velocidad | ${e.network}.${e.station}.${e.location}.${e.channel}`,
-        subtext: `Inicio: ${e.starttime} || Fin: ${e.endtime} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
+        subtext: `Inicio: ${fechaIn} || Fin: ${fechaFn} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
       },
       tooltip: {
         trigger: 'axis',
@@ -1432,7 +1435,7 @@ export class LectorDemoComponent implements OnInit {
       animationDuration: 5000,
       title: {
         text: `${dataformat} - Desplazamiento | ${e.network}.${e.station}.${e.location}.${e.channel}`,
-        subtext: `Inicio: ${e.starttime} || Fin: ${e.endtime} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
+        subtext: `Inicio: ${fechaIn} || Fin: ${fechaFn} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
       },
       tooltip: {
         trigger: 'axis',
@@ -1561,6 +1564,8 @@ export class LectorDemoComponent implements OnInit {
 
   }
 
+
+
   // ? Clasificacion de Estaciones
 
   groupedData: { [key: string]: any[] } = {};
@@ -1681,13 +1686,13 @@ export class LectorDemoComponent implements OnInit {
     const fechaHora = new Date(date);
 
     const año = fechaHora.getFullYear();
-    const mes = fechaHora.getMonth() + 1; // Los meses comienzan desde 0
-    const dia = fechaHora.getDate();
-    const horas = fechaHora.getHours();
-    const minutos = fechaHora.getMinutes();
-    const segundos = fechaHora.getSeconds();
+    const mes = ("0" + (fechaHora.getMonth() + 1)).slice(-2); 
+    const dia = ("0" + fechaHora.getDate()).slice(-2); 
+    const horas = ("0" + fechaHora.getHours()).slice(-2); 
+    const minutos = ("0" + fechaHora.getMinutes()).slice(-2); 
+    const segundos = ("0" + fechaHora.getSeconds()).slice(-2); 
 
-    const formatoFechaHora = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+    const formatoFechaHora = `${año}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
 
     return formatoFechaHora
   }
