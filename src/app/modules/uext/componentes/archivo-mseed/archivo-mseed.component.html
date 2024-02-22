@@ -109,10 +109,16 @@
                             <mat-icon matPrefix>speed</mat-icon>
                             <mat-select formControlName="unitst">
                                 <mat-option value="">unk</mat-option>
-                                <mat-option value="m">m/s2</mat-option>
-                                <mat-option value="gal">cm/s2</mat-option>
-                                <mat-option value="inch" disabled>in/s2</mat-option>
-                                <mat-option value="feet" disabled>ft/s2</mat-option>
+                                <mat-optgroup label="Aceleracion">
+                                    <mat-option value="m">m/s2</mat-option>
+                                    <mat-option value="gal">cm/s2</mat-option>
+                                    <mat-option value="inch" disabled>in/s2</mat-option>
+                                    <mat-option value="feet" disabled>ft/s2</mat-option>
+                                </mat-optgroup>
+                                <mat-optgroup label="Velocidad">
+                                    <mat-option value="cm">cm/s</mat-option>
+                                    <mat-option value="ms">m/s</mat-option>
+                                </mat-optgroup>
                             </mat-select>
                         </mat-form-field>
 

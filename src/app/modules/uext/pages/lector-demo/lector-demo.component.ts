@@ -10,6 +10,7 @@ import { ArchivoTXTComponent } from '../../componentes/archivo-txt/archivo-txt.c
 import { ArchivoMseedComponent } from '../../componentes/archivo-mseed/archivo-mseed.component';
 import { RegisterDialogComponent } from '../../componentes/register-dialog/register-dialog.component';
 import { DecimalPipe } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-lector-demo',
@@ -100,7 +101,7 @@ export class LectorDemoComponent implements OnInit {
   hideToolTip = false
 
   baseLineOptions = ['constant', 'linear', 'demean', 'simple']
-  unitConvertOptions = ['cm/s2 [GaL]', 'm/s2', 'G', 'unk']
+  unitConvertOptions = ['cm/s2 [GaL]', 'm/s2', 'G', 'mg','unk']
 
   tabs: any = []
   matTabs: MatTab[] = []
@@ -111,12 +112,16 @@ export class LectorDemoComponent implements OnInit {
 
   formGroups: FormGroup[] = [];
 
+  stopXmr: Subscription | any
+  stopMseed: Subscription | any
+  stopTxt: Subscription | any
+
   constructor(
     private obsApi: ObspyAPIService,
     private snackBar: MatSnackBar,
     private cdRef: ChangeDetectorRef,
     private matDialog: MatDialog,
-    private decimalPipe : DecimalPipe,
+    private decimalPipe: DecimalPipe,
   ) {
 
     this.FilterForm = new FormGroup({
@@ -176,6 +181,7 @@ export class LectorDemoComponent implements OnInit {
     let textoValue = this.controlForm.get('url').value;
     let archivoValue = this.arch;
 
+
     let valorNoVacio: string | File | undefined;
 
     this.loadingSpinner = true
@@ -187,124 +193,152 @@ export class LectorDemoComponent implements OnInit {
 
       if (this.urlFile == '' && this.stringdata == '') {
 
-        this.obsApi.uploadFile(valorNoVacio).subscribe({
-          next: value => {
+        try {
 
-            this.idFile = value.id
-            this.urlFile = value.file
-            this.stringdata = value.string_data
+          let valorNoVacio_recived: any = archivoValue.name
+          let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+          let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
-            localStorage.setItem('urlFileUpload', value.file)
-            localStorage.setItem('urlSearched', value.string_data)
 
-          },
-          error: err => {
-            this.loadingSpinner = false
-            this.loadingSpinnerStaInfo = false
-            this.btnDisable = false
-            // console.error('REQUEST API ERROR: ' + err.message)
-            this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
-          },
-          complete: () => {
-            let valorNoVacio_recived: any = this.urlFile || this.stringdata
-            let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
-            let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
-
-            if (this.urlFile == null) {
-
-              if (extension == 'txt') {
-
-                this.leerTxt(valorNoVacio_recived)
-
-              } else if (extension == 'mseed') {
-
-                this.leerMseed(valorNoVacio_recived)
-
-              } else {
-
-                this.obsApi.getData(this.stringdata).subscribe({
-                  next: value => {
-
-                    if (value.data[0].und_calib == 'M/S**2' ) {
-                      localStorage.setItem('ogUnit', 'm')
-                    } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130' ) {
-                      localStorage.setItem('ogUnit', 'gal')
-                    } else if (value.data[0].und_calib == 'G') {
-                      localStorage.setItem('ogUnit', 'g')
-                    } else {
-                      localStorage.setItem('ogUnit', '')
-                    }
-
-                    this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-
-                    this.leer(value.data[0])
-                  },
-                  error: err => {
-                    this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                    this.loadingSpinner = false
-                    this.loadingSpinnerStaInfo = false
-                    this.btnDisable = false
-                  },
-                  complete: () => {
-                      
-                    this.loadingSpinner = false
-                    this.loadingSpinnerStaInfo = false
-                    this.btnDisable = false
-                  }
-                })
-
+          if (extension == 'XMR') {
+            this.stopXmr = this.obsApi.covertionXMR(archivoValue).subscribe({
+              next: value => {
+                this.leerTxt(value.url)
+              },
+              error: err => {
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+              },
+              complete: () => {
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
               }
+            })
+          } else {
+            this.stopXmr.unsubscribe()
+            throw new Error('')
+          }
 
-            } else if (this.stringdata == null) {
+        } catch (error) {
 
-              if (extension == 'txt') {
+          this.obsApi.uploadFile(valorNoVacio).subscribe({
+            next: value => {
 
-                this.leerTxt(valorNoVacio_recived)
+              this.idFile = value.id
+              this.urlFile = value.file
+              this.stringdata = value.string_data
 
-              } else if (extension == 'mseed') {
+              localStorage.setItem('urlFileUpload', value.file)
+              localStorage.setItem('urlSearched', value.string_data)
 
-                this.leerMseed(valorNoVacio_recived)
-
-              } else {
-
-                this.obsApi.getData(this.urlFile).subscribe({
-                  next: value => {
-                    if (value.data[0].und_calib == 'M/S**2'  ) {
-                      localStorage.setItem('ogUnit', 'm')
-                    } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
-                      localStorage.setItem('ogUnit', 'gal')
-                    } else if (value.data[0].und_calib == 'G') {
-                      localStorage.setItem('ogUnit', 'g')
-                    } else {
-                      localStorage.setItem('ogUnit', '')
-                    }
-                    this.toggleTabs = true
-                    this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                    this.leer(value.data[0])
-                  },
-                  error: err => {
-                    this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                    this.loadingSpinner = false
-                    this.loadingSpinnerStaInfo = false
-                    this.btnDisable = false
-                  },
-                  complete: () => {
-                    this.loadingSpinner = false
-                    this.loadingSpinnerStaInfo =
-                      this.btnDisable = false
-                  }
-                })
-
-              }
-
-            } else {
-              this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+            },
+            error: err => {
               this.loadingSpinner = false
               this.loadingSpinnerStaInfo = false
               this.btnDisable = false
+              this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
+            },
+            complete: () => {
+              let valorNoVacio_recived: any = this.urlFile || this.stringdata
+              let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+              let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+
+              if (this.urlFile == null) {
+
+                if (extension == 'txt') {
+
+                  this.leerTxt(valorNoVacio_recived)
+
+                } else if (extension == 'mseed') {
+
+                  this.leerMseed(valorNoVacio_recived)
+
+                } else {
+
+                  this.obsApi.getData(this.stringdata).subscribe({
+                    next: value => {
+
+                      if (value.data[0].und_calib == 'M/S**2') {
+                        localStorage.setItem('ogUnit', 'm')
+                      } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
+                        localStorage.setItem('ogUnit', 'gal')
+                      } else if (value.data[0].und_calib == 'G') {
+                        localStorage.setItem('ogUnit', 'g')
+                      } else {
+                        localStorage.setItem('ogUnit', '')
+                      }
+
+                      this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+
+                      this.leer(value.data[0])
+                    },
+                    error: err => {
+                      this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                      this.loadingSpinner = false
+                      this.loadingSpinnerStaInfo = false
+                      this.btnDisable = false
+                    },
+                    complete: () => {
+
+                      this.loadingSpinner = false
+                      this.loadingSpinnerStaInfo = false
+                      this.btnDisable = false
+                    }
+                  })
+
+                }
+
+              } else if (this.stringdata == null) {
+
+                if (extension == 'txt') {
+
+                  this.leerTxt(valorNoVacio_recived)
+
+                } else if (extension == 'mseed') {
+
+                  this.leerMseed(valorNoVacio_recived)
+
+                } else {
+
+                  this.obsApi.getData(this.urlFile).subscribe({
+                    next: value => {
+                      if (value.data[0].und_calib == 'M/S**2') {
+                        localStorage.setItem('ogUnit', 'm')
+                      } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
+                        localStorage.setItem('ogUnit', 'gal')
+                      } else if (value.data[0].und_calib == 'G') {
+                        localStorage.setItem('ogUnit', 'g')
+                      } else {
+                        localStorage.setItem('ogUnit', '')
+                      }
+                      this.toggleTabs = true
+                      this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                      this.leer(value.data[0])
+                    },
+                    error: err => {
+                      this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                      this.loadingSpinner = false
+                      this.loadingSpinnerStaInfo = false
+                      this.btnDisable = false
+                    },
+                    complete: () => {
+                      this.loadingSpinner = false
+                      this.loadingSpinnerStaInfo =
+                        this.btnDisable = false
+                    }
+                  })
+
+                }
+
+              } else {
+                this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
+              }
             }
-          }
-        })
+          })
+        }
 
       } else {
 
@@ -327,7 +361,7 @@ export class LectorDemoComponent implements OnInit {
             this.obsApi.getData(this.stringdata).subscribe({
               next: value => {
 
-                if (value.data[0].und_calib == 'M/S**2' ) {
+                if (value.data[0].und_calib == 'M/S**2') {
                   localStorage.setItem('ogUnit', 'm')
                 } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
                   localStorage.setItem('ogUnit', 'gal')
@@ -369,7 +403,7 @@ export class LectorDemoComponent implements OnInit {
             this.obsApi.getData(this.urlFile).subscribe({
               next: value => {
 
-                if (value.data[0].und_calib == 'M/S**2' ) {
+                if (value.data[0].und_calib == 'M/S**2') {
                   localStorage.setItem('ogUnit', 'm')
                 } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
                   localStorage.setItem('ogUnit', 'gal')
@@ -405,95 +439,6 @@ export class LectorDemoComponent implements OnInit {
           this.btnDisable = false
         }
       }
-
-      // this.obsApi.uploadFile(valorNoVacio).subscribe({4
-      //   next: value => {
-      //     this.idFile = value.id
-      //     this.urlFile = value.file
-      //     this.stringdata = value.string_data
-
-      //     localStorage.setItem('urlFileUpload', value.file)
-      //     localStorage.setItem('urlSearched', value.string_data)
-
-      //   },
-      //   error: err => {
-      //     this.loadingSpinner = false
-      //     this.loadingSpinnerStaInfo = false
-      //     // console.error('REQUEST API ERROR: ' + err.message)
-      //     this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
-      //   },
-      //   complete: () => {
-      //     let valorNoVacio_recived: any = this.urlFile || this.stringdata
-      //     let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
-      //     let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
-
-      //     if (this.urlFile == null) {
-
-      //       if (extension == 'txt') {
-
-      //         this.leerTxt(valorNoVacio_recived)
-
-      //       } else if (extension == 'mseed') {
-
-      //         this.leerMseed(valorNoVacio_recived)
-
-      //       } else {
-
-      //         this.obsApi.getData(this.stringdata).subscribe({
-      //           next: value => {
-      //             this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-      //           },
-      //           error: err => {
-      //             this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-      //             this.loadingSpinner = false
-      //             this.loadingSpinnerStaInfo = false
-      //           },
-      //           complete: () => {
-      //             this.loadingSpinner = false
-      //             this.loadingSpinnerStaInfo = false
-      //           }
-      //         })
-
-      //       }
-
-      //     } else if (this.stringdata == null) {
-
-      //       if (extension == 'txt') {
-
-      //         this.leerTxt(valorNoVacio_recived)
-
-      //       } else if (extension == 'mseed') {
-
-      //         this.leerMseed(valorNoVacio_recived)
-
-      //       } else {
-
-      //         this.obsApi.getData(this.urlFile).subscribe({
-      //           next: value => {
-
-      //             this.toggleTabs = true
-      //             this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-      //           },
-      //           error: err => {
-      //             this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-      //             this.loadingSpinner = false
-      //             this.loadingSpinnerStaInfo = false
-      //           },
-      //           complete: () => {
-      //             this.loadingSpinner = false
-      //             this.loadingSpinnerStaInfo = false
-      //           }
-      //         })
-
-      //       }
-
-      //     } else {
-      //       this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
-      //       this.loadingSpinner = false
-      //       this.loadingSpinnerStaInfo = false
-      //     }
-      //   }
-      // })
 
     } else {
       this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
@@ -536,7 +481,7 @@ export class LectorDemoComponent implements OnInit {
             localStorage.setItem('urlFileUpload', value.url)
             localStorage.setItem('ogUnit', value.unit)
 
-            this.obsApi.getData(value.url).subscribe({
+            this.stopTxt = this.obsApi.getData(value.url).subscribe({
               next: value => {
                 this.toggleTabs = true
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
@@ -604,7 +549,7 @@ export class LectorDemoComponent implements OnInit {
             localStorage.setItem('urlFileUpload', valueUrl.url)
             localStorage.setItem('ogUnit', valueUrl.unit)
 
-            this.obsApi.getData(valueUrl.url).subscribe({
+            this.stopMseed = this.obsApi.getData(valueUrl.url).subscribe({
               next: value => {
                 this.toggleTabs = true
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
@@ -810,7 +755,7 @@ export class LectorDemoComponent implements OnInit {
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
     let unit_from = localStorage.getItem('ogUnit')!
-    
+
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
     let base = this.tabs[index].base || ''
@@ -996,6 +941,7 @@ export class LectorDemoComponent implements OnInit {
       'cm/s2 [GaL]': 'gal',
       'm/s2': 'm',
       'G': 'g',
+      'mg': 'mg',
       'unk': ''
     };
 
@@ -1622,6 +1568,10 @@ export class LectorDemoComponent implements OnInit {
   deleteFile() {
     localStorage.clear()
 
+    if(this.stopMseed != undefined){
+      this.stopMseed.unsubscribe()
+    }
+
     this.urlFile = ''
     this.stringdata = ''
 
@@ -1631,6 +1581,11 @@ export class LectorDemoComponent implements OnInit {
 
     this.btnShow = false;
     this.btnCancel = true;
+    this.btnDisable = false
+
+    this.loadingSpinner = false
+    this.loadingSpinnerStaInfo = false
+
     this.fileInput.nativeElement.value = ''
 
     this.groupedData = {}
@@ -1696,11 +1651,11 @@ export class LectorDemoComponent implements OnInit {
     const fechaHora = new Date(date);
 
     const año = fechaHora.getFullYear();
-    const mes = ("0" + (fechaHora.getMonth() + 1)).slice(-2); 
-    const dia = ("0" + fechaHora.getDate()).slice(-2); 
-    const horas = ("0" + fechaHora.getHours()).slice(-2); 
-    const minutos = ("0" + fechaHora.getMinutes()).slice(-2); 
-    const segundos = ("0" + fechaHora.getSeconds()).slice(-2); 
+    const mes = ("0" + (fechaHora.getMonth() + 1)).slice(-2);
+    const dia = ("0" + fechaHora.getDate()).slice(-2);
+    const horas = ("0" + fechaHora.getHours()).slice(-2);
+    const minutos = ("0" + fechaHora.getMinutes()).slice(-2);
+    const segundos = ("0" + fechaHora.getSeconds()).slice(-2);
 
     const formatoFechaHora = `${año}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
 

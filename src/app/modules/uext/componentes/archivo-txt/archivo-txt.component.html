@@ -67,9 +67,16 @@
                     <mat-label>Unidad</mat-label>
                     <mat-icon class="colorIconSubBar" matPrefix>straighten</mat-icon>
                     <mat-select formControlName="unidad">
-                        <mat-option value="gal">cm/s2 [GAL]</mat-option>
-                        <mat-option value="m">m/s2</mat-option>
-                        <mat-option value="g" disabled>G</mat-option>
+                        <mat-optgroup label="Aceleracion">
+                            <mat-option value="gal">cm/s2 [GAL]</mat-option>
+                            <mat-option value="m">m/s2</mat-option>
+                            <mat-option value="g">g [Gravedad]</mat-option>
+                            <mat-option value="mg">mg</mat-option>
+                        </mat-optgroup>
+                        <mat-optgroup label="Velocidad">
+                            <mat-option value="cm">cm/s</mat-option>
+                            <mat-option value="ms">m/s</mat-option>
+                        </mat-optgroup>
                     </mat-select>
                 </mat-form-field>
             </div>

@@ -131,7 +131,7 @@ export class ArchivoTXTComponent implements OnInit {
     const datosPrimeraLinea = lineas[indiceInicioDatos].trim().split(/[,;]\s*|\s+/).filter(Boolean);
 
     try {
-      encabezados = lineas[indiceInicioDatos - 1].trim().split(/[,;]\s*|\s+/).filter(Boolean)
+      encabezados = lineas[indiceInicioDatos - 1].trim().split(/[^\w\s]+|\s+/).filter(Boolean)
     } catch (error) {
       encabezados = []
     }
@@ -252,8 +252,8 @@ export class ArchivoTXTComponent implements OnInit {
   // ^\s*-?\d*\.?\d+\s+-?\d*\.?\d+\s+-?\d*\.?\d+\s*$
   // ^\s*(?:-?\d+\.\d+|[.,;]?\d+(?:\.\d+)?(?:[.,;]\d+)?(?:\.\d+)?)\s*(?:[.,;]?(?:-?\d+\.\d+|[.,;]?\d+(?:\.\d+)?(?:[.,;]\d+)?(?:\.\d+)?)\s*)*$
   buscarCoincidencia(): void {
-    const regex = /^\s*(?:-?\d+\.\d+|[.,;]?\d+(?:\.\d+)?(?:[.,;]\d+)?(?:\.\d+)?)\s*(?:[.,;]?(?:-?\d+\.\d+|[.,;]?\d+(?:\.\d+)?(?:[.,;]\d+)?(?:\.\d+)?)\s*)*$/;
-
+    // const regex = /^\s*(?:-?\d+\.\d+|[.,;]?\d+(?:\.\d+)?(?:[.,;]\d+)?(?:\.\d+)?)\s*(?:[.,;]?(?:-?\d+\.\d+|[.,;]?\d+(?:\.\d+)?(?:[.,;]\d+)?(?:\.\d+)?)\s*)*$/;
+    const regex = /^\s*(?:-?\d+(?:[.,;]\d+)?(?:\s*[.,;]?\s*-?\d+(?:[.,;]\d+)?)*\s*)$/
     const lineas = this.infoText.split(/\r?\n/);
     let fila = 0;
 
