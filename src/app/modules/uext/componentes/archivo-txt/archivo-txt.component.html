@@ -6,19 +6,19 @@
         <mat-divider></mat-divider>
     </div>
 
+    <div *ngIf="loadingSpinnerText" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    </div>
+
     <div fxLayout="row" fxLayoutGap="10" fxLayout.lt-sm="column">
 
-        <div fxLayout="column" fxLayoutAlign="center center">
-            
-            <div *ngIf="loadingSpinnerText" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
-                <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
-                    [diameter]="50"></mat-progress-spinner>
-                <h3> <b>Cargando Texto ....</b> </h3>
+        <div fxLayout="column" fxLayoutAlign="start center">
+            <div class="txtContainer">
+                <pre [hidden]="showText" contenteditable="false" (click)="onPreClick($event)" #myPre>
+                    {{infoText}}
+                </pre>
             </div>
 
-            <pre [hidden]="showText" contenteditable="false" (click)="onPreClick($event)" #myPre class="txtContainer">
-                {{infoText}} 
-            </pre>
         </div>
 
         <form [formGroup]="controlForm" fxLayout="column" fxLayoutAlign="start center" (submit)="crearSteam()">
@@ -88,29 +88,35 @@
                 </div>
 
                 <div class="columGen">
-                    <div *ngFor="let itm of columnDetector;let i = index">
+
+                    <div *ngFor="let itm of columnDetector; let i = index">
                         <mat-form-field appearance="outline" class="mtff">
                             <mat-label>Columna {{i+1}}</mat-label>
                             <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
                             <mat-select formControlName='c_{{i}}'>
-                                <mat-option value="T">Tiempo</mat-option>
-                                <mat-option *ngFor="let opt of columnDetector; let ind = index" [value]="opt">
-                                    <ng-container *ngIf="ind === 0">Z</ng-container>
-                                    <ng-container *ngIf="ind === 1">N</ng-container>
-                                    <ng-container *ngIf="ind === 2">E</ng-container>
-                                    <ng-container *ngIf="ind > 2">C{{ind+3}}</ng-container>
+                                <mat-option *ngFor="let itms of columnDetector; let is = index" [value]="itms">
+                                    Col {{is+1}}
                                 </mat-option>
                             </mat-select>
                         </mat-form-field>
+                    </div>
 
-                        <!-- <mat-form-field appearance="outline" class="mtfs">
-                            <mat-label>C {{i+1}}</mat-label>
+                    <div *ngFor="let itm of columHead;let i = index">
+                        <mat-form-field appearance="outline" class="mtff">
+                            <mat-label>Canal {{i+1}}</mat-label>
                             <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
-                            <input matInput formControlName='cc_{{i}}' type="number">
-                        </mat-form-field> -->
-
+                            <mat-select formControlName='cc_{{i}}'>
+                                <mat-option value="T">Tiempo</mat-option>
+                                <mat-option *ngFor="let itms of columHead;let i = index" [value]="itms">
+                                    {{itms}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
                     </div>
                 </div>
+
+
+
             </div>
 
 

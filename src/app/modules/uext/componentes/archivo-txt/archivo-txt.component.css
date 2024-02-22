@@ -16,11 +16,19 @@ h4 {
     color: #747474
 }
 
+pre {
+    display: block;
+    font-family: monospace;
+    white-space: pre;
+    margin: 1em 0;
+  } 
+
 .txtContainer {
     border: 0.5px solid rgba(197, 197, 197, 0.699);
     padding: 10px;
     overflow: scroll;
-    height: 500px;
+    height: 600px;
+    width: 500px;
     border-radius: 5px;
 }
 
@@ -54,8 +62,6 @@ h4 {
     background-color: rgb(252, 252, 252);
     border-radius: 5px;
     border: 0.5px dashed #B6B6B6;
-    column-count: 2;
-    column-gap: 10px;
     column-count: 2;
     column-gap: 10px;
 }

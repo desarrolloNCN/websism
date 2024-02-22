@@ -499,6 +499,7 @@ export class LectorDemoComponent implements OnInit {
       this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
       this.loadingSpinner = false
       this.loadingSpinnerStaInfo = false
+      this.btnDisable = false
     }
   }
 

@@ -112,17 +112,46 @@ export class ArchivoTXTComponent implements OnInit {
       this.controlForm.controls['fr_line'].setValue(row);
       this.controlForm.controls['ls_line'].setValue(this.maxRows);
 
-      this.splitCols()
+      // this.splitCols()
     }
   }
 
+  // -?\d+\.\d+\s+-?\d+\.\d+\s+-?\d+\.\d+(?![^\n]*\n\n)
+
   splitCols() {
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 5 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    let encabezados: string[] = []
 
     const lineas = this.infoText.trim().split('\n');
-    // -?\d+\.\d+\s+-?\d+\.\d+\s+-?\d+\.\d+(?![^\n]*\n\n)
-    let indiceInicioDatos = parseInt(this.controlForm.get('fr_line').value) - 1;
 
+    let indiceInicioDatos = parseInt(this.controlForm.get('fr_line').value) - 1;
     const datosPrimeraLinea = lineas[indiceInicioDatos].trim().split(/[,;]\s*|\s+/).filter(Boolean);
+
+    try {
+      encabezados = lineas[indiceInicioDatos - 1].trim().split(/[,;]\s*|\s+/).filter(Boolean)
+    } catch (error) {
+      encabezados = []
+    }
+
+    if (encabezados.length < datosPrimeraLinea.length) {
+      for (let i = encabezados.length; i < datosPrimeraLinea.length; i++) {
+        if(i == 0){
+          encabezados.push('Z')
+        }else if(i == 1){
+          encabezados.push('N')
+        }else if(i == 2){
+          encabezados.push('E')
+        }else{
+          encabezados.push(`C${i+1}`);
+        }
+      }
+    } else if (encabezados.length > datosPrimeraLinea.length) {
+      this.snackBar.open('✅ Verificar Encabezados', 'cerrar', snackBar)
+    }
+
     const numeroColumnas = datosPrimeraLinea.length;
 
     const valoresAgrupados: any[] = [];
@@ -140,37 +169,60 @@ export class ArchivoTXTComponent implements OnInit {
       }
     }
 
-    this.columnDetector = valoresAgrupados
+   this.columnDetector = valoresAgrupados
+   this.columHead = encabezados
+   this.encabezados(valoresAgrupados, encabezados)
 
-    // TODO:Pendiente indicar Canales
+   
+   
+  }
 
-    // this.columnDetector.forEach((item: any, index: number) => {
-    //   if (index === 0) {
-    //     this.channels.push('Z');
-    //   } else if (index === 1) {
-    //     this.channels.push('N');
-    //   } else if (index === 2) {
-    //     this.channels.push('E');
-    //   } else {
-    //     this.channels.push('C' + (index + 3)); 
+
+  // TODO:Pendiente indicar Canales
+
+  // this.columnDetector.forEach((item: any, index: number) => {
+  //   if (index === 0) {
+  //     this.channels.push('Z');
+  //   } else if (index === 1) {
+  //     this.channels.push('N');
+  //   } else if (index === 2) {
+  //     this.channels.push('E');
+  //   } else {
+  //     this.channels.push('C' + (index + 3))}; 
+
+
+  encabezados(valores : any, headers : any){
+
+    // ! Remueve los controles que empiezan por 'c_'
+
+    // Object.keys(this.controlForm.controls).forEach(key => {
+    //   if (key.startsWith('c_')) {
+    //     this.controlForm.removeControl(key);
     //   }
     // });
 
-
-    Object.keys(this.controlForm.controls).forEach(key => {
-      if (key.startsWith('c_')) {
-        this.controlForm.removeControl(key);
-      }
+    headers.forEach((encabezado: any) => {
+      this.controlForm.removeControl(encabezado);
     });
 
-    this.columnDetector.forEach((columna: any, index: string) => {
+    valores.forEach((encabezado: any) => {
+      this.controlForm.removeControl(encabezado);
+    });
+
+    // ! Añade los controles que empiezan por 'c_'
+    headers.forEach( (header: any, index: string) => {
       this.controlForm.addControl('c_' + index, new FormControl('', Validators.required));
-      // this.controlForm.addControl('cc_' + index, new FormControl('', Validators.required));
+    }); 
+
+    // ! Añade los controles que empiezan por 'c_'
+    valores.forEach( (valores: any, index: string) => {
+      this.controlForm.addControl('cc_' + index, new FormControl('', Validators.required));
     });
 
   }
 
   crearSteam() {
+
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 5 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
@@ -180,8 +232,8 @@ export class ArchivoTXTComponent implements OnInit {
       this.obsApi.convertToStream(this.controlForm.value).subscribe({
         next: value => {
           let respData = {
-            "url" : value.url,
-            "unit" : this.controlForm.get('unidad').value
+            "url": value.url,
+            "unit": this.controlForm.get('unidad').value
           }
           this.matDialogRef.close(respData)
         },
@@ -198,9 +250,9 @@ export class ArchivoTXTComponent implements OnInit {
   }
 
   // ^\s*-?\d*\.?\d+\s+-?\d*\.?\d+\s+-?\d*\.?\d+\s*$
-
+  // ^\s*(?:-?\d+\.\d+|[.,;]?\d+(?:\.\d+)?(?:[.,;]\d+)?(?:\.\d+)?)\s*(?:[.,;]?(?:-?\d+\.\d+|[.,;]?\d+(?:\.\d+)?(?:[.,;]\d+)?(?:\.\d+)?)\s*)*$
   buscarCoincidencia(): void {
-    const regex = /^\s*-?\d*\.?\d+\s+-?\d*\.?\d+\s+-?\d*\.?\d+\s*$/;
+    const regex = /^\s*(?:-?\d+\.\d+|[.,;]?\d+(?:\.\d+)?(?:[.,;]\d+)?(?:\.\d+)?)\s*(?:[.,;]?(?:-?\d+\.\d+|[.,;]?\d+(?:\.\d+)?(?:[.,;]\d+)?(?:\.\d+)?)\s*)*$/;
 
     const lineas = this.infoText.split(/\r?\n/);
     let fila = 0;
@@ -221,8 +273,8 @@ export class ArchivoTXTComponent implements OnInit {
 
   Close() {
     let respData = {
-      "url" : '',
-      "unit" : ''
+      "url": '',
+      "unit": ''
     }
     this.matDialogRef.close(respData)
   }
