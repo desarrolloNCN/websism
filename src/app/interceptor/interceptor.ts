@@ -27,8 +27,8 @@ export class HttpHeadersInterceptor implements HttpInterceptor {
       return next.handle(newReq);
     }
 
-    //const newUrl = `https://apiqs.ncn.pe/${req.url}`;
-    const newUrl = `http://localhost:8000/${req.url}`;
+    const newUrl = `https://apiqs.ncn.pe/${req.url}`;
+    //const newUrl = `http://localhost:8000/${req.url}`;
     //const newUrl = `${this.baseUrl}${req.url}`;
 
     let modifiedReq = req.clone({ url: newUrl });
@@ -36,7 +36,7 @@ export class HttpHeadersInterceptor implements HttpInterceptor {
     if (!modifiedReq.headers.has('Authorization')) {
       const authHeader = 'Basic ' + btoa(`${this.user}:${this.pass}`);
       modifiedReq = modifiedReq.clone({
-        setHeaders: { Authorization: 'token 41f667e2286647397fd91cd4b7213d37416a6eca' }
+        setHeaders: { Authorization: authHeader }
       });
     }
 
