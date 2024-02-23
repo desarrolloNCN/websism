@@ -414,5 +414,15 @@ export class ObspyAPIService {
     );
   }
 
+  testuser(){
+    const url = `users/`
+   
+    return this.http.get<any>(url).pipe(
+      catchError(error => {
+        return throwError(() => error);
+      })
+    );
+  }
+
 }
 

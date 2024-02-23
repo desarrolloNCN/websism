@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/service/auth.service';
+import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 
 @Component({
   selector: 'app-user-home',
@@ -14,12 +15,27 @@ export class UserHomeComponent implements OnInit {
   IniResp = ''
   showSpinner = false
 
+  testa = ''
+
   constructor(
     private router: Router,
     private auth: AuthService,
+    private obs: ObspyAPIService,
   ) { }
 
   ngOnInit(): void {
+
+    this.obs.testuser().subscribe({
+      next: value => {
+        this.testa = value
+      },
+      error: err => {
+        this.testa = err
+      },
+      complete: () =>{
+        alert('completo')
+      }
+    })
 
   }
 
