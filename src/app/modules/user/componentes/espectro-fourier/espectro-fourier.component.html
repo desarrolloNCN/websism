@@ -1,0 +1,23 @@
+<mat-dialog-content>
+    <div fxLayout="column" >
+
+        <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+            <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
+                [diameter]="50"></mat-progress-spinner>
+            <h3> <b>Cargando Datos ....</b> </h3>
+        </div>
+        
+        <plotly-plot *ngIf="loadedPlot" [data]="data" [layout]="layout" [config]="config" ></plotly-plot>
+
+    </div>
+    
+</mat-dialog-content>
+<mat-dialog-actions>
+
+    <div>
+        <button mat-flat-button color="warn" (click)="Close()">
+            Cerrar
+        </button>
+    </div>
+
+</mat-dialog-actions>

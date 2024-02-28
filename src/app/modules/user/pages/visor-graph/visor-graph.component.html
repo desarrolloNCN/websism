@@ -390,7 +390,7 @@
                                 </div>
 
                                 <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
-                                    <button mat-icon-button type="button" (click)="espectroFourier(i)">
+                                    <button mat-icon-button type="button" (click)="espectFourier(i)">
                                         <mat-icon class="colorIconBar"
                                         title="Ocultar Paneles">settings_input_component</mat-icon>
                                     </button>
@@ -525,8 +525,6 @@
                             <div echarts [options]="tab.graph[0]" [loading]="isLoading" class="divGraph"></div>
                             <div echarts [options]="tab.graph[1]" [loading]="isLoading" class="divGraph"></div>
                             <div echarts [options]="tab.graph[2]" [loading]="isLoading" class="divGraph"></div>
-                            <div echarts [options]="four" [loading]="isLoading" class="divGraph"></div>
-                            <div echarts [options]="four_es" [loading]="isLoading" class="divGraph"></div>
                         </div>
                     </div>
 

@@ -1,4 +1,5 @@
 import { trigger, transition, style, animate, state } from '@angular/animations';
+import { DecimalPipe } from '@angular/common';
 import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -9,7 +10,10 @@ import { ECharts, EChartsCoreOption, EChartsOption } from 'echarts';
 import { Subscription } from 'rxjs';
 import { ArchivoMseedComponent } from 'src/app/modules/uext/componentes/archivo-mseed/archivo-mseed.component';
 import { ArchivoTXTComponent } from 'src/app/modules/uext/componentes/archivo-txt/archivo-txt.component';
+import { RegisterDialogComponent } from 'src/app/modules/uext/componentes/register-dialog/register-dialog.component';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
+import { AmplitudFourierComponent } from '../../componentes/amplitud-fourier/amplitud-fourier.component';
+import { EspectroFourierComponent } from '../../componentes/espectro-fourier/espectro-fourier.component';
 
 @Component({
   selector: 'app-visor-graph',
@@ -83,8 +87,10 @@ export class VisorGraphComponent implements OnInit {
   btnShow = false
   btnCancel = true
   btnDisable = false
+  isButtonActive = false
 
   hideStaPanel = true
+  hideStaPanel2 = true
   showResponsivebar = false
 
   urlFile = ''
@@ -97,26 +103,31 @@ export class VisorGraphComponent implements OnInit {
   toogleTrim = false
   toogleFilter = false
 
+  hideToolTip = false
+
   baseLineOptions = ['constant', 'linear', 'demean', 'simple']
-  unitConvertOptions = ['cm/s2 [GaL]', 'm/s2', 'G', 'unk']
+  unitConvertOptions = ['cm/s2 [GaL]', 'm/s2', 'G', 'mg', 'unk']
 
   tabs: any = []
   matTabs: MatTab[] = []
   tabIndex = 0
+  lastIndexTab = 0
 
-  four: any = []
-  four_es : any = []
-  
   actApli: any = []
 
   formGroups: FormGroup[] = [];
+
+  stopXmr: Subscription | any
+  stopMseed: Subscription | any
+  stopTxt: Subscription | any
 
   constructor(
     private obsApi: ObspyAPIService,
     private snackBar: MatSnackBar,
     private cdRef: ChangeDetectorRef,
     private matDialog: MatDialog,
-    private router: Router
+    private router: Router,
+    private decimalPipe: DecimalPipe,
   ) {
 
     this.FilterForm = new FormGroup({
@@ -172,7 +183,6 @@ export class VisorGraphComponent implements OnInit {
     return confirmationMessage;
   }
 
-  // ! Manipulacion de Archivos 
 
   onFileSelected(event: any) {
     let archivos = event.target.files;
@@ -205,6 +215,7 @@ export class VisorGraphComponent implements OnInit {
     let textoValue = this.controlForm.get('url').value;
     let archivoValue = this.arch;
 
+
     let valorNoVacio: string | File | undefined;
 
     this.loadingSpinner = true
@@ -216,101 +227,152 @@ export class VisorGraphComponent implements OnInit {
 
       if (this.urlFile == '' && this.stringdata == '') {
 
-        this.obsApi.uploadFile(valorNoVacio).subscribe({
-          next: value => {
+        try {
 
-            this.idFile = value.id
-            this.urlFile = value.file
-            this.stringdata = value.string_data
+          let valorNoVacio_recived: any = archivoValue.name
+          let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+          let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
-            localStorage.setItem('urlFileUpload', value.file)
-            localStorage.setItem('urlSearched', value.string_data)
 
-          },
-          error: err => {
-            this.loadingSpinner = false
-            this.loadingSpinnerStaInfo = false
-            this.btnDisable = false
-            // console.error('REQUEST API ERROR: ' + err.message)
-            this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
-          },
-          complete: () => {
-            let valorNoVacio_recived: any = this.urlFile || this.stringdata
-            let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
-            let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
-
-            if (this.urlFile == null) {
-
-              if (extension == 'txt') {
-
-                this.leerTxt(valorNoVacio_recived)
-
-              } else if (extension == 'mseed') {
-
-                this.leerMseed(valorNoVacio_recived)
-
-              } else {
-
-                this.obsApi.getData(this.stringdata).subscribe({
-                  next: value => {
-                    this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                  },
-                  error: err => {
-                    this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                    this.loadingSpinner = false
-                    this.loadingSpinnerStaInfo = false
-                    this.btnDisable = false
-                  },
-                  complete: () => {
-                    this.loadingSpinner = false
-                    this.loadingSpinnerStaInfo = false
-                    this.btnDisable = false
-                  }
-                })
-
+          if (extension == 'XMR') {
+            this.stopXmr = this.obsApi.covertionXMR(archivoValue).subscribe({
+              next: value => {
+                this.leerTxt(value.url)
+              },
+              error: err => {
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+              },
+              complete: () => {
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
               }
+            })
+          } else {
+            this.stopXmr.unsubscribe()
+            throw new Error('')
+          }
 
-            } else if (this.stringdata == null) {
+        } catch (error) {
 
-              if (extension == 'txt') {
+          this.obsApi.uploadFile(valorNoVacio).subscribe({
+            next: value => {
 
-                this.leerTxt(valorNoVacio_recived)
+              this.idFile = value.id
+              this.urlFile = value.file
+              this.stringdata = value.string_data
 
-              } else if (extension == 'mseed') {
+              localStorage.setItem('urlFileUpload', value.file)
+              localStorage.setItem('urlSearched', value.string_data)
 
-                this.leerMseed(valorNoVacio_recived)
-
-              } else {
-
-                this.obsApi.getData(this.urlFile).subscribe({
-                  next: value => {
-
-                    this.toggleTabs = true
-                    this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                  },
-                  error: err => {
-                    this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                    this.loadingSpinner = false
-                    this.loadingSpinnerStaInfo = false
-                    this.btnDisable = false
-                  },
-                  complete: () => {
-                    this.loadingSpinner = false
-                    this.loadingSpinnerStaInfo =
-                      this.btnDisable = false
-                  }
-                })
-
-              }
-
-            } else {
-              this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+            },
+            error: err => {
               this.loadingSpinner = false
               this.loadingSpinnerStaInfo = false
               this.btnDisable = false
+              this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
+            },
+            complete: () => {
+              let valorNoVacio_recived: any = this.urlFile || this.stringdata
+              let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+              let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+
+              if (this.urlFile == null) {
+
+                if (extension == 'txt') {
+
+                  this.leerTxt(valorNoVacio_recived)
+
+                } else if (extension == 'mseed') {
+
+                  this.leerMseed(valorNoVacio_recived)
+
+                } else {
+
+                  this.obsApi.getData(this.stringdata).subscribe({
+                    next: value => {
+
+                      if (value.data[0].und_calib == 'M/S**2') {
+                        localStorage.setItem('ogUnit', 'm')
+                      } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
+                        localStorage.setItem('ogUnit', 'gal')
+                      } else if (value.data[0].und_calib == 'G') {
+                        localStorage.setItem('ogUnit', 'g')
+                      } else {
+                        localStorage.setItem('ogUnit', '')
+                      }
+
+                      this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+
+                      this.leer(value.data[0])
+                    },
+                    error: err => {
+                      this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                      this.loadingSpinner = false
+                      this.loadingSpinnerStaInfo = false
+                      this.btnDisable = false
+                    },
+                    complete: () => {
+
+                      this.loadingSpinner = false
+                      this.loadingSpinnerStaInfo = false
+                      this.btnDisable = false
+                    }
+                  })
+
+                }
+
+              } else if (this.stringdata == null) {
+
+                if (extension == 'txt') {
+
+                  this.leerTxt(valorNoVacio_recived)
+
+                } else if (extension == 'mseed') {
+
+                  this.leerMseed(valorNoVacio_recived)
+
+                } else {
+
+                  this.obsApi.getData(this.urlFile).subscribe({
+                    next: value => {
+                      if (value.data[0].und_calib == 'M/S**2') {
+                        localStorage.setItem('ogUnit', 'm')
+                      } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
+                        localStorage.setItem('ogUnit', 'gal')
+                      } else if (value.data[0].und_calib == 'G') {
+                        localStorage.setItem('ogUnit', 'g')
+                      } else {
+                        localStorage.setItem('ogUnit', '')
+                      }
+                      this.toggleTabs = true
+                      this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                      this.leer(value.data[0])
+                    },
+                    error: err => {
+                      this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                      this.loadingSpinner = false
+                      this.loadingSpinnerStaInfo = false
+                      this.btnDisable = false
+                    },
+                    complete: () => {
+                      this.loadingSpinner = false
+                      this.loadingSpinnerStaInfo =
+                        this.btnDisable = false
+                    }
+                  })
+
+                }
+
+              } else {
+                this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
+              }
             }
-          }
-        })
+          })
+        }
 
       } else {
 
@@ -332,6 +394,17 @@ export class VisorGraphComponent implements OnInit {
 
             this.obsApi.getData(this.stringdata).subscribe({
               next: value => {
+
+                if (value.data[0].und_calib == 'M/S**2') {
+                  localStorage.setItem('ogUnit', 'm')
+                } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
+                  localStorage.setItem('ogUnit', 'gal')
+                } else if (value.data[0].und_calib == 'G') {
+                  localStorage.setItem('ogUnit', 'g')
+                } else {
+                  localStorage.setItem('ogUnit', '')
+                }
+
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
               },
               error: err => {
@@ -364,8 +437,19 @@ export class VisorGraphComponent implements OnInit {
             this.obsApi.getData(this.urlFile).subscribe({
               next: value => {
 
+                if (value.data[0].und_calib == 'M/S**2') {
+                  localStorage.setItem('ogUnit', 'm')
+                } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
+                  localStorage.setItem('ogUnit', 'gal')
+                } else if (value.data[0].und_calib == 'G') {
+                  localStorage.setItem('ogUnit', 'g')
+                } else {
+                  localStorage.setItem('ogUnit', '')
+                }
+
                 this.toggleTabs = true
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                this.leer(value.data[0])
               },
               error: err => {
                 this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
@@ -390,99 +474,11 @@ export class VisorGraphComponent implements OnInit {
         }
       }
 
-      // this.obsApi.uploadFile(valorNoVacio).subscribe({4
-      //   next: value => {
-      //     this.idFile = value.id
-      //     this.urlFile = value.file
-      //     this.stringdata = value.string_data
-
-      //     localStorage.setItem('urlFileUpload', value.file)
-      //     localStorage.setItem('urlSearched', value.string_data)
-
-      //   },
-      //   error: err => {
-      //     this.loadingSpinner = false
-      //     this.loadingSpinnerStaInfo = false
-      //     // console.error('REQUEST API ERROR: ' + err.message)
-      //     this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
-      //   },
-      //   complete: () => {
-      //     let valorNoVacio_recived: any = this.urlFile || this.stringdata
-      //     let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
-      //     let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
-
-      //     if (this.urlFile == null) {
-
-      //       if (extension == 'txt') {
-
-      //         this.leerTxt(valorNoVacio_recived)
-
-      //       } else if (extension == 'mseed') {
-
-      //         this.leerMseed(valorNoVacio_recived)
-
-      //       } else {
-
-      //         this.obsApi.getData(this.stringdata).subscribe({
-      //           next: value => {
-      //             this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-      //           },
-      //           error: err => {
-      //             this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-      //             this.loadingSpinner = false
-      //             this.loadingSpinnerStaInfo = false
-      //           },
-      //           complete: () => {
-      //             this.loadingSpinner = false
-      //             this.loadingSpinnerStaInfo = false
-      //           }
-      //         })
-
-      //       }
-
-      //     } else if (this.stringdata == null) {
-
-      //       if (extension == 'txt') {
-
-      //         this.leerTxt(valorNoVacio_recived)
-
-      //       } else if (extension == 'mseed') {
-
-      //         this.leerMseed(valorNoVacio_recived)
-
-      //       } else {
-
-      //         this.obsApi.getData(this.urlFile).subscribe({
-      //           next: value => {
-
-      //             this.toggleTabs = true
-      //             this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-      //           },
-      //           error: err => {
-      //             this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-      //             this.loadingSpinner = false
-      //             this.loadingSpinnerStaInfo = false
-      //           },
-      //           complete: () => {
-      //             this.loadingSpinner = false
-      //             this.loadingSpinnerStaInfo = false
-      //           }
-      //         })
-
-      //       }
-
-      //     } else {
-      //       this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
-      //       this.loadingSpinner = false
-      //       this.loadingSpinnerStaInfo = false
-      //     }
-      //   }
-      // })
-
     } else {
       this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
       this.loadingSpinner = false
       this.loadingSpinnerStaInfo = false
+      this.btnDisable = false
     }
   }
 
@@ -502,10 +498,7 @@ export class VisorGraphComponent implements OnInit {
       .subscribe({
         next: value => {
 
-          console.log(value);
-          console.log(value.url);
-
-          this.toggleTabs = true
+          // this.toggleTabs = true
 
           if (value.url == '') {
 
@@ -522,10 +515,11 @@ export class VisorGraphComponent implements OnInit {
             localStorage.setItem('urlFileUpload', value.url)
             localStorage.setItem('ogUnit', value.unit)
 
-            this.obsApi.getData(value.url).subscribe({
+            this.stopTxt = this.obsApi.getData(value.url).subscribe({
               next: value => {
                 this.toggleTabs = true
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                this.leer(value.data[0])
               },
               error: err => {
                 this.snackBar.open('⚠️ Error CTS-DT', 'cerrar', snackBar)
@@ -542,8 +536,16 @@ export class VisorGraphComponent implements OnInit {
 
 
           }
-
         },
+        error: err => {
+          this.snackBar.open('⚠️ Error ', 'cerrar', snackBar)
+          this.loadingSpinner = false
+          this.loadingSpinnerStaInfo = false
+          this.btnDisable = false
+        },
+        complete: () => {
+          this.loadingSpinner = false
+        }
       }
 
       )
@@ -565,15 +567,8 @@ export class VisorGraphComponent implements OnInit {
     this.matDialog.open(ArchivoMseedComponent, matDialogConfig).afterClosed()
       .subscribe({
         next: valueUrl => {
-
           // this.toggleTabs = true
-          console.log(valueUrl);
-
           if (valueUrl.url == '') {
-
-            this.urlFile = valueUrl.url
-
-            localStorage.setItem('urlFileUpload', valueUrl.url)
 
             this.loadingSpinner = false
             this.loadingSpinnerStaInfo = false
@@ -583,13 +578,16 @@ export class VisorGraphComponent implements OnInit {
           } else {
 
             this.urlFile = valueUrl.url
+            this.original_unit = valueUrl.unit
 
             localStorage.setItem('urlFileUpload', valueUrl.url)
+            localStorage.setItem('ogUnit', valueUrl.unit)
 
-            this.obsApi.getData(valueUrl.url).subscribe({
+            this.stopMseed = this.obsApi.getData(valueUrl.url).subscribe({
               next: value => {
                 this.toggleTabs = true
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                this.leer(value.data[0])
               },
               error: err => {
                 this.snackBar.open('⚠️ Error CTS-DT', 'cerrar', snackBar)
@@ -606,6 +604,15 @@ export class VisorGraphComponent implements OnInit {
           }
 
         },
+        error: err => {
+          this.snackBar.open('⚠️ Error ', 'cerrar', snackBar)
+          this.loadingSpinner = false
+          this.loadingSpinnerStaInfo = false
+          this.btnDisable = false
+        },
+        complete: () => {
+          this.loadingSpinner = false
+        }
       }
 
       )
@@ -674,6 +681,8 @@ export class VisorGraphComponent implements OnInit {
       TrimForm,
       graph,
     });
+
+    this.lastIndexTab = this.tabs.length - 1
 
     this.ToggleGraph = true;
 
@@ -779,6 +788,7 @@ export class VisorGraphComponent implements OnInit {
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
+    let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -824,7 +834,7 @@ export class VisorGraphComponent implements OnInit {
 
     this.isLoading = true
 
-    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit, '').subscribe({
+    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -867,6 +877,7 @@ export class VisorGraphComponent implements OnInit {
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
+    let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -909,7 +920,7 @@ export class VisorGraphComponent implements OnInit {
     this.isLoading = true
 
 
-    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit, '').subscribe({
+    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -947,273 +958,6 @@ export class VisorGraphComponent implements OnInit {
     })
   }
 
-  fourier(index: number) {
-
-    this.four = {}
-
-    const snackBar = new MatSnackBarConfig();
-    snackBar.duration = 3 * 1000;
-    snackBar.panelClass = ['snackBar-validator'];
-
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
-
-    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
-
-    let sta = this.tabs[index].dataEst.station
-    let cha = this.tabs[index].dataEst.channel
-
-    console.log(dataToUse);
-    console.log(sta + ' - ' + cha);
-    
-
-    this.obsApi.createFourier(dataToUse, sta, cha).subscribe({
-      next: value => {
-        this.ToggleGraph = false
-        this.loadingSpinnerData = true
-
-        console.log(value);
-        console.log(value.periodo);
-        console.log(value.amplitud);
-        
-        this.four = {
-          animationDuration: 5000,
-          title: {
-            text: 'Amplitud de Fourier',
-          },
-          tooltip: {
-            trigger: 'axis',
-            axisPointer: {
-              type: 'cross'
-            }
-          },
-          toolbox: {
-            show: true,
-            itemSize: 25,
-            feature: {
-              dataZoom: {
-                yAxisIndex: 'none'
-              },
-              dataView: { readOnly: true },
-              restore: {},
-              saveAsImage: {},
-            },
-          },
-          grid: {
-            top: 100
-          },
-          xAxis: {
-            type: 'category',
-            data: value.periodo,
-            name: "Periodo",
-            silent: false,
-            minorSplitLine: {
-              show: true
-            },
-            splitLine: {
-              show: false,
-            },
-            axisLabel: {
-              hideOverlap: true,
-            },
-          },
-          yAxis: {
-            min: 0.01,
-            type: 'log',
-            name: "Amplitud",
-            axisLabel: {
-              hideOverlap: true,
-              formatter: function (value: number) {
-                return value.toExponential();
-              }
-            },
-          },
-          dataZoom: [
-            {
-              type: 'inside',
-              start: 0,
-              end: 100,
-              zoomLock: true
-            },
-            {
-              start: 0,
-              end: 100,
-              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
-              handleSize: '100%',
-              handleStyle: {
-                color: '#ddd'
-              }
-            }
-          ],
-          series: [
-            {
-              type: 'line',
-              showSymbol: false,
-              data: value.amplitud,
-              animationDelay: (idx: number) => idx * 10,
-            },
-          ],
-          graphic: [
-            {
-              type: 'image',
-              id: 'logo3',
-              left: 'center',
-              top: 'center',
-              z: -10,
-              bounding: 'all',
-              style: {
-                image: 'assets/ncnLogoColor.png',
-                width: 300,
-                height: 300,
-                opacity: 0.2
-              }
-            },
-          ],
-          animationEasing: 'elasticOut',
-          animationDelayUpdate: (idx: number) => idx * 5,
-        };
-      },
-      error: err => {
-        console.log('error fourier');
-        
-      },
-      complete: () => {
-        console.log('complete fourier');
-        
-      }
-    })
-
-  }
-
-  espectroFourier(index: number) {
-
-    this.four_es = {}
-
-    const snackBar = new MatSnackBarConfig();
-    snackBar.duration = 3 * 1000;
-    snackBar.panelClass = ['snackBar-validator'];
-
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
-
-    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
-
-    let sta = this.tabs[index].dataEst.station
-    let cha = this.tabs[index].dataEst.channel
-
-    console.log(dataToUse);
-    console.log(sta + ' - ' + cha);
-    
-
-    this.obsApi.createFourierEspc(dataToUse, sta, cha).subscribe({
-      next: value => {
-        this.ToggleGraph = false
-        this.loadingSpinnerData = true
-
-        console.log(value);
-        console.log(value.periodo);
-        console.log(value.amplitud);
-        
-        this.four_es = {
-          animationDuration: 5000,
-          title: {
-            text: 'Aceleracion Espectral 5% Amortiguamiento',
-          },
-          tooltip: {
-            trigger: 'axis',
-            axisPointer: {
-              type: 'cross'
-            }
-          },
-          toolbox: {
-            show: true,
-            itemSize: 25,
-            feature: {
-              dataZoom: {
-                yAxisIndex: 'none'
-              },
-              dataView: { readOnly: true },
-              restore: {},
-              saveAsImage: {},
-            },
-          },
-          grid: {
-            top: 100
-          },
-          xAxis: {
-            data: value.periodo,
-            name: "Periodo",
-            silent: false,
-            minorSplitLine: {
-              show: true
-            },
-            splitLine: {
-              show: false,
-            },
-            axisLabel: {
-              hideOverlap: true,
-            },
-          },
-          yAxis: {
-            name: "Amplitud",
-          },
-          dataZoom: [
-            {
-              type: 'inside',
-              start: 0,
-              end: 100,
-              zoomLock: true
-            },
-            {
-              start: 0,
-              end: 100,
-              handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
-              handleSize: '100%',
-              handleStyle: {
-                color: '#ddd'
-              }
-            }
-          ],
-          series: [
-            {
-              type: 'line',
-              showSymbol: false,
-              data: value.amplitud,
-              animationDelay: (idx: number) => idx * 10,
-            },
-          ],
-          graphic: [
-            {
-              type: 'image',
-              id: 'logo3',
-              left: 'center',
-              top: 'center',
-              z: -10,
-              bounding: 'all',
-              style: {
-                image: 'assets/ncnLogoColor.png',
-                width: 300,
-                height: 300,
-                opacity: 0.2
-              }
-            },
-          ],
-          animationEasing: 'elasticOut',
-          animationDelayUpdate: (idx: number) => idx * 5,
-        };
-      },
-      error: err => {
-        console.log('error fourier');
-        
-      },
-      complete: () => {
-        console.log('complete fourier');
-        
-      }
-    })
-
-  }
-
   unitConverter(menuIndex: number, index: number) {
 
     const snackBar = new MatSnackBarConfig();
@@ -1231,6 +975,7 @@ export class VisorGraphComponent implements OnInit {
       'cm/s2 [GaL]': 'gal',
       'm/s2': 'm',
       'G': 'g',
+      'mg': 'mg',
       'unk': ''
     };
 
@@ -1322,6 +1067,7 @@ export class VisorGraphComponent implements OnInit {
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
+    let unit_from = localStorage.getItem('ogUnit')!
 
     this.tabs[index].base = 'linear'
     this.tabs[index].unit = 'gal'
@@ -1339,7 +1085,7 @@ export class VisorGraphComponent implements OnInit {
 
     this.isLoading = true
 
-    this.obsApi.autoAdjust(dataToUse, sta, cha,'').subscribe({
+    this.obsApi.autoAdjust(dataToUse, sta, cha, unit_from).subscribe({
       next: value => {
 
         this.ToggleGraph = false
@@ -1374,12 +1120,82 @@ export class VisorGraphComponent implements OnInit {
     })
   }
 
+
+
+  // -------------------------------------------------------------------------------------
+
+  fourier(index: number) {
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 3 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    const matDialogConfig = new MatDialogConfig()
+    matDialogConfig.disableClose = true;
+    
+
+    var dataString: string = localStorage.getItem('urlSearched')!
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
+
+    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+
+    let sta = this.tabs[index].dataEst.station
+    let cha = this.tabs[index].dataEst.channel
+
+    let sendData = {
+      "url" : dataToUse,
+      "station" : sta,
+      "channel" : cha
+    }
+
+    matDialogConfig.data = sendData
+
+    this.matDialog.open(AmplitudFourierComponent, matDialogConfig)
+
+    
+  }
+
+  espectFourier(index: number) {
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 3 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    const matDialogConfig = new MatDialogConfig()
+    matDialogConfig.disableClose = true;
+
+    var dataString: string = localStorage.getItem('urlSearched')!
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
+
+    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+
+    let sta = this.tabs[index].dataEst.station
+    let cha = this.tabs[index].dataEst.channel
+    
+    let sendData = {
+      "url" : dataToUse,
+      "station" : sta,
+      "channel" : cha
+    }
+    
+    matDialogConfig.data = sendData
+
+    this.matDialog.open(EspectroFourierComponent, matDialogConfig)
+
+   
+
+
+  }
+
+  // -------------------------------------------------------------------------------------
+
+
+
+
   // ! Generador de Graficos
   graphGenerator(e: any, value: any, dataformat: any) {
 
     const st = new Date(e.starttime).getTime()
     const et = new Date(e.endtime).getTime()
-
 
     const diff = et - st;
     const h = Math.floor(diff / (1000 * 60 * 60));
@@ -1390,42 +1206,53 @@ export class VisorGraphComponent implements OnInit {
     const graphArr: any = []
 
     let und = e.und_calib
-
     und ? e.und_calib : 'unk'
 
-    const dataZoomConfig = [
-      {
-        type: 'inside',
-        start: 0,
-        end: 100,
-        zoomLock: true
-      },
-      {
-        start: 0,
-        end: 100,
-        handleIcon: 'M10 0 L5 10 L0 0 L5 0 Z',
-        handleSize: '100%',
-        handleStyle: {
-          color: '#ddd'
-        }
-      }
-    ]
+    let peakA = value[0].peak_a || 0.00;
+    let peakV = value[0].peak_v || 0.00;
+    let peakD = value[0].peak_d || 0.00;
 
-    let peakA = value[0].peak_a || 0.00
-    let peakV = value[0].peak_v || 0.00
-    let peakD = value[0].peak_d || 0.00
+    let peakAFormated = this.decimalPipe.transform(peakA, '1.3-3');
+    let peakVFormated = this.decimalPipe.transform(peakV, '1.3-3');
+    let peakDFormated = this.decimalPipe.transform(peakD, '1.3-3');
+
+    let peakaff;
+    let peakvff;
+    let peakdff;
+
+    if (peakAFormated!.endsWith('.000')) {
+      peakaff = this.decimalPipe.transform(peakA, '1.6-6');
+    } else {
+      peakaff = peakAFormated;
+    }
+
+    if (peakVFormated!.endsWith('.000')) {
+      peakvff = this.decimalPipe.transform(peakV, '1.6-6');
+    } else {
+      peakvff = peakVFormated;
+    }
+
+    if (peakDFormated!.endsWith('.000')) {
+      peakdff = this.decimalPipe.transform(peakD, '1.6-6');
+    } else {
+      peakdff = peakDFormated;
+    }
+
+    let fechaIn = this.dateConverter(e.starttime)
+    let fechaFn = this.dateConverter(e.endtime)
 
     const accel = {
       animationDuration: 5000,
       title: {
         text: `${dataformat} - Aceleracion | ${e.network}.${e.station}.${e.location}.${e.channel}`,
-        subtext: `Inicio: ${e.starttime} || Fin: ${e.endtime} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
+        subtext: `Inicio: ${fechaIn} || Fin: ${fechaFn} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
       },
       tooltip: {
         trigger: 'axis',
         axisPointer: {
           type: 'cross'
-        }
+        },
+        triggerOn: 'click'
       },
       toolbox: {
         show: true,
@@ -1461,6 +1288,7 @@ export class VisorGraphComponent implements OnInit {
               document.body.removeChild(downloadLink);
             }
           },
+
         }
       },
       grid: {
@@ -1530,7 +1358,7 @@ export class VisorGraphComponent implements OnInit {
             fill: '#333',
             width: 220,
             overflow: 'break',
-            text: `PGA: ${parseFloat(peakA).toFixed(7)} [${value[0].trace_a_unit}]`,
+            text: `PGA: ${peakaff} [${value[0].trace_a_unit}]`,
             font: '14px Microsoft YaHei'
           }
         }
@@ -1543,10 +1371,14 @@ export class VisorGraphComponent implements OnInit {
       animationDuration: 5000,
       title: {
         text: `${dataformat} - Velocidad | ${e.network}.${e.station}.${e.location}.${e.channel}`,
-        subtext: `Inicio: ${e.starttime} || Fin: ${e.endtime} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
+        subtext: `Inicio: ${fechaIn} || Fin: ${fechaFn} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
       },
       tooltip: {
         trigger: 'axis',
+        axisPointer: {
+          type: 'cross'
+        },
+        triggerOn: 'click'
       },
       toolbox: {
         show: true,
@@ -1651,7 +1483,7 @@ export class VisorGraphComponent implements OnInit {
             fill: '#333',
             width: 220,
             overflow: 'break',
-            text: `PGV: ${parseFloat(peakV).toFixed(7)} [${value[0].trace_v_unit}] `,
+            text: `PGV: ${peakvff} [${value[0].trace_v_unit}] `,
             font: '14px Microsoft YaHei'
           }
         }
@@ -1664,13 +1496,14 @@ export class VisorGraphComponent implements OnInit {
       animationDuration: 5000,
       title: {
         text: `${dataformat} - Desplazamiento | ${e.network}.${e.station}.${e.location}.${e.channel}`,
-        subtext: `Inicio: ${e.starttime} || Fin: ${e.endtime} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
+        subtext: `Inicio: ${fechaIn} || Fin: ${fechaFn} || Duracion: ${h}hrs. ${m}min. ${s}seg. ${ms}ms.`,
       },
       tooltip: {
         trigger: 'axis',
         axisPointer: {
           type: 'cross'
-        }
+        },
+        triggerOn: 'click'
       },
       toolbox: {
         show: true,
@@ -1775,7 +1608,7 @@ export class VisorGraphComponent implements OnInit {
             fill: '#333',
             width: 220,
             overflow: 'break',
-            text: `PGD: ${parseFloat(peakD).toFixed(7)} [${value[0].trace_d_unit}]`,
+            text: `PGD: ${peakdff} [${value[0].trace_d_unit}]`,
             font: '14px Microsoft YaHei'
           }
         }
@@ -1791,6 +1624,8 @@ export class VisorGraphComponent implements OnInit {
     return graphArr
 
   }
+
+
 
   // ? Clasificacion de Estaciones
 
@@ -1838,6 +1673,10 @@ export class VisorGraphComponent implements OnInit {
   deleteFile() {
     localStorage.clear()
 
+    if (this.stopMseed != undefined) {
+      this.stopMseed.unsubscribe()
+    }
+
     this.urlFile = ''
     this.stringdata = ''
 
@@ -1847,6 +1686,11 @@ export class VisorGraphComponent implements OnInit {
 
     this.btnShow = false;
     this.btnCancel = true;
+    this.btnDisable = false
+
+    this.loadingSpinner = false
+    this.loadingSpinnerStaInfo = false
+
     this.fileInput.nativeElement.value = ''
 
     this.groupedData = {}
@@ -1856,6 +1700,7 @@ export class VisorGraphComponent implements OnInit {
 
   togglePanel() {
     this.hideStaPanel = !this.hideStaPanel
+    this.hideStaPanel2 = !this.hideStaPanel2
   }
 
   filterData() {
@@ -1905,55 +1750,64 @@ export class VisorGraphComponent implements OnInit {
     }
   }
 
-  // ? Utilidades
 
   dateConverter(date: string) {
 
     const fechaHora = new Date(date);
 
     const año = fechaHora.getFullYear();
-    const mes = fechaHora.getMonth() + 1; // Los meses comienzan desde 0
-    const dia = fechaHora.getDate();
-    const horas = fechaHora.getHours();
-    const minutos = fechaHora.getMinutes();
-    const segundos = fechaHora.getSeconds();
+    const mes = ("0" + (fechaHora.getMonth() + 1)).slice(-2);
+    const dia = ("0" + fechaHora.getDate()).slice(-2);
+    const horas = ("0" + fechaHora.getHours()).slice(-2);
+    const minutos = ("0" + fechaHora.getMinutes()).slice(-2);
+    const segundos = ("0" + fechaHora.getSeconds()).slice(-2);
 
-    const formatoFechaHora = `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+    const formatoFechaHora = `${año}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
 
     return formatoFechaHora
+  }
+
+  showRegisterDialog(opcion: String) {
+
+    const matDialogConfig = new MatDialogConfig()
+    matDialogConfig.disableClose = true;
+    matDialogConfig.data = opcion
+
+    this.matDialog.open(RegisterDialogComponent, matDialogConfig)
   }
 
   resetGraph(tabInfo: any) {
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
+    let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
     this.isLoading = true
 
-    this.obsApi.getTraceData(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel).subscribe({
-      next: value => {
+    this.obsApi.getTraceData(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel, unit_from)
+      .subscribe({
+        next: value => {
 
-        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`);
+          const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`)
+          if (indx !== -1) {
 
-        if (indx !== -1) {
+            const graph = this.graphGenerator(this.stationInfo, value, '(RAWDATA)')
 
-          const graph = this.graphGenerator(this.stationInfo, value, '(RAWDATA)')
-
-          this.tabs[indx].graph = graph
-          this.tabs[indx].base = ''
-          this.tabs[indx].unit = ''
-          this.cdRef.detectChanges()
+            this.tabs[indx].graph = graph
+            this.tabs[indx].base = ''
+            this.tabs[indx].unit = ''
+            this.cdRef.detectChanges()
+          }
+        },
+        error: err => { this.isLoading = false },
+        complete: () => {
+          this.loadingSpinnerGraph = false
+          this.ToggleGraph = true
+          this.isLoading = false
         }
-      },
-      error: err => { this.isLoading = false },
-      complete: () => {
-        this.loadingSpinnerGraph = false
-        this.ToggleGraph = true
-        this.isLoading = false
-      }
-    })
+      })
 
   }
 
@@ -1977,5 +1831,10 @@ export class VisorGraphComponent implements OnInit {
     } else {
       return { 'background-color': 'black' }
     }
+  }
+
+  toggleButton() {
+    this.isButtonActive = !this.isButtonActive;
+    this.hideStaPanel = !this.hideStaPanel
   }
 }
