@@ -1,5 +1,5 @@
 <div *ngIf="hideStaPanel" [@enterAnimation2] class="winTitle">
-    <h2><b>(DEMO) - Lector de Archivos Acelerográficos</b></h2>
+    <h2><b>Lector de Archivos Acelerográficos</b></h2>
     <h4 fxHide.lt-sm>Podras manipular archivos de diferentes acelerografos y aplicar las diferentes herramientas
         que ofrecemos </h4>
 </div>
@@ -14,7 +14,7 @@
             <div class="inputUrl" [ngStyle.lt-sm]="{'width': '250px'}" fxLayout="row" fxLayoutGap="5">
                 <mat-icon class="colorIcon">link</mat-icon>
                 <input matInput type="text" formControlName="url"
-                    placeholder="Ejm: http://examples.obspy.org/RJOB_061005_072159.ehz.new">
+                    placeholder="Ejm: https://ncn.pe/files/NC.NCN01.00.HNZ.mseed">
             </div>
 
             <p fxHide.lt-md>O</p>
@@ -81,12 +81,17 @@
         </button>
     </div>
 
-    <div *ngIf="hideStaPanel" [@enterAnimation] class="stInfo" fxLayout="column" fxLayout.lt-lg="row"
+    <div *ngIf="hideStaPanel2" [@enterAnimation] class="stInfo" fxLayout="column" fxLayout.lt-lg="row"
         fxLayoutGap="10" fxFlex="23">
 
         <div fxLayout="column" [fxHide.lt-lg]="showResponsivebar" fxLayoutGap="5" fxFlex.lt-lg="33">
             <div style="padding-left: 10px;">
-                <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>ESTACIONES ENCONTRADAS</b></h2>
+                <div fxLayout="row" fxLayoutAlign="space-between">
+                    <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>ESTACIONES ENCONTRADAS</b></h2>
+                    <button mat-icon-button (click)="toggleButton()">
+                        <mat-icon>{{ isButtonActive ? 'expand_more' :  'expand_less' }}</mat-icon>
+                      </button>
+                </div>
                 <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Busque y eliga la estacion que quiera consultar</h4>
             </div>
             <div class="listSt" fxLayout="column" fxLayoutGap="5">
@@ -286,7 +291,9 @@
     </div>
 
     <div [@enterAnimation3] class="stGraph" fxLayout="column" fxLayoutGap="10" fxFlex>
-
+        <div *ngIf="loadingSpinnerGraph" style="padding: 2px;">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        </div>
         <div class="graphContainer" fxLayout="column" fxLayoutAlign="center center">
 
             <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
@@ -295,7 +302,7 @@
                 <h3> <b>Cargando Datos ....</b> </h3>
             </div>
 
-            <mat-tab-group (selectedTabChange)="onTabChange($event)" #tabGroup style="width: 100%;"
+            <mat-tab-group  [selectedIndex]="lastIndexTab" (selectedTabChange)="onTabChange($event)" #tabGroup style="width: 100%;"
                 [ngStyle]="showtabs(toggleTabs)">
 
                 <mat-tab *ngFor="let tab of tabs; let i = index" [label]="getTabLabel(tab)">
@@ -385,14 +392,14 @@
                                     <mat-divider class="separator" vertical="true"></mat-divider>
                                     <button mat-icon-button type="button" (click)="fourier(i)">
                                         <mat-icon class="colorIconBar"
-                                            title="Ocultar Paneles">area_chart</mat-icon>
+                                            title="Amplitud de Fourier">area_chart</mat-icon>
                                     </button>
                                 </div>
 
                                 <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                                     <button mat-icon-button type="button" (click)="espectFourier(i)">
                                         <mat-icon class="colorIconBar"
-                                        title="Ocultar Paneles">settings_input_component</mat-icon>
+                                        title="Espectro de Fourier">settings_input_component</mat-icon>
                                     </button>
                                     <mat-divider class="separator" vertical="true"></mat-divider>
                                 </div>

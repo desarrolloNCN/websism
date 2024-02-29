@@ -54,18 +54,14 @@ export class AmplitudFourierComponent implements OnInit {
           xaxis: {
             title: 'Periodo [s]',
             type: 'log',
-            autorange: true,
-            exponentformat: 'e',
-            showexponent: 'all',
-            range: [0.01, 10]
+            range: [-2, 1],
           },
           yaxis: {
             title: 'Amplitud [cm/s]',
             type: 'log',
-            autorange: true,
             exponentformat: 'e',
             showexponent: 'all',
-            range: [0.001, 0.1]
+
           },
       
         };
