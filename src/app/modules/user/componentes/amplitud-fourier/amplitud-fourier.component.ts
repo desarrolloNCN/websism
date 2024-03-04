@@ -11,7 +11,7 @@ import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 export class AmplitudFourierComponent implements OnInit {
 
   trace1: any = {}
-  data : any= []
+  data: any = []
   layout: any = {}
   config: any = {}
 
@@ -29,28 +29,39 @@ export class AmplitudFourierComponent implements OnInit {
     this.loadingSpinnerGraph = true
 
     this.loadGraph()
-   
+
   }
 
-  async loadGraph(){
+  async loadGraph() {
 
-    this.obsApi.createFourier(this.dataFourier.url, this.dataFourier.station, this.dataFourier.channel).subscribe({
+    let url = this.dataFourier.url
+    let sta = this.dataFourier.station
+    let cha = this.dataFourier.channel
+
+    this.obsApi.createFourier(url, sta, cha).subscribe({
       next: value => {
 
         this.trace1 = {
           type: "scatter",
           mode: "lines",
-          name: 'AAPL High',
+          name: 'Fourier',
           x: value.periodo,
           y: value.amplitud,
           line: { color: '#31456D' }
         }
-      
-      
+
+
         this.data = [this.trace1];
-      
+
         this.layout = {
           title: 'Amplitud de Fourier [cm/s]',
+          
+          images: [{
+            name: 'NCN Nuevo Control',
+            source: 'https://ncn.pe/wp-content/uploads/2023/09/Logo_NCN_1-1.jpg',
+            opacity: 0.1,
+            layer: "below"
+          }],
           xaxis: {
             title: 'Periodo [s]',
             type: 'log',
@@ -63,9 +74,9 @@ export class AmplitudFourierComponent implements OnInit {
             showexponent: 'all',
 
           },
-      
+
         };
-      
+
         this.config = {
           displaylogo: false,
           responsive: true
@@ -74,11 +85,11 @@ export class AmplitudFourierComponent implements OnInit {
       },
       error: err => { },
       complete: () => {
-        this.loadingSpinnerGraph = false 
+        this.loadingSpinnerGraph = false
         this.loadedPlot = true
       }
     })
-  }  
+  }
 
   Close() {
     let respData = {

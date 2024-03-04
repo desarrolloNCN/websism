@@ -55,15 +55,15 @@
                 <span>INICIO</span>
             </button>
             <button mat-menu-item routerLink="/lectorDemo">
-                <mat-icon>voicemail</mat-icon>
+                <mat-icon>sensors</mat-icon>
                 <span>LECTOR ACEL.</span>
             </button>
             <button mat-menu-item>
-                <mat-icon>notifications_off</mat-icon>
+                <mat-icon>comment_bank</mat-icon>
                 <span>ACERCA DE</span>
             </button>
             <button mat-menu-item>
-                <mat-icon>notifications_off</mat-icon>
+                <mat-icon>contact_page</mat-icon>
                 <span>CONTACTO</span>
             </button>
         </mat-menu>
@@ -71,8 +71,8 @@
     </div>
 
     <div *ngIf="showUserNav" fxLayout="row" fxLayoutGap="10" fxLayoutAlign="center center">
-        <img class="avatar"   >
-        <span class="username" > {{apiAuth.name || 'Waiting User'}} </span>
+        <!-- <img class="avatar"   > -->
+        <span class="username" > {{apiAuth.name || 'Waiting User..'}} </span>
         <button mat-icon-button [matMenuTriggerFor]="menuUser" aria-label="Example icon-button with a menu">
             <mat-icon class="coloIconTop">more_vert</mat-icon>
         </button>
@@ -81,12 +81,12 @@
                 <mat-icon>login</mat-icon>
                 <span>Login</span>
             </button>
-            <button mat-menu-item routerLink="/user/lectorDemo">
+            <button mat-menu-item routerLink="/user">
                 <mat-icon>person_add</mat-icon>
                 <span>Perfil</span>
             </button>
-            <button mat-menu-item routerLink="/user/lectorDemo">
-                <mat-icon>person_add</mat-icon>
+            <button mat-menu-item routerLink="/user/lectorAcel">
+                <mat-icon>sensors</mat-icon>
                 <span>Lector Acel.</span>
             </button>
             <button mat-menu-item (click)="redirect()">

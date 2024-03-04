@@ -15,7 +15,9 @@ export class UserHomeComponent implements OnInit {
   IniResp = ''
   showSpinner = false
 
-  testa = ''
+  initContainer = {
+    "background" : "/assets/mine.jpg"
+  }
 
   constructor(
     private router: Router,
@@ -25,20 +27,7 @@ export class UserHomeComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.obs.testuser().subscribe({
-      next: value => {
-        this.testa = value
-      },
-      error: err => {
-        this.testa = err
-      },
-      complete: () =>{
-        alert('completo')
-      }
-    })
-
   }
-
 
 
   getJsonResponse() {

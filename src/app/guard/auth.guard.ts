@@ -1,51 +1,44 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, catchError, map, of } from 'rxjs';
 import { AuthService } from '../service/auth.service';
+import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthGuard implements CanActivate {
 
-  private isAuth = false
-
   constructor(
     private authService: AuthService,
-    private router: Router
-  ) {
-
-    this.authService.getToken().subscribe({
-      next: value => {
-        
-        console.log(value.username);
-        
-        if (!value.username || value.username == 'null' || value.username == null || value.username == undefined) {
-          this.isAuth = false
-        } else {
-          this.isAuth = true
-        }
-
-      },
-      error: err => {
-        this.isAuth = false
-      },
-    })
-
-  }
+    private router: Router,
+    private snackBar: MatSnackBar
+  ) { }
 
   canActivate(
     route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
+    state: RouterStateSnapshot): Observable<boolean> | Promise<boolean | UrlTree> | boolean | UrlTree {
 
-    if (this.isAuth) {
-      this.router.navigate(['/user']);
-      return true
-    } else {
-      this.router.navigateByUrl('https://qs.ncn.pe/site')
-      return false
-    }
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 5 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
 
+    return this.authService.getToken().pipe(
+      map((data) => {
+        if (data.username == null) {
+          this.snackBar.open('⚠️ Acceso Denegado', 'cerrar', snackBar)
+          this.router.navigateByUrl('/home')
+          return false
+        } else {
+          return true
+        }
+      }),
+      catchError(() => {
+        this.router.navigateByUrl('/home')
+        return of(false)
+      })
+    )
+    return true
   }
 
 }

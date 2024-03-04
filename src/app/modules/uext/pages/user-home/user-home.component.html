@@ -1,45 +1,124 @@
-<div class="home" fxLayout="column">
+<div class="home">
 
     <app-nav-bar></app-nav-bar>
 
-    <div style="height: 600px ;">
+    <div style="height: 550px ; position: relative; width: 100%;">
 
         <img src="/assets/mine.jpg" class="topImage">
 
-        <div style="position: absolute; top: 300px; padding-inline: 80px;" fxLayout="row" fxLayoutAlign="space-around">
+        <div fxHide.lt-md style="position: absolute; top: 250px; padding-inline: 80px;" fxLayout="row"
+            fxLayoutAlign="space-around">
 
-            <div fxHide.lt-md fxLayout="column" fxLayoutGap="15">
-                <p style="color: white; font-size: 35px;"><strong>Lorem, ipsum dolor sit amet</strong> </p>
-                <p style="color: rgb(207, 207, 207); font-size: 20px; width: 350px;">Lorem, ipsum dolor sit amet
-                    consectetur adipisicing elit. Ex sapiente voluptate, perspiciatis ut enim</p>
+            <div fxLayout="column" fxLayoutGap="15">
+                <p style="color: white; font-size: 30px;">
+                    <strong style="color: white; font-size: 38px;">
+                        QuakeSense
+                    </strong>
+                    | Nuevo Control
+                </p>
+                <p style="color: rgb(238, 238, 238); font-size: 18px; width: 600px;"> <b>QuakeSense</b> presenta una
+                    interfaz de usuario
+                    moderna y fácil de usar, que permite a los usuarios cargar y explorar rápidamente archivos
+                    acelerográficos.</p>
                 <div class="demoLector" fxLayout="row" fxLayoutAlign="center center">
-                    <mat-icon>call_made</mat-icon>
+                    <mat-icon>near_me</mat-icon>
+                    <button mat-button routerLink="/lectorDemo">Version Demo</button>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div fxHide="true" fxShow.lt-md style="position: absolute; top: 250px; width: 100%;">
+
+            <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="15">
+                <p style="color: white; font-size: 22px;">
+                    <strong style="color: white; font-size: 30px;">
+                        QuakeSense
+                    </strong>
+                    | Nuevo Control
+                </p>
+                <p style="color: rgb(238, 238, 238); font-size: 18px; width: 425px; text-align: center;">
+                    <b>QuakeSense</b> presenta una
+                    interfaz de usuario
+                    moderna y fácil de usar, que permite a los usuarios cargar y explorar rápidamente archivos
+                    acelerográficos.
+                </p>
+                <div class="demoLector" fxLayout="row" fxLayoutAlign="center center">
+                    <mat-icon>near_me</mat-icon>
                     <button mat-button>Version Demo</button>
                 </div>
-                
+
             </div>
 
         </div>
 
     </div>
 
-    <div>
-        <pre *ngFor="let item of testa">
-            {{item | json}}
-        </pre>
-    </div>
+    <div style=" background-color: rgb(238, 238, 238); padding-top: 30px; padding-bottom: 30px;" fxLayout="column"
+        fxLayoutAlign="start center" fxLayoutGap="15">
 
-    <div class="bodyHome" fxLayout="column" fxLayoutAlign="center center">
-        <br>
-        <br>
-        <br>
-        <button mat-button (click)="getJsonResponse()">Probar Token</button>
-        <p> {{IniResp}} </p>
-        <p> {{errorNot}} </p>
-        <pre> {{resp | json}} </pre>
-        <br>
-        <br>
-        <br>
+        <div fxLayout="column" fxLayoutAlign="center center">
+            <h5 class="upTitleMin">Sobre QuakeSense</h5>
+            <h4 class="titleMin">Es una Plataforma Web Innovadora</h4>
+            <h6 class="downtitleMin">Facilita el análisis y la visualización de datos acelerográficos recopilados por
+                estaciones sísmicas de
+                diferentes modelos y en
+                diversas ubicaciones.
+            </h6>
+        </div>
+
+        <div fxLayout="row" fxLayout.lt-md="column" fxLayoutAlign="center center" fxLayoutGap="15">
+
+            <div class="toolItem">
+                <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="15">
+                    <mat-icon class="toolItemIcon">monitor_heart</mat-icon>
+                    <div fxLayout="column" fxLayoutGap="10">
+                        <h4 class="toolItemTitle">Correcion por Linea Base</h4>
+                        <mat-divider class="toolItemDivider"></mat-divider>
+                    </div>
+                </div>
+                <h5 class="toolItemDescription">
+                    La línea de base se refiere al nivel medio o tendencia de una señal a lo largo del tiempo. <br><br>
+                    La corrección de línea base implica la eliminación o ajuste de esta tendencia para resaltar las
+                    características de la señal de interés.
+                </h5>
+            </div>
+
+            <div class="toolItem">
+                <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="15">
+                    <mat-icon class="toolItemIcon">filter_alt</mat-icon>
+                    <div fxLayout="column" fxLayoutGap="10">
+                        <h4 class="toolItemTitle">Filtros</h4>
+                        <mat-divider class="toolItemDivider"></mat-divider>
+                    </div>
+                </div>
+                <h5 class="toolItemDescription">
+                    Puedes aplicar filtros paso bajo, paso alto, paso de banda y rechazo de banda. <br><br>
+                    Estos filtros te permiten eliminar componentes de frecuencia no deseados y resaltar características
+                    específicas de la señal sísmica.
+                </h5>
+            </div>
+
+            <div class="toolItem">
+                <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="15">
+                    <mat-icon class="toolItemIcon">content_cut</mat-icon>
+                    <div fxLayout="column" fxLayoutGap="10">
+                        <h4 class="toolItemTitle">Separacion (Trim)</h4>
+                        <mat-divider class="toolItemDivider"></mat-divider>
+                    </div>
+                </div>
+                <h5 class="toolItemDescription">
+                    El recorte de datos implica la selección de un segmento específico de una señal sísmica para su
+                    análisis. <br><br>
+                    Puedes especificar el inicio y el final del segmento que deseas mantener y descartar el resto de la
+                    señal.
+                </h5>
+            </div>
+
+        </div>
+
+
     </div>
 
     <app-footer-bar></app-footer-bar>

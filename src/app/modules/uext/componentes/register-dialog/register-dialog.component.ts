@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { LectorDemoComponent } from '../../pages/lector-demo/lector-demo.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register-dialog',
@@ -13,6 +14,7 @@ export class RegisterDialogComponent implements OnInit {
 
   constructor(
     private matDialogRef: MatDialogRef<LectorDemoComponent>,
+    private router: Router,
     @Inject(MAT_DIALOG_DATA) public opcion: any
   ) { }
 
@@ -23,5 +25,10 @@ export class RegisterDialogComponent implements OnInit {
   Close() {
     this.matDialogRef.close('')
   }
+  
+  redirect() {
+    window.location.href = 'https://qs.ncn.pe/site/'
+  }
+
 
 }

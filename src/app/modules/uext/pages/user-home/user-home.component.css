@@ -21,52 +21,8 @@ h4 {
     height: 100%;
 }
 
-.banner {
-    height: 70px;
-    background-color: #18294d;
-    padding: 10px 20px 10px 20px;
-    position: sticky;
-}
-
-.logoQs {
-    height: 45px;
-    width: 45px;
-    object-fit: contain;
-}
-
-.separator {
-    border: solid #ffffff5d 1px;
-
-    height: 40px;
-}
-
-.qs {
-    margin: 0;
-    color: white;
-    font-weight: bold;
-}
-
-.subqs {
-    margin-top: -6px;
-    color: rgba(238, 238, 238, 0.904);
-}
-
-.navBar,
-a {
-    color: white;
-    font-weight: 700;
-    font-size: medium;
-    text-decoration: none;
-}
-
-.registerBtn {
-    background-color: rgb(241, 174, 72);
-    color: black;
-    box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
-}
-
 .topImage {
-    height: 600px;
+    height: 550px;
     width: 100%;
     object-fit: cover;
     object-position: 40% 40%;
@@ -82,44 +38,12 @@ a {
     box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
 }
 
-.bodyHome {
-    background-color: #f0f0f0;
-    height: 100%;
-}
-
-.winTitle {
-    padding-bottom: 20px;
-    text-align: center;
-}
-
-.dndZoneContainer {
-    width: 60%;
-    background-color: whitesmoke;
-    padding: 5px;
-    border-radius: 10px;
-}
-
-.dndZone {
-    background-color: rgba(231, 231, 231, 0.438);
-    height: 300px;
-    border-radius: 10px;
-    border: 0.5px dashed #B6B6B6;
-}
-
 .colorIcon {
     color: #606060;
 }
 
 .sendInfo {
     width: 100px;
-}
-
-.inputUrl {
-    width: 450px;
-    padding: 8px;
-    border-radius: 10px;
-    background-color: white;
-    box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
 }
 
 .uploadbtn {
@@ -131,72 +55,63 @@ a {
     box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
 }
 
+.upTitleMin {
+    color: rgb(241, 174, 72);
+    font-weight: 600;
+    font-size: 17px;
+}
+
+.titleMin {
+    color: rgb(73, 73, 73);
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.downtitleMin {
+    color: rgb(73, 73, 73);
+    font-size: 16px;
+    text-align: center;
+    padding: 10px;
+
+}
+
+.toolItem {
+    width: 320px;
+    height: 300px;
+    border: 0.1px solid rgb(223, 223, 223);
+    padding: 15px;
+}
+
+.toolItemIcon {
+    overflow: visible;
+    font-size: 70px;
+    width: 70px;
+    height: 70px;
+    color: rgb(241, 174, 72);
+}
+
+.toolItemTitle {
+    color: rgb(110, 110, 110);
+    font-weight: 600;
+    font-size: 17px;
+}
+
+.toolItemDivider {
+    width: 90px;
+    border: solid rgb(241, 174, 72) 1px;
+}
+
+.toolItemDescription {
+    padding-top: 10px;
+    padding-left: 60px;
+    font-size: 14px;
+    
+}
+
 .infoDiv {
     border-radius: 5px;
     background-color: #31456D;
     padding: 10px;
     color: white;
     padding-bottom: 40px;
-}
-
-.infoDiv mat-icon {
-    height: 50px;
-    width: 50px;
-    font-size: 50px;
-}
-
-.infoDiv,
-.infoDiv p {
-    text-align: center;
-    color: #DEDEDE;
-    width: 230px;
-}
-
-.infoIconDiv {
-    color: #F8BD79;
-}
-
-.userfooter {
-    width: 100%;
-    bottom: 0;
-    height: 340px;
-    background-color: transparent;
-}
-
-.footerLogo {
-    padding-bottom: 10px;
-}
-
-.userfooter *>a {
-    margin: 0;
-    color: rgb(241, 174, 72);
-}
-
-.userfooter *>h4 {
-    color: white;
-}
-
-.footerContent {
-    background-color: #18294d;
-}
-
-.footerContent>h4 {
-    margin-bottom: 10px;
-    color: rgb(233, 233, 233);
-}
-
-.footerContent h5 {
-    color: rgb(199, 199, 199);
-}
-
-.footerNav {
-    padding-inline: 40px;
-}
-
-.inputFooterEmail {
-    width: 300px;
-    padding: 8px;
-    border-radius: 5px;
-    background-color: white;
-    box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
 }

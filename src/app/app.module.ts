@@ -13,9 +13,6 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { HttpHeadersInterceptor } from './interceptor/interceptor';
 import { NgxEchartsModule } from 'ngx-echarts';
 
-
-
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -31,7 +28,8 @@ import { NgxEchartsModule } from 'ngx-echarts';
     MaterialModule,
     NgxEchartsModule.forRoot({
       echarts: () => import('echarts')
-    })
+    }),
+    
   ],
   providers: [{
     provide: HTTP_INTERCEPTORS,

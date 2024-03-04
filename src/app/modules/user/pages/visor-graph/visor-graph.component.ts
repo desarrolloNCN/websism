@@ -145,9 +145,14 @@ export class VisorGraphComponent implements OnInit {
 
     this.navigationSubscription = this.router.events.subscribe((event: any) => {
       if (event instanceof NavigationStart) {
-        // Aquí puedes ejecutar el código que desees cuando se inicie la navegación.
-        // Por ejemplo, puedes lanzar una advertencia.
-        this.showWarning();
+        let textoValue = this.controlForm.get('url').value;
+        let archivoValue = this.arch;
+        let valorNoVacio = archivoValue || textoValue
+
+        if (valorNoVacio != '') {
+          this.showWarning();
+        }
+
       }
     });
 
@@ -163,7 +168,6 @@ export class VisorGraphComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    // Es importante cancelar la suscripción cuando el componente se destruye.
     if (this.navigationSubscription) {
       this.navigationSubscription.unsubscribe();
     }
@@ -172,7 +176,9 @@ export class VisorGraphComponent implements OnInit {
   showWarning() {
     const confirmed = window.confirm('-¿Estás seguro de que deseas abandonar esta página?');
     if (!confirmed) {
-      this.router.navigate(['/current-route']);
+      this.router.navigate(['/user/lectorAcel']);
+    } else {
+      return
     }
   }
 
@@ -1131,7 +1137,7 @@ export class VisorGraphComponent implements OnInit {
 
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
-    
+
 
     var dataString: string = localStorage.getItem('urlSearched')!
     var dataFile: string = localStorage.getItem('urlFileUpload')!
@@ -1142,16 +1148,16 @@ export class VisorGraphComponent implements OnInit {
     let cha = this.tabs[index].dataEst.channel
 
     let sendData = {
-      "url" : dataToUse,
-      "station" : sta,
-      "channel" : cha
+      "url": dataToUse,
+      "station": sta,
+      "channel": cha
     }
 
     matDialogConfig.data = sendData
 
     this.matDialog.open(AmplitudFourierComponent, matDialogConfig)
 
-    
+
   }
 
   espectFourier(index: number) {
@@ -1170,18 +1176,18 @@ export class VisorGraphComponent implements OnInit {
 
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
-    
+
     let sendData = {
-      "url" : dataToUse,
-      "station" : sta,
-      "channel" : cha
+      "url": dataToUse,
+      "station": sta,
+      "channel": cha
     }
-    
+
     matDialogConfig.data = sendData
 
     this.matDialog.open(EspectroFourierComponent, matDialogConfig)
 
-   
+
 
 
   }

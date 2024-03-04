@@ -18,11 +18,11 @@ export class NavBarComponent implements OnInit {
     private auth: AuthService
   ) {
     delay(5000)
+    this.getAuthCrede()
   }
 
   ngOnInit(): void {
     window.addEventListener('popstate', this.onBackButtonClicked.bind(this));
-    this.getAuthCrede()
   }
 
   redirect() {
@@ -45,6 +45,7 @@ export class NavBarComponent implements OnInit {
         if (value.name == null) {
           return
         } else {
+          localStorage.setItem('tk', value.token)
           this.showUserNav = true
           this.hideCommonAuth = false
           this.apiAuth = value

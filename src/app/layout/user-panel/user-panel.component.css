@@ -1,59 +1,51 @@
-.example-sidenav-content {
-    background-color: #e7e7e7;
-}
-
-.logo-container {
-    width: 250px;
-    padding-top: 15px;
-    padding-inline: 20px;
-    cursor: pointer;
-    padding-bottom: 15px;
-}
-
-.logo-inverted {
-    width: 80px;
-    height: 70px;
-    object-fit: cover;
-}
-
-.empTitle {
-    font-weight: bold;
-    font-size: 20px;
-    color: rgb(252, 156, 66);
-}
-
-.pnpDistrito {
-    font-weight: bold;
-    color: rgb(194, 194, 194);
-    min-width: 100;
-    text-overflow: ellipsis;
+.example-container {
+    height: 100%;
 }
 
 .example-sidenav {
     user-select: none;
-    background: #31456D; /* rgb(8, 20, 53)
+    background: #31456D;
+    /* rgb(8, 20, 53)
     /* background: linear-gradient(180deg, rgba(38, 66, 37, 1) 0%, rgba(58, 99, 57, 1) 53%, rgba(23, 55, 80, 1) 100%); */
     border-right: 0px;
-    width: 250px;
 }
 
-.avatar {
-    height: 35px;
-    width: 35px;
-    border-radius: 50%;
+.logoContainer {
+    padding-left: 8px;
+    padding-top: 10px;
+    cursor: pointer;
 }
 
-.img-avatar {
+.logoQs {
     height: 50px;
     width: 50px;
-    object-fit: cover;
-    border-radius: 50%;
+    object-fit: contain;
 }
 
-::ng-deep .mat-menu-panel {
-    min-width: 175px !important;
-    border-radius: 0px !important;
+.empTitle {
+    font-weight: 600;
+    color: white;
+    margin: 0;
+    font-size: 23px;
 }
+
+.empsubTitle {
+    font-weight: 400;
+    color: rgb(233, 233, 233);
+}
+
+.separator {
+    padding-top: 10px;
+    padding-inline: 10px;
+}
+
+.separator mat-divider {
+    border-top-color: rgba(255, 255, 255, 0.5);
+    border-width: 2px;
+    width: 100%;
+}
+
+
 
 .inputUrl {
     width: 450px;
@@ -63,74 +55,38 @@
     box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
 }
 
-::ng-deep .mat-form-field-underline {
-    display: none;
+.logoContainer mat-icon {
+    color: white;
+    font-size: 30px;
+    overflow: visible;
 }
 
-.sidenavList h1 {
+.sidenavList mat-icon {
+    color: white;
+    font-size: 30px;
+    overflow: visible;
+}
+
+.sidenavList h2 {
+    width: 150px;
     font-weight: 500;
+    font-size: 15px;
     color: white;
+    margin: 0;
+
 }
 
-.iconNavList mat-icon {
+/* .iconNavList mat-icon {
     color: white;
-    font-size: 20px;
-}
+    font-size: 30px;
+    overflow: visible;
+} */
 
-.iconNavList h2 {
+
+
+/* .iconNavList h2 {
     margin: 0px;
     color: white;
     font-weight: 500;
     font-size: 15px;
-}
-
-.mini-profile {
-    padding: 15px;
-}
-
-.mini-profile img {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-}
-
-.mini-profile span {
-    color: white;
-}
-
-.rol-profile {
-    padding-left: 10px;
-    padding-right: 10px;
-    background-color: #1a1c20;
-    border-radius: 20px;
-}
-
-.led {
-    width: 8px;
-    height: 8px;
-    background-color: #ABFF00;
-    border-radius: 50%;
-    box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 1px 1px,
-        inset #304701 0 1px 3px, #89FF00 0 1px 4px;
-}
-
-.separator mat-divider {
-    border-top-color: rgb(252, 156, 66);
-    border-top-width: 2px;
-    width: 200px;
-}
-
-.toolBar-acc {
-    background-color: yellow;
-    padding: 5px;
-}
-
-.acc-nom {
-    margin: 0px;
-    font-size: 15px;
-}
-
-.acc-ran {
-    margin: 0px;
-    font-size: 14px;
-}
+} */

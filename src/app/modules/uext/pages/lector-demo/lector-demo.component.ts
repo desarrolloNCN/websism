@@ -1665,7 +1665,6 @@ export class LectorDemoComponent implements OnInit {
   showRegisterDialog(opcion: String) {
 
     const matDialogConfig = new MatDialogConfig()
-    matDialogConfig.disableClose = true;
     matDialogConfig.data = opcion
 
     this.matDialog.open(RegisterDialogComponent, matDialogConfig)

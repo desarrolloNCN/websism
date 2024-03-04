@@ -1,14 +1,15 @@
 <mat-dialog-content>
-    <h3 style="margin: 0;"> <b>{{title}}</b> </h3>
+    <h3 style="margin: 0; font-size: 23px;"> <b>{{title}}</b> </h3>
     <mat-divider></mat-divider>
-    <h4 style="padding-top: 10px;">Esta opcion esta disponible para usuarios Registrados</h4>
-</mat-dialog-content>
-<mat-dialog-actions>
-
-    <div>
-        <button mat-flat-button color="warn" (click)="Close()">
+    <h4 style="padding-top: 10px; margin: 0;">Esta opcion esta disponible para usuarios Registrados</h4>
+    <h4 style="padding-top: 10px;"><b>* Si ya se registro acceda a su Perfil</b></h4>
+    <div fxLayout="row" fxLayoutGap="5px">
+        <button mat-flat-button color="accent" (click)="Close()">
             Cerrar
+        </button>
+        <button mat-flat-button color="primary" (click)="redirect()">
+            Registrarse
         </button>
     </div>
 
-</mat-dialog-actions>
+</mat-dialog-content>

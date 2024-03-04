@@ -16,17 +16,20 @@ export class UserProjectsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.getProyectos()
+    // this.getProyectos()
   }
 
   getProyectos(){
+
     this.loadingSpinner = true
+
     this.userService.getProjectUser(this.ud).subscribe({
       next: value => {
         this.proyectos = value
       },
       error: err => {
         this.loadingSpinner = false
+        
       },
       complete: () => {
         this.loadingSpinner = false
@@ -35,17 +38,17 @@ export class UserProjectsComponent implements OnInit {
   }
 
   crearProyecto(){
-    this.userService.postProjectUser(this.ud).subscribe({
-      next: value => {
+    // this.userService.postProjectUser(this.ud).subscribe({
+    //   next: value => {
         
-      },
-      error: err => {
-        this.loadingSpinner = false
-      },
-      complete: () => {
-        this.getProyectos()
-      }
-    })
+    //   },
+    //   error: err => {
+    //     this.loadingSpinner = false
+    //   },
+    //   complete: () => {
+    //     this.getProyectos()
+    //   }
+    // })
   }
 
 

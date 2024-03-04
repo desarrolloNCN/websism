@@ -2,14 +2,14 @@
 
     <div class="winTitle">
         <h2><b>Mis Proyectos</b></h2>
-        <h4 fxHide.lt-sm>Aca encontrarás tus projectos</h4>
+        <h4>Aca encontrarás tus projectos</h4>
     </div>
 
     <button class="newProjectBtn" mat-raised-button type="button" (click)="crearProyecto()">
         <mat-icon class="colorIcon">add</mat-icon>
     </button>
 
-    <div class="projectContainer" fxLayout="row wrap" fxLayoutAlign="center center" fxLayoutGap="10" style="background-color: rebeccapurple;">
+    <div class="projectContainer" fxLayout="row wrap" fxLayoutAlign="center center" fxLayoutGap="10">
 
         <div *ngFor="let proj of proyectos; let i = index">
             <div class="newProject" fxLayout="column" fxLayoutAlign="start center">

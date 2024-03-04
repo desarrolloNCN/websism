@@ -8,7 +8,7 @@ const routes: Routes = [
     path: 'user',
     component: UserPanelComponent,
     loadChildren: () => import('./modules/user/user.module').then(m => m.UserModule),
-    // canActivate: [AuthGuard]
+    canActivate: [AuthGuard]
   },
   {
     path: '',
@@ -22,6 +22,7 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
+  providers: [AuthGuard],
 })
 export class AppRoutingModule { }
