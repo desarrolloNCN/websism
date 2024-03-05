@@ -297,7 +297,7 @@
             </div>
 
             <div [@enterAnimation3] class="stGraph" fxLayout="column" fxLayoutGap="10" fxFlex>
-                <div *ngIf="loadingSpinnerGraph" style="padding: 2px;">
+                <div *ngIf="loadingBarGraph" style="padding: 2px;">
                     <mat-progress-bar mode="indeterminate"></mat-progress-bar>
                 </div>
                 <div class="graphContainer" fxLayout="column" fxLayoutAlign="center center">
@@ -533,12 +533,17 @@
                                         [diameter]="50"></mat-progress-spinner>
                                     <h3> <b>Cargando Datos ....</b> </h3>
                                 </div> -->
-
+                               
+                                
                                 <div fxLayout="column" fxLayoutGap="10">
-                                    <div echarts [options]="tab.graph[0]" [loading]="isLoading" class="divGraph"></div>
+                                    <img [src]="tab.img">
+                                    <!-- <div echarts [options]="tab.graph[0]" [loading]="isLoading" class="divGraph"></div>
                                     <div echarts [options]="tab.graph[1]" [loading]="isLoading" class="divGraph"></div>
-                                    <div echarts [options]="tab.graph[2]" [loading]="isLoading" class="divGraph"></div>
+                                    <div echarts [options]="tab.graph[2]" [loading]="isLoading" class="divGraph"></div> -->
                                 </div>
+
+                                
+
                             </div>
 
                         </mat-tab>

@@ -424,5 +424,129 @@ export class ObspyAPIService {
     );
   }
 
+  plotGraph(data: string, 
+    station_selected: string, 
+    channel_selected: string,
+    unit?:string
+    ): Observable<any>{ 
+
+      const formData = new FormData();
+    
+      const url = 'plot/'
+  
+      unit = unit || ''
+  
+      if (typeof data === 'string') {
+        formData.append('data', data);
+        formData.append('station_selected', station_selected)
+        formData.append('channel_selected', channel_selected)
+        formData.append('unit_from', unit)
+      } else {
+        throw new Error('SREV-GET-02: Se espera un archivo datos para Lectura');
+      }
+  
+      return this.http.post<any>(url, formData).pipe(
+        catchError(error => {
+          return of(error)
+        })
+      );
+    
+  }
+
+  plotToolGraph(
+    data: string, 
+    station_selected: string, 
+    channel_selected: string, 
+    base_line: string, 
+    filter: string, 
+    freqmin: string, 
+    freqmax: string, 
+    corner: string, 
+    zero: string, 
+    t_min: string, 
+    t_max: string,
+    unit_from: string,
+    unit_to: string
+    ): Observable<any> {
+    const formData = new FormData();
+    const url = 'plot-tool/'
+
+    if (typeof data === 'string') {
+      formData.append('data', data);
+      formData.append('station_selected', station_selected)
+      formData.append('channel_selected', channel_selected)
+      formData.append('base_line', base_line)
+      formData.append('filter_type', filter)
+      formData.append('freq_min', freqmin)
+      formData.append('freq_max', freqmax)
+      formData.append('corner', corner)
+      formData.append('zero', zero)
+      formData.append('t_min', t_min)
+      formData.append('t_max', t_max)
+      formData.append('unit_from', unit_from)
+      formData.append('unit_to', unit_to)
+    } else {
+      throw new Error('SREV-GET-03: Se espera un archivo datos para Lectura');
+    }
+
+    return this.http.post<any>(url, formData).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    );
+
+  }
+
+  plotToolauto( 
+    data: string, 
+    station_selected: string, 
+    channel_selected: string,
+    unit: string,
+    base_line?: string, 
+    filter?: string, 
+    freqmin?: string, 
+    freqmax?: string, 
+    corner?: string, 
+    zero?: string, 
+    t_min?: string, 
+    t_max?: string
+    ): Observable<any> {
+    const formData = new FormData();
+    const url = 'plot-tool-auto/'
+
+    base_line = '', 
+    filter    = '', 
+    freqmin   = '', 
+    freqmax   = '', 
+    corner    = '', 
+    zero      = '', 
+    t_min     = '', 
+    t_max     = ''
+
+    if (typeof data === 'string') {
+      formData.append('data', data);
+      formData.append('station_selected', station_selected)
+      formData.append('channel_selected', channel_selected)
+      formData.append('base_line', base_line)
+      formData.append('filter_type', filter)
+      formData.append('freq_min', freqmin)
+      formData.append('freq_max', freqmax)
+      formData.append('corner', corner)
+      formData.append('zero', zero)
+      formData.append('t_min', t_min)
+      formData.append('t_max', t_max)
+      formData.append('unit_from', unit)
+    } else {
+      throw new Error('SREV-GET-04: Se espera un archivo datos para Lectura');
+    }
+
+    return this.http.post<any>(url, formData).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    );
+
+  }
+
 }
 

@@ -72,6 +72,7 @@ export class LectorDemoComponent implements OnInit {
 
   loadingSpinner = false
   loadingSpinnerStaInfo = false
+  loadingBarGraph = false
   loadingSpinnerGraph = false
   loadingSpinnerData = false
   isLoading = false
@@ -101,7 +102,7 @@ export class LectorDemoComponent implements OnInit {
   hideToolTip = false
 
   baseLineOptions = ['constant', 'linear', 'demean', 'simple']
-  unitConvertOptions = ['cm/s2 [GaL]', 'm/s2', 'G', 'mg','unk']
+  unitConvertOptions = ['cm/s2 [GaL]', 'm/s2', 'G', 'mg', 'unk']
 
   tabs: any = []
   matTabs: MatTab[] = []
@@ -257,6 +258,7 @@ export class LectorDemoComponent implements OnInit {
 
                   this.obsApi.getData(this.stringdata).subscribe({
                     next: value => {
+                      console.log('BB', value);
 
                       if (value.data[0].und_calib == 'M/S**2') {
                         localStorage.setItem('ogUnit', 'm')
@@ -302,6 +304,8 @@ export class LectorDemoComponent implements OnInit {
 
                   this.obsApi.getData(this.urlFile).subscribe({
                     next: value => {
+                      console.log('AA', value);
+
                       if (value.data[0].und_calib == 'M/S**2') {
                         localStorage.setItem('ogUnit', 'm')
                       } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
@@ -360,6 +364,7 @@ export class LectorDemoComponent implements OnInit {
 
             this.obsApi.getData(this.stringdata).subscribe({
               next: value => {
+                console.log('CC', value);
 
                 if (value.data[0].und_calib == 'M/S**2') {
                   localStorage.setItem('ogUnit', 'm')
@@ -402,6 +407,7 @@ export class LectorDemoComponent implements OnInit {
 
             this.obsApi.getData(this.urlFile).subscribe({
               next: value => {
+                console.log('XX', value);
 
                 if (value.data[0].und_calib == 'M/S**2') {
                   localStorage.setItem('ogUnit', 'm')
@@ -595,6 +601,7 @@ export class LectorDemoComponent implements OnInit {
     }
 
     this.loadingSpinnerGraph = true
+    this.loadingBarGraph = true
     this.ToggleGraph = false
     this.toggleTabs = false
 
@@ -606,22 +613,38 @@ export class LectorDemoComponent implements OnInit {
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
-    this.obsApi.getTraceData(dataToUse, e.station, e.channel, og_unit).subscribe({
-      next: value => { this.createTab(e, value) },
-      error: err => console.error('REQUEST API ERROR: ' + err.message),
+    // this.obsApi.getTraceData(dataToUse, e.station, e.channel, og_unit).subscribe({
+    //   next: value => { this.createTab(e, value , '') },
+    //   error: err => console.error('REQUEST API ERROR: ' + err.message),
+    //   complete: () => {
+    //     this.loadingSpinnerGraph = false
+    //     this.ToggleGraph = true
+    //   }
+    // })
+
+    this.obsApi.plotGraph(dataToUse, e.station, e.channel, og_unit).subscribe({
+      next: val => {
+        if (!val.url) {
+          this.createTab(e, val, '')
+        } else {
+          this.createTab(e, val, val.url)
+        }
+      },
       complete: () => {
         this.loadingSpinnerGraph = false
+        this.loadingBarGraph = false
         this.ToggleGraph = true
       }
+
     })
   }
 
   // ! Creacion de Tabs
 
-  createTab(e: any, value: any): void {
+  createTab(e: any, value: any, img: string): void {
     this.ToggleGraph = false;
 
-    const graph = this.graphGenerator(e, value, '(RAWDATA)');
+    // const graph = this.graphGenerator(e, value, '(RAWDATA)');
 
     this.toggleTabs = true;
 
@@ -645,7 +668,8 @@ export class LectorDemoComponent implements OnInit {
       entime: e.endtime,
       FilterForm,
       TrimForm,
-      graph,
+      //graph,
+      img
     });
 
     this.lastIndexTab = this.tabs.length - 1
@@ -710,40 +734,55 @@ export class LectorDemoComponent implements OnInit {
 
     this.ToggleGraph = false
     this.isLoading = true
+    this.loadingBarGraph = true
 
-    this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+    this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
       next: value => {
-
-        this.ToggleGraph = false
-
-
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-
         if (indx !== -1) {
 
-          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
-
-          this.tabs[indx].graph = graph;
+          this.tabs[indx].img = value.url
           this.tabs[indx].base = base
-
           this.cdRef.detectChanges();
         }
-
-
-      },
-      error: err => {
-        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-        this.loadingSpinnerGraph = false
-        console.error('REQUEST API ERROR: ' + err.message)
       },
       complete: () => {
-        this.actApli.push(`Linea Base: ${base} a ${sta}.${cha}`)
-        this.loadingSpinnerData = false
-
-        this.ToggleGraph = true
-        this.isLoading = false
+        this.loadingBarGraph = false
       }
     })
+
+    // this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+    //   next: value => {
+
+    //     this.ToggleGraph = false
+
+    //     const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+
+    //     if (indx !== -1) {
+
+    //       const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+
+    //       this.tabs[indx].graph = graph;
+    //       this.tabs[indx].base = base
+
+    //       this.cdRef.detectChanges();
+    //     }
+
+
+    //   },
+    //   error: err => {
+    //     this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+    //     this.loadingSpinnerGraph = false
+    //     console.error('REQUEST API ERROR: ' + err.message)
+    //   },
+    //   complete: () => {
+    //     this.actApli.push(`Linea Base: ${base} a ${sta}.${cha}`)
+    //     this.loadingSpinnerData = false
+
+    //     this.ToggleGraph = true
+    //     this.isLoading = false
+    //   }
+    // })
   }
 
   filter(index: number) {
@@ -799,40 +838,57 @@ export class LectorDemoComponent implements OnInit {
     }
 
     this.isLoading = true
+    this.loadingBarGraph = true
 
-    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+    this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+
       next: value => {
-
-        this.ToggleGraph = false
-        this.loadingSpinnerData = true
-
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
 
         if (indx !== -1) {
-
-          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
-
-          this.tabs[indx].graph = graph;
-
-          // Manualmente activar la detección de cambios para la pestaña actualizada
+          this.tabs[indx].img = value.url
           this.cdRef.detectChanges();
         }
-
-      },
-      error: err => {
-        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-        this.loadingSpinnerGraph = false
-        console.error('REQUEST API ERROR: ' + err.message)
       },
       complete: () => {
-        this.actApli.push(`Filtro: ${type} a ${sta}.${cha}`)
-
-        this.loadingSpinnerData = false
-        this.ToggleGraph = true
-        this.toogleFilter = false
-        this.isLoading = false
+        this.loadingBarGraph = false
       }
     })
+
+    // this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+    //   next: value => {
+
+    //     this.ToggleGraph = false
+    //     this.loadingSpinnerData = true
+
+    //     const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+
+    //     if (indx !== -1) {
+
+    //       const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+
+    //       this.tabs[indx].graph = graph;
+
+    //       // Manualmente activar la detección de cambios para la pestaña actualizada
+    //       this.cdRef.detectChanges();
+    //     }
+
+    //   },
+    //   error: err => {
+    //     this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+    //     this.loadingSpinnerGraph = false
+    //     this.loadingBarGraph = false
+    //     console.error('REQUEST API ERROR: ' + err.message)
+    //   },
+    //   complete: () => {
+    //     this.actApli.push(`Filtro: ${type} a ${sta}.${cha}`)
+
+    //     this.loadingSpinnerData = false
+    //     this.ToggleGraph = true
+    //     this.toogleFilter = false
+    //     this.isLoading = false
+    //   }
+    // })
   }
 
   trim(index: number) {
@@ -884,44 +940,59 @@ export class LectorDemoComponent implements OnInit {
     this.ToggleGraph = false
 
     this.isLoading = true
+    this.loadingBarGraph = true
 
-
-    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+    this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
       next: value => {
-
-        this.ToggleGraph = false
-        this.loadingSpinnerData = true
-
-        // const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-
         if (indx !== -1) {
 
-          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
-
-          this.tabs[indx].graph = graph;
-
+          this.tabs[indx].img = value.url
           this.cdRef.detectChanges();
         }
-
-      },
-      error: err => {
-        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-        this.loadingSpinnerGraph = false
-        console.error('REQUEST API ERROR: ' + err.message)
       },
       complete: () => {
-        this.actApli.push(`Trim: ${t_max - t_min}seg a ${sta}.${cha}`)
-
-        this.loadingSpinnerData = false
-
-        this.ToggleGraph = true
-
-        this.isLoading = false
-
-        this.toogleFilter = false
+        this.loadingBarGraph = false
       }
     })
+
+    // this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+    //   next: value => {
+
+    //     this.ToggleGraph = false
+    //     this.loadingSpinnerData = true
+
+    //     // const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
+    //     const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+
+    //     if (indx !== -1) {
+
+    //       const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+
+    //       this.tabs[indx].graph = graph;
+
+    //       this.cdRef.detectChanges();
+    //     }
+
+    //   },
+    //   error: err => {
+    //     this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+    //     this.loadingSpinnerGraph = false
+    //     this.loadingBarGraph = false
+    //     console.error('REQUEST API ERROR: ' + err.message)
+    //   },
+    //   complete: () => {
+    //     this.actApli.push(`Trim: ${t_max - t_min}seg a ${sta}.${cha}`)
+
+    //     this.loadingSpinnerData = false
+
+    //     this.ToggleGraph = true
+
+    //     this.isLoading = false
+
+    //     this.toogleFilter = false
+    //   }
+    // })
   }
 
   unitConverter(menuIndex: number, index: number) {
@@ -988,41 +1059,67 @@ export class LectorDemoComponent implements OnInit {
     }
 
     this.ToggleGraph = false
+    this.loadingBarGraph = true
     this.isLoading = true
 
-    this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to).subscribe({
+    this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to).subscribe({
       next: value => {
-
-        this.ToggleGraph = false
-
-
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-
         if (indx !== -1) {
 
-          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
-
-          this.tabs[indx].graph = graph;
+          this.tabs[indx].img = value.url
           this.tabs[indx].unit = unit_to
-
           this.cdRef.detectChanges();
         }
-
-
-      },
-      error: err => {
-        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-        this.loadingSpinnerGraph = false
-        console.error('REQUEST API ERROR: ' + err.message)
       },
       complete: () => {
-        this.actApli.push(`Linea Base: ${base} a ${sta}.${cha}`)
-        this.loadingSpinnerData = false
-
-        this.ToggleGraph = true
-        this.isLoading = false
+        this.loadingBarGraph = false
       }
     })
+
+    // this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to).subscribe({
+    //   next: value => {
+
+    //     this.ToggleGraph = false
+
+
+    //     const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+
+    //     if (indx !== -1) {
+
+    //       const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+
+    //       this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to).subscribe({
+    //         next: val => {
+    //           this.tabs[indx].img = val.url
+    //         },
+    //         complete: () =>{
+    //           this.loadingBarGraph = false
+    //         }
+    //       })
+
+    //       this.tabs[indx].graph = graph;
+    //       this.tabs[indx].unit = unit_to
+
+    //       this.cdRef.detectChanges();
+    //     }
+
+
+    //   },
+    //   error: err => {
+    //     this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+    //     this.loadingSpinnerGraph = false
+    //     this.loadingBarGraph = false
+    //     console.error('REQUEST API ERROR: ' + err.message)
+    //   },
+    //   complete: () => {
+    //     this.actApli.push(`Linea Base: ${base} a ${sta}.${cha}`)
+    //     this.loadingSpinnerData = false
+
+    //     this.ToggleGraph = true
+    //     this.isLoading = false
+    //   }
+    // })
   }
 
   autoAjuste(index: number) {
@@ -1050,40 +1147,66 @@ export class LectorDemoComponent implements OnInit {
     let cha = this.tabs[index].dataEst.channel
 
     this.isLoading = true
+    this.loadingBarGraph = true
 
-    this.obsApi.autoAdjust(dataToUse, sta, cha, unit_from).subscribe({
+    this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from).subscribe({
       next: value => {
-
-        this.ToggleGraph = false
-        this.loadingSpinnerData = true
-
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-
         if (indx !== -1) {
 
-          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+          this.tabs[indx].img = value.url
 
-          this.tabs[indx].graph = graph;
-
-          // Manualmente activar la detección de cambios para la pestaña actualizada
           this.cdRef.detectChanges();
         }
-
-      },
-      error: err => {
-        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-        this.loadingSpinnerGraph = false
-        console.error('REQUEST API ERROR: ' + err.message)
       },
       complete: () => {
-        this.actApli.push(`AutoAjuste a ${sta}.${cha}`)
-
-        this.loadingSpinnerData = false
-        this.ToggleGraph = true
-        this.toogleFilter = false
-        this.isLoading = false
+        this.loadingBarGraph = false
       }
     })
+
+    // this.obsApi.autoAdjust(dataToUse, sta, cha, unit_from).subscribe({
+    //   next: value => {
+
+    //     this.ToggleGraph = false
+    //     this.loadingSpinnerData = true
+
+    //     const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+
+    //     if (indx !== -1) {
+
+    //       const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+
+    //       this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from).subscribe({
+    //         next: val => {
+    //           this.tabs[indx].img = val.url
+    //         },
+    //         complete: () =>{
+    //           this.loadingBarGraph = false
+    //         }
+    //       })
+
+    //       this.tabs[indx].graph = graph;
+
+    //       // Manualmente activar la detección de cambios para la pestaña actualizada
+    //       this.cdRef.detectChanges();
+    //     }
+
+    //   },
+    //   error: err => {
+    //     this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+    //     this.loadingSpinnerGraph = false
+    //     this.loadingBarGraph = false
+    //     console.error('REQUEST API ERROR: ' + err.message)
+    //   },
+    //   complete: () => {
+    //     this.actApli.push(`AutoAjuste a ${sta}.${cha}`)
+
+    //     this.loadingSpinnerData = false
+    //     this.ToggleGraph = true
+    //     this.toogleFilter = false
+    //     this.isLoading = false
+    //   }
+    // })
   }
 
   // ! Generador de Graficos
@@ -1568,7 +1691,7 @@ export class LectorDemoComponent implements OnInit {
   deleteFile() {
     localStorage.clear()
 
-    if(this.stopMseed != undefined){
+    if (this.stopMseed != undefined) {
       this.stopMseed.unsubscribe()
     }
 
@@ -1679,29 +1802,49 @@ export class LectorDemoComponent implements OnInit {
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
     this.isLoading = true
+    this.loadingBarGraph = true
 
-    this.obsApi.getTraceData(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel, unit_from)
-      .subscribe({
-        next: value => {
+    this.obsApi.plotGraph(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel, unit_from).subscribe({
+      next: value => {
+        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`)
+        if (indx !== -1) {
 
-          const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`)
-          if (indx !== -1) {
+          this.tabs[indx].img = value.url
+          this.tabs[indx].base = ''
+          this.tabs[indx].unit = ''
 
-            const graph = this.graphGenerator(this.stationInfo, value, '(RAWDATA)')
-
-            this.tabs[indx].graph = graph
-            this.tabs[indx].base = ''
-            this.tabs[indx].unit = ''
-            this.cdRef.detectChanges()
-          }
-        },
-        error: err => { this.isLoading = false },
-        complete: () => {
-          this.loadingSpinnerGraph = false
-          this.ToggleGraph = true
-          this.isLoading = false
+          this.cdRef.detectChanges()
         }
-      })
+      },
+      complete: () => {
+        this.loadingSpinnerGraph = false
+        this.loadingBarGraph = false
+        this.ToggleGraph = true
+      }
+
+    })
+
+    // this.obsApi.getTraceData(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel, unit_from).subscribe({
+    //   next: value => {
+
+    //     const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`)
+    //     if (indx !== -1) {
+
+    //       const graph = this.graphGenerator(this.stationInfo, value, '(RAWDATA)')
+
+    //       this.tabs[indx].graph = graph
+    //       this.tabs[indx].base = ''
+    //       this.tabs[indx].unit = ''
+    //       this.cdRef.detectChanges()
+    //     }
+    //   },
+    //   error: err => { this.isLoading = false },
+    //   complete: () => {
+    //     this.loadingSpinnerGraph = false
+    //     this.ToggleGraph = true
+    //     this.isLoading = false
+    //   }
+    // })
 
   }
 
