@@ -1,25 +1,32 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html,
+body {
+    height: 100%;
+}
 
-.spacer{
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.spacer {
     flex: 1 1 auto;
 }
 
-.container{
+.container {
     margin: 0px;
     padding: 0 15px 15px 15px;
 }
 
-.snackBar-validator{
-    font-size: 25px !important; 
+.snackBar-validator {
+    font-size: 25px !important;
     background-color: #31456D;
 }
 
 .mat-input-element {
     font: inherit;
-    background: rgba(0,0,0,0);
+    background: rgba(0, 0, 0, 0);
     color: currentColor;
     border: none;
     outline: none;
@@ -30,4 +37,16 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     vertical-align: bottom;
     text-align: inherit;
     box-sizing: content-box;
+}
+
+.btnImageViewerx {
+    background-color: #31456D;
+    height: 40px;
+    width: 40px;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    /* cursor: pointer;
+    top: 15px;
+    bottom: unset !important; */
 }

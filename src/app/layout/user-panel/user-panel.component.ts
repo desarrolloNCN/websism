@@ -26,6 +26,13 @@ export class UserPanelComponent implements OnInit {
     window.location.href = 'https://qs.ncn.pe/site/'
   }
 
+  
+  profileRedirect() {
+    window.location.href = 'https://qs.ncn.pe/site/index.php/cb-profile-edit'
+  }
+
+  
+
   toggleSidenav(): void {
     this.isSidenavOpened = !this.isSidenavOpened;
     // Ajustar el ancho del sidenav dependiendo de si está abierto o cerrado

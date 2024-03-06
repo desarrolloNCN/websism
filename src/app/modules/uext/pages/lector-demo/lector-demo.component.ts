@@ -1,5 +1,5 @@
 import { trigger, transition, style, animate } from '@angular/animations';
-import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
@@ -11,7 +11,8 @@ import { ArchivoMseedComponent } from '../../componentes/archivo-mseed/archivo-m
 import { RegisterDialogComponent } from '../../componentes/register-dialog/register-dialog.component';
 import { DecimalPipe } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { ImageViewerComponent, ImageViewerConfig } from 'ngx-image-viewer';
+import { CustomEvent, ImageViewerComponent, ImageViewerConfig } from 'ngx-image-viewer';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-lector-demo',
@@ -124,6 +125,7 @@ export class LectorDemoComponent implements OnInit {
     private cdRef: ChangeDetectorRef,
     private matDialog: MatDialog,
     private decimalPipe: DecimalPipe,
+    private http: HttpClient
   ) {
 
     this.FilterForm = new FormGroup({
@@ -679,23 +681,36 @@ export class LectorDemoComponent implements OnInit {
 
   }
 
-  @ViewChild('imageViewer') viewer! : ImageViewerComponent
-  fullscreen:boolean = false
   imageIndex = 0
 
   config: ImageViewerConfig = {
-    btnClass: 'default', 
-    zoomFactor: 0.1, 
-    containerBackgroundColor: '#ccc', 
-    wheelZoom: true, 
-    allowFullscreen: true, 
+    btnClass: 'btnImageViewerx',
+    zoomFactor: 0.1,
+    containerBackgroundColor: '#ccc',
+    wheelZoom: true,
+    allowFullscreen: true,
     btnShow: {
       zoomIn: true,
       zoomOut: true,
       rotateClockwise: true,
       rotateCounterClockwise: true,
-    }
+    },
+    customBtns: [
+      {
+        name: "descargar",
+        icon: "fa fa-download"
+      }
+    ]
   };
+
+  handleEvent(event: CustomEvent, index: number) {
+
+    switch (event.name) {
+      case 'descargar':
+        break;
+    }
+  }
+
   // ! Herramientas para Ploteo
 
   baseLine(menuIndex: number, index: number) {
@@ -1077,8 +1092,8 @@ export class LectorDemoComponent implements OnInit {
     }
 
     this.ToggleGraph = false
-    this.loadingBarGraph = true
     this.isLoading = true
+    this.loadingBarGraph = true
 
     this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to).subscribe({
       next: value => {

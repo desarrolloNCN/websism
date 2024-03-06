@@ -81,16 +81,16 @@
         </button>
     </div>
 
-    <div *ngIf="hideStaPanel2" [@enterAnimation] class="stInfo" fxLayout="column" fxLayout.lt-lg="row"
-        fxLayoutGap="10" fxFlex="23">
+    <div *ngIf="hideStaPanel2" [@enterAnimation] class="stInfo" fxLayout="column" fxLayout.lt-lg="row" fxLayoutGap="10"
+        fxFlex="23">
 
         <div fxLayout="column" [fxHide.lt-lg]="showResponsivebar" fxLayoutGap="5" fxFlex.lt-lg="33">
             <div style="padding-left: 10px;">
                 <div fxLayout="row" fxLayoutAlign="space-between">
                     <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>ESTACIONES ENCONTRADAS</b></h2>
                     <button mat-icon-button (click)="toggleButton()">
-                        <mat-icon>{{ isButtonActive ? 'expand_more' :  'expand_less' }}</mat-icon>
-                      </button>
+                        <mat-icon>{{ isButtonActive ? 'expand_more' : 'expand_less' }}</mat-icon>
+                    </button>
                 </div>
                 <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Busque y eliga la estacion que quiera consultar</h4>
             </div>
@@ -103,8 +103,8 @@
 
                 <div class="scrlSta" fxLayout="column">
 
-                    <div *ngIf="loadingSpinnerStaInfo" fxLayout="column" fxLayoutGap="10"
-                        fxLayoutAlign="center center" style="padding-top: 20%;">
+                    <div *ngIf="loadingSpinnerStaInfo" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center"
+                        style="padding-top: 20%;">
                         <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                             [diameter]="50"></mat-progress-spinner>
                         <h3> <b>Cargando Datos ....</b> </h3>
@@ -133,8 +133,7 @@
 
                     </div> -->
 
-                    <ng-container style="width: 100%;"
-                        *ngFor="let sta of groupedData | keyvalue; let i = index">
+                    <ng-container style="width: 100%;" *ngFor="let sta of groupedData | keyvalue; let i = index">
                         <div style="width: 100%;"
                             [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
                             (click)="selectGroup(sta.key)" fxLayout="column" fxLayoutGap="3"
@@ -291,7 +290,7 @@
     </div>
 
     <div [@enterAnimation3] class="stGraph" fxLayout="column" fxLayoutGap="10" fxFlex>
-        <div *ngIf="loadingSpinnerGraph" style="padding: 2px;">
+        <div *ngIf="loadingBarGraph" style="padding: 2px;">
             <mat-progress-bar mode="indeterminate"></mat-progress-bar>
         </div>
         <div class="graphContainer" fxLayout="column" fxLayoutAlign="center center">
@@ -302,8 +301,8 @@
                 <h3> <b>Cargando Datos ....</b> </h3>
             </div>
 
-            <mat-tab-group  [selectedIndex]="lastIndexTab" (selectedTabChange)="onTabChange($event)" #tabGroup style="width: 100%;"
-                [ngStyle]="showtabs(toggleTabs)">
+            <mat-tab-group [selectedIndex]="lastIndexTab" (selectedTabChange)="onTabChange($event)" #tabGroup
+                style="width: 100%;" [ngStyle]="showtabs(toggleTabs)">
 
                 <mat-tab *ngFor="let tab of tabs; let i = index" [label]="getTabLabel(tab)">
 
@@ -323,8 +322,7 @@
 
                                 <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                                     <button mat-icon-button type="button" (click)="togglePanel()">
-                                        <mat-icon class="colorIconBar"
-                                            title="Ocultar Paneles">fit_screen</mat-icon>
+                                        <mat-icon class="colorIconBar" title="Ocultar Paneles">fit_screen</mat-icon>
                                     </button>
                                     <mat-divider class="separator" vertical="true"></mat-divider>
                                 </div>
@@ -355,8 +353,7 @@
                                     <mat-icon class="colorIconBar"
                                         title="Correccion por Linea Base">monitor_heart</mat-icon>
                                     <mat-menu #menuBaseLine="matMenu">
-                                        <button mat-menu-item
-                                            *ngFor="let item of baseLineOptions; let btni = index"
+                                        <button mat-menu-item *ngFor="let item of baseLineOptions; let btni = index"
                                             (click)="baseLine(btni, i)">
                                             {{item}}
                                         </button>
@@ -391,15 +388,14 @@
                                 <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                                     <mat-divider class="separator" vertical="true"></mat-divider>
                                     <button mat-icon-button type="button" (click)="fourier(i)">
-                                        <mat-icon class="colorIconBar"
-                                            title="Amplitud de Fourier">area_chart</mat-icon>
+                                        <mat-icon class="colorIconBar" title="Amplitud de Fourier">area_chart</mat-icon>
                                     </button>
                                 </div>
 
                                 <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                                     <button mat-icon-button type="button" (click)="espectFourier(i)">
                                         <mat-icon class="colorIconBar"
-                                        title="Espectro de Fourier">settings_input_component</mat-icon>
+                                            title="Espectro de Fourier">settings_input_component</mat-icon>
                                     </button>
                                     <mat-divider class="separator" vertical="true"></mat-divider>
                                 </div>
@@ -409,8 +405,7 @@
                                 <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                                     <mat-divider class="separator" vertical="true"></mat-divider>
                                     <button mat-icon-button type="button" (click)="resetGraph(tab)">
-                                        <mat-icon class="colorIconBar"
-                                            title="Reestablecer Datos">refresh</mat-icon>
+                                        <mat-icon class="colorIconBar" title="Reestablecer Datos">refresh</mat-icon>
                                     </button>
                                 </div>
 
@@ -441,8 +436,7 @@
                                     </mat-form-field>
 
                                     <div style="padding-bottom: 16px; padding-left: 15px;">
-                                        <button type="submit" class="sendInfoSubBar" mat-raised-button
-                                            color="primary">
+                                        <button type="submit" class="sendInfoSubBar" mat-raised-button color="primary">
                                             <mat-icon>query_stats</mat-icon>
                                             APLICAR
                                         </button>
@@ -476,8 +470,7 @@
                                     <mat-form-field appearance="outline" style="width: 160px;">
                                         <mat-label>Frecuencia Min</mat-label>
                                         <mat-icon class="colorIconSubBar" matPrefix>show_chart</mat-icon>
-                                        <input matInput type="number" formControlName="freqmin"
-                                            placeholder="0.1">
+                                        <input matInput type="number" formControlName="freqmin" placeholder="0.1">
                                         <mat-error *ngIf="FilterForm.get('freqmin')?.hasError('required')">
                                             Ingrese <strong>
                                                 Freq. Min. </strong> </mat-error>
@@ -485,10 +478,8 @@
 
                                     <mat-form-field appearance="outline" style="width: 160px;">
                                         <mat-label>Frecuencia Max</mat-label>
-                                        <mat-icon class="colorIconSubBar"
-                                            matPrefix>stacked_line_chart</mat-icon>
-                                        <input matInput type="number" formControlName="freqmax"
-                                            placeholder="25">
+                                        <mat-icon class="colorIconSubBar" matPrefix>stacked_line_chart</mat-icon>
+                                        <input matInput type="number" formControlName="freqmax" placeholder="25">
                                         <mat-error *ngIf="FilterForm.get('freqmax')?.hasError('required')">
                                             Ingrese <strong>
                                                 Freq. Max. </strong> </mat-error>
@@ -496,8 +487,7 @@
 
                                     <mat-form-field appearance="outline" style="width: 160px;">
                                         <mat-label>Corner</mat-label>
-                                        <mat-icon class="colorIconSubBar"
-                                            matPrefix>stacked_line_chart</mat-icon>
+                                        <mat-icon class="colorIconSubBar" matPrefix>stacked_line_chart</mat-icon>
                                         <input matInput type="number" formControlName="order" placeholder="2">
                                         <mat-error *ngIf="FilterForm.get('order')?.hasError('required')">
                                             Ingrese <strong>Corner</strong>
@@ -509,8 +499,7 @@
                                     </div>
 
                                     <div style="padding-bottom: 16px; padding-left: 15px;">
-                                        <button type="submit" class="sendInfoSubBar" mat-raised-button
-                                            color="primary">
+                                        <button type="submit" class="sendInfoSubBar" mat-raised-button color="primary">
                                             <mat-icon>query_stats</mat-icon>
                                             APLICAR
                                         </button>
@@ -527,8 +516,18 @@
                                 [diameter]="50"></mat-progress-spinner>
                             <h3> <b>Cargando Datos ....</b> </h3>
                         </div> -->
+                        <link rel="stylesheet"
+                            href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
-                        <div fxLayout="column" fxLayoutGap="10">
+                        <div [fxHide]="!graphClientOption" fxLayout="column" fxLayoutGap="10">
+                            <div style="width: 100%;">
+                                <ngx-image-viewer [src]="[tab.img]" [(index)]="imageIndex" [config]="config"
+                                    (customEvent)="handleEvent($event, i)">
+                                </ngx-image-viewer>
+                            </div>
+                        </div>
+
+                        <div [fxHide]="graphClientOption" fxLayout="column" fxLayoutGap="10">
                             <div echarts [options]="tab.graph[0]" [loading]="isLoading" class="divGraph"></div>
                             <div echarts [options]="tab.graph[1]" [loading]="isLoading" class="divGraph"></div>
                             <div echarts [options]="tab.graph[2]" [loading]="isLoading" class="divGraph"></div>
@@ -545,7 +544,6 @@
 
 </div>
 
-<div style="height: 100%; padding: 20px; border-radius: 5px; background-color: #31456D;" fxShow="false"
-    fxShow.lt-sm>
+<div style="height: 100%; padding: 20px; border-radius: 5px; background-color: #31456D;" fxShow="false" fxShow.lt-sm>
     <h1 style="text-align: center; color: white;"><b>Voltear el Dispositivo, para Mejor Visualizacion</b></h1>
 </div>

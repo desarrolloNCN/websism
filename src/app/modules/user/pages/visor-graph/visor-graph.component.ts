@@ -1,12 +1,12 @@
-import { trigger, transition, style, animate, state } from '@angular/animations';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
-import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
+import { MatTab, MatTabChangeEvent } from '@angular/material/tabs';
 import { NavigationStart, Router } from '@angular/router';
-import { ECharts, EChartsCoreOption, EChartsOption } from 'echarts';
+import { EChartsOption } from 'echarts';
 import { Subscription } from 'rxjs';
 import { ArchivoMseedComponent } from 'src/app/modules/uext/componentes/archivo-mseed/archivo-mseed.component';
 import { ArchivoTXTComponent } from 'src/app/modules/uext/componentes/archivo-txt/archivo-txt.component';
@@ -14,6 +14,8 @@ import { RegisterDialogComponent } from 'src/app/modules/uext/componentes/regist
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 import { AmplitudFourierComponent } from '../../componentes/amplitud-fourier/amplitud-fourier.component';
 import { EspectroFourierComponent } from '../../componentes/espectro-fourier/espectro-fourier.component';
+import { CustomEvent, ImageViewerConfig } from 'ngx-image-viewer';
+import { AuthService } from 'src/app/service/auth.service';
 
 @Component({
   selector: 'app-visor-graph',
@@ -76,6 +78,7 @@ export class VisorGraphComponent implements OnInit {
   stationInfo: any = {}
 
   loadingSpinner = false
+  loadingBarGraph = false
   loadingSpinnerStaInfo = false
   loadingSpinnerGraph = false
   loadingSpinnerData = false
@@ -121,8 +124,11 @@ export class VisorGraphComponent implements OnInit {
   stopMseed: Subscription | any
   stopTxt: Subscription | any
 
+  graphClientOption = false
+
   constructor(
     private obsApi: ObspyAPIService,
+    private auth: AuthService,
     private snackBar: MatSnackBar,
     private cdRef: ChangeDetectorRef,
     private matDialog: MatDialog,
@@ -143,6 +149,8 @@ export class VisorGraphComponent implements OnInit {
       t_max: new FormControl('', [Validators.required])
     });
 
+    this.reloadSettingUser()
+
     this.navigationSubscription = this.router.events.subscribe((event: any) => {
       if (event instanceof NavigationStart) {
         let textoValue = this.controlForm.get('url').value;
@@ -158,6 +166,24 @@ export class VisorGraphComponent implements OnInit {
 
   }
 
+  reloadSettingUser() {
+    this.auth.getToken().subscribe({
+      next: value => {
+        if (value.modo_grafico == null || value.modo_grafico == 'no') {
+          this.graphClientOption = true
+        } else {
+          this.graphClientOption = false
+        }
+      },
+      error: err => {
+        this.graphClientOption = true
+      },
+      complete: () => {
+
+      }
+    })
+  }
+
   ngOnInit(): void {
     localStorage.clear()
 
@@ -165,6 +191,7 @@ export class VisorGraphComponent implements OnInit {
       url: new FormControl(''),
 
     })
+
   }
 
   ngOnDestroy() {
@@ -205,6 +232,38 @@ export class VisorGraphComponent implements OnInit {
       this.arch = null;
     }
   }
+
+  imageIndex = 0
+
+  config: ImageViewerConfig = {
+    btnClass: 'btnImageViewerx',
+    zoomFactor: 0.1,
+    containerBackgroundColor: '#ccc',
+    wheelZoom: true,
+    allowFullscreen: true,
+    btnShow: {
+      zoomIn: true,
+      zoomOut: true,
+      rotateClockwise: true,
+      rotateCounterClockwise: true,
+    },
+    customBtns: [
+      {
+        name: "descargar",
+        icon: "fa fa-download"
+      }
+    ]
+  };
+
+  handleEvent(event: CustomEvent, index: number) {
+
+    switch (event.name) {
+      case 'descargar':
+        break;
+    }
+  }
+
+
 
   @ViewChild('fileInput') fileInput!: ElementRef
 
@@ -627,6 +686,7 @@ export class VisorGraphComponent implements OnInit {
 
   leer(e: any) {
 
+
     for (const elem of this.tabs) {
       if (elem.label == `${e.station}.${e.channel}`) {
         alert('Ya hay una pestaña con esa estacion')
@@ -635,6 +695,7 @@ export class VisorGraphComponent implements OnInit {
     }
 
     this.loadingSpinnerGraph = true
+    this.loadingBarGraph = true
     this.ToggleGraph = false
     this.toggleTabs = false
 
@@ -646,22 +707,67 @@ export class VisorGraphComponent implements OnInit {
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
-    this.obsApi.getTraceData(dataToUse, e.station, e.channel, og_unit).subscribe({
-      next: value => { this.createTab(e, value) },
-      error: err => console.error('REQUEST API ERROR: ' + err.message),
-      complete: () => {
-        this.loadingSpinnerGraph = false
-        this.ToggleGraph = true
-      }
+    this.auth.getToken().subscribe({
+      next: value => {
+        if (value.modo_grafico == null || value.modo_grafico == 'no') {
+          this.graphClientOption = true
+          this.obsApi.plotGraph(dataToUse, e.station, e.channel, og_unit).subscribe({
+            next: val => {
+              if (!val.url) {
+                this.createTab(e, val, '')
+              } else {
+                this.createTab(e, val, val.url)
+              }
+            },
+            error: err => {
+              this.loadingBarGraph = false
+            },
+            complete: () => {
+              this.loadingSpinnerGraph = false
+              this.loadingBarGraph = false
+              this.ToggleGraph = true
+            }
+
+          })
+
+        } else {
+          this.graphClientOption = false
+          this.obsApi.getTraceData(dataToUse, e.station, e.channel, og_unit).subscribe({
+            next: value => { this.createTab(e, value, '') },
+            error: err => {
+              this.loadingBarGraph = false
+            },
+            complete: () => {
+              this.loadingSpinnerGraph = false
+              this.loadingBarGraph = false
+              this.ToggleGraph = true
+            }
+          })
+
+        }
+      },
+      error: err => {
+        this.graphClientOption = true
+        this.loadingBarGraph = false
+      },
+     
     })
+
   }
 
   // ! Creacion de Tabs
 
-  createTab(e: any, value: any): void {
+  createTab(e: any, value: any, img: string): void {
+
     this.ToggleGraph = false;
 
-    const graph = this.graphGenerator(e, value, '(RAWDATA)');
+    let graph = ''
+
+    if (this.graphClientOption) {
+      graph = ''
+    } else {
+      graph = this.graphGenerator(e, value, '(RAWDATA)');
+    }
 
     this.toggleTabs = true;
 
@@ -686,6 +792,7 @@ export class VisorGraphComponent implements OnInit {
       FilterForm,
       TrimForm,
       graph,
+      img
     });
 
     this.lastIndexTab = this.tabs.length - 1
@@ -697,6 +804,8 @@ export class VisorGraphComponent implements OnInit {
   // ! Herramientas para Ploteo
 
   baseLine(menuIndex: number, index: number) {
+
+    this.reloadSettingUser()
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
@@ -749,44 +858,76 @@ export class VisorGraphComponent implements OnInit {
     }
 
     this.ToggleGraph = false
-    this.isLoading = true
+    this.isLoading =
+    this.loadingBarGraph = true
 
-    this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+    this.auth.getToken().subscribe({
       next: value => {
-
-        this.ToggleGraph = false
-
-
-        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-
-        if (indx !== -1) {
-
-          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
-
-          this.tabs[indx].graph = graph;
-          this.tabs[indx].base = base
-
-          this.cdRef.detectChanges();
+        if (value.modo_grafico == null || value.modo_grafico == 'no') {
+          this.graphClientOption = true
+          this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+            next: value => {
+              const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+              if (indx !== -1) {
+    
+                this.tabs[indx].img = value.url
+                this.tabs[indx].base = base
+                this.cdRef.detectChanges();
+              }
+            },
+            complete: () => {
+              this.loadingBarGraph = false
+            }
+          })
+        } else {
+          this.graphClientOption = false
+          this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+            next: value => {
+    
+              this.ToggleGraph = false
+    
+    
+              const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+    
+              if (indx !== -1) {
+    
+                const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+    
+                this.tabs[indx].graph = graph;
+                this.tabs[indx].base = base
+    
+                this.cdRef.detectChanges();
+              }
+    
+    
+            },
+            error: err => {
+              this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+              this.loadingSpinnerGraph = false
+              console.error('REQUEST API ERROR: ' + err.message)
+            },
+            complete: () => {
+              this.actApli.push(`Linea Base: ${base} a ${sta}.${cha}`)
+              this.loadingSpinnerData = false
+              this.loadingBarGraph = false
+              this.ToggleGraph = true
+              this.isLoading = false
+            }
+          })
         }
-
-
       },
       error: err => {
-        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-        this.loadingSpinnerGraph = false
-        console.error('REQUEST API ERROR: ' + err.message)
+        this.graphClientOption = true
+        this.loadingBarGraph = false
       },
-      complete: () => {
-        this.actApli.push(`Linea Base: ${base} a ${sta}.${cha}`)
-        this.loadingSpinnerData = false
-
-        this.ToggleGraph = true
-        this.isLoading = false
-      }
     })
+
+
   }
 
   filter(index: number) {
+
+    this.reloadSettingUser()
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
@@ -839,43 +980,77 @@ export class VisorGraphComponent implements OnInit {
     }
 
     this.isLoading = true
+    this.loadingBarGraph = true
 
-    this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+    this.auth.getToken().subscribe({
       next: value => {
+        if (value.modo_grafico == null || value.modo_grafico == 'no') {
+          this.graphClientOption = true
+          this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
 
-        this.ToggleGraph = false
-        this.loadingSpinnerData = true
-
-        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-
-        if (indx !== -1) {
-
-          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
-
-          this.tabs[indx].graph = graph;
-
-          // Manualmente activar la detección de cambios para la pestaña actualizada
-          this.cdRef.detectChanges();
+            next: value => {
+              const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+    
+              if (indx !== -1) {
+                this.tabs[indx].img = value.url
+                this.cdRef.detectChanges();
+              }
+            },
+            complete: () => {
+              this.loadingBarGraph = false
+    
+            }
+          })
+        } else {
+          this.graphClientOption = false
+          this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+            next: value => {
+    
+              this.ToggleGraph = false
+              this.loadingSpinnerData = true
+    
+              const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+    
+              if (indx !== -1) {
+    
+                const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+    
+                this.tabs[indx].graph = graph;
+    
+                // Manualmente activar la detección de cambios para la pestaña actualizada
+                this.cdRef.detectChanges();
+              }
+    
+            },
+            error: err => {
+              this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+              this.loadingSpinnerGraph = false
+              console.error('REQUEST API ERROR: ' + err.message)
+            },
+            complete: () => {
+              this.actApli.push(`Filtro: ${type} a ${sta}.${cha}`)
+    
+              this.loadingSpinnerData = false
+              this.loadingBarGraph = false
+              this.ToggleGraph = true
+              this.toogleFilter = false
+              this.isLoading = false
+            }
+          })
         }
-
       },
       error: err => {
-        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-        this.loadingSpinnerGraph = false
-        console.error('REQUEST API ERROR: ' + err.message)
+        this.graphClientOption = true
+        this.loadingBarGraph = false
       },
-      complete: () => {
-        this.actApli.push(`Filtro: ${type} a ${sta}.${cha}`)
-
-        this.loadingSpinnerData = false
-        this.ToggleGraph = true
-        this.toogleFilter = false
-        this.isLoading = false
-      }
     })
+
+
   }
 
   trim(index: number) {
+
+    this.reloadSettingUser()
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
@@ -925,46 +1100,78 @@ export class VisorGraphComponent implements OnInit {
 
     this.isLoading = true
 
+    this.loadingBarGraph = true
 
-    this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+    this.auth.getToken().subscribe({
       next: value => {
-
-        this.ToggleGraph = false
-        this.loadingSpinnerData = true
-
-        // const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
-        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-
-        if (indx !== -1) {
-
-          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
-
-          this.tabs[indx].graph = graph;
-
-          this.cdRef.detectChanges();
+        if (value.modo_grafico == null || value.modo_grafico == 'no') {
+          this.graphClientOption = true
+          this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+            next: value => {
+              const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+              if (indx !== -1) {
+    
+                this.tabs[indx].img = value.url
+                this.cdRef.detectChanges();
+              }
+            },
+            complete: () => {
+              this.loadingBarGraph = false
+            }
+          })
+        } else {
+          this.graphClientOption = false
+          this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+            next: value => {
+    
+              this.ToggleGraph = false
+              this.loadingSpinnerData = true
+    
+              // const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
+              const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+    
+              if (indx !== -1) {
+    
+                const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+    
+                this.tabs[indx].graph = graph;
+    
+                this.cdRef.detectChanges();
+              }
+    
+            },
+            error: err => {
+              this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+              this.loadingSpinnerGraph = false
+              console.error('REQUEST API ERROR: ' + err.message)
+            },
+            complete: () => {
+              this.actApli.push(`Trim: ${t_max - t_min}seg a ${sta}.${cha}`)
+    
+              this.loadingSpinnerData = false
+    
+              this.loadingBarGraph = false
+    
+              this.ToggleGraph = true
+    
+              this.isLoading = false
+    
+              this.toogleFilter = false
+            }
+          })
         }
-
       },
       error: err => {
-        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-        this.loadingSpinnerGraph = false
-        console.error('REQUEST API ERROR: ' + err.message)
+        this.graphClientOption = true
       },
-      complete: () => {
-        this.actApli.push(`Trim: ${t_max - t_min}seg a ${sta}.${cha}`)
-
-        this.loadingSpinnerData = false
-
-        this.ToggleGraph = true
-
-        this.isLoading = false
-
-        this.toogleFilter = false
-      }
+      
     })
+
   }
 
   unitConverter(menuIndex: number, index: number) {
+
+    this.reloadSettingUser()
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
@@ -1030,42 +1237,74 @@ export class VisorGraphComponent implements OnInit {
     this.ToggleGraph = false
     this.isLoading = true
 
-    this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to).subscribe({
+    this.loadingBarGraph = true
+
+    this.auth.getToken().subscribe({
       next: value => {
-
-        this.ToggleGraph = false
-
-
-        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-
-        if (indx !== -1) {
-
-          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
-
-          this.tabs[indx].graph = graph;
-          this.tabs[indx].unit = unit_to
-
-          this.cdRef.detectChanges();
+        if (value.modo_grafico == null || value.modo_grafico == 'no') {
+          this.graphClientOption = true
+          this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to).subscribe({
+            next: value => {
+              const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+              if (indx !== -1) {
+    
+                this.tabs[indx].img = value.url
+                this.tabs[indx].unit = unit_to
+                this.cdRef.detectChanges();
+              }
+            },
+            complete: () => {
+              this.loadingBarGraph = false
+            }
+          })
+        } else {
+          this.graphClientOption = false
+          this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to).subscribe({
+            next: value => {
+    
+              this.ToggleGraph = false
+    
+    
+              const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+    
+              if (indx !== -1) {
+    
+                const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+    
+                this.tabs[indx].graph = graph;
+                this.tabs[indx].unit = unit_to
+    
+                this.cdRef.detectChanges();
+              }
+    
+    
+            },
+            error: err => {
+              this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+              this.loadingSpinnerGraph = false
+              console.error('REQUEST API ERROR: ' + err.message)
+            },
+            complete: () => {
+              this.actApli.push(`Linea Base: ${base} a ${sta}.${cha}`)
+              this.loadingSpinnerData = false
+              this.loadingBarGraph = false
+              this.ToggleGraph = true
+              this.isLoading = false
+            }
+          })
         }
-
-
       },
       error: err => {
-        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-        this.loadingSpinnerGraph = false
-        console.error('REQUEST API ERROR: ' + err.message)
+        this.graphClientOption = true
       },
-      complete: () => {
-        this.actApli.push(`Linea Base: ${base} a ${sta}.${cha}`)
-        this.loadingSpinnerData = false
 
-        this.ToggleGraph = true
-        this.isLoading = false
-      }
     })
+
   }
 
   autoAjuste(index: number) {
+
+    this.reloadSettingUser()
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
@@ -1091,39 +1330,69 @@ export class VisorGraphComponent implements OnInit {
 
     this.isLoading = true
 
-    this.obsApi.autoAdjust(dataToUse, sta, cha, unit_from).subscribe({
+    this.loadingBarGraph = true
+
+    this.auth.getToken().subscribe({
       next: value => {
-
-        this.ToggleGraph = false
-        this.loadingSpinnerData = true
-
-        const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-
-        if (indx !== -1) {
-
-          const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
-
-          this.tabs[indx].graph = graph;
-
-          // Manualmente activar la detección de cambios para la pestaña actualizada
-          this.cdRef.detectChanges();
+        if (value.modo_grafico == null || value.modo_grafico == 'no') {
+          this.graphClientOption = true
+          this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from).subscribe({
+            next: value => {
+              const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+              if (indx !== -1) {
+    
+                this.tabs[indx].img = value.url
+    
+                this.cdRef.detectChanges();
+              }
+            },
+            complete: () => {
+              this.loadingBarGraph = false
+            }
+          })
+        } else {
+          this.graphClientOption = false
+          this.obsApi.autoAdjust(dataToUse, sta, cha, unit_from).subscribe({
+            next: value => {
+    
+              this.ToggleGraph = false
+              this.loadingSpinnerData = true
+    
+              const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+    
+              if (indx !== -1) {
+    
+                const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)')
+    
+                this.tabs[indx].graph = graph;
+    
+                // Manualmente activar la detección de cambios para la pestaña actualizada
+                this.cdRef.detectChanges();
+              }
+    
+            },
+            error: err => {
+              this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+              this.loadingSpinnerGraph = false
+              console.error('REQUEST API ERROR: ' + err.message)
+            },
+            complete: () => {
+              this.actApli.push(`AutoAjuste a ${sta}.${cha}`)
+    
+              this.loadingSpinnerData = false
+              this.loadingBarGraph = false
+              this.ToggleGraph = true
+              this.toogleFilter = false
+              this.isLoading = false
+            }
+          })          
         }
-
       },
       error: err => {
-        this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-        this.loadingSpinnerGraph = false
-        console.error('REQUEST API ERROR: ' + err.message)
+        this.graphClientOption = true
       },
-      complete: () => {
-        this.actApli.push(`AutoAjuste a ${sta}.${cha}`)
-
-        this.loadingSpinnerData = false
-        this.ToggleGraph = true
-        this.toogleFilter = false
-        this.isLoading = false
-      }
     })
+
   }
 
 

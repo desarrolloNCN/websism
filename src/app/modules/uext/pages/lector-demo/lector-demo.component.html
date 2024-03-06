@@ -95,8 +95,8 @@
                         <div fxLayout="row" fxLayoutAlign="space-between">
                             <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>ESTACIONES ENCONTRADAS</b></h2>
                             <button mat-icon-button (click)="toggleButton()">
-                                <mat-icon>{{ isButtonActive ? 'expand_more' :  'expand_less' }}</mat-icon>
-                              </button>
+                                <mat-icon>{{ isButtonActive ? 'expand_more' : 'expand_less' }}</mat-icon>
+                            </button>
                         </div>
                         <h4 [ngStyle.lt-lg]="{'font-size': '13px'}">Busque y eliga la estacion que quiera consultar</h4>
                     </div>
@@ -308,8 +308,8 @@
                         <h3> <b>Cargando Datos ....</b> </h3>
                     </div>
 
-                    <mat-tab-group  [selectedIndex]="lastIndexTab" (selectedTabChange)="onTabChange($event)" #tabGroup style="width: 100%;"
-                        [ngStyle]="showtabs(toggleTabs)">
+                    <mat-tab-group [selectedIndex]="lastIndexTab" (selectedTabChange)="onTabChange($event)" #tabGroup
+                        style="width: 100%;" [ngStyle]="showtabs(toggleTabs)">
 
                         <mat-tab *ngFor="let tab of tabs; let i = index" [label]="getTabLabel(tab)">
 
@@ -396,21 +396,29 @@
 
                                         <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                                             <mat-divider class="separator" vertical="true"></mat-divider>
-                                            <button mat-icon-button type="button" (click)="showRegisterDialog('Amplitud de Fourier')">
+                                            <button mat-icon-button type="button"
+                                                (click)="showRegisterDialog('Amplitud de Fourier')">
                                                 <mat-icon class="colorIconBar"
                                                     title="Amplitud de Fourier">area_chart</mat-icon>
                                             </button>
                                         </div>
 
                                         <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
-                                            <button mat-icon-button type="button" (click)="showRegisterDialog('Aceleracion Espectral')">
+                                            <button mat-icon-button type="button"
+                                                (click)="showRegisterDialog('Aceleracion Espectral')">
                                                 <mat-icon class="colorIconBar"
-                                                title="Espectro de Fourier">settings_input_component</mat-icon>
+                                                    title="Espectro de Fourier">settings_input_component</mat-icon>
                                             </button>
                                             <mat-divider class="separator" vertical="true"></mat-divider>
                                         </div>
 
+
                                         <div class="spacer"></div>
+
+                                        <button mat-icon-button type="button">
+                                            <mat-icon class=" colorIconBar"
+                                                title="Descargar Datos">save_alt</mat-icon>
+                                        </button>
 
                                         <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                                             <mat-divider class="separator" vertical="true"></mat-divider>
@@ -533,13 +541,14 @@
                                         [diameter]="50"></mat-progress-spinner>
                                     <h3> <b>Cargando Datos ....</b> </h3>
                                 </div> -->
-                               
-                                <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+                                <link rel="stylesheet"
+                                    href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
                                 <div fxLayout="column" fxLayoutGap="10">
-                                    <div [class.fullscreen]="fullscreen">
-                                        <div style="width: 100%;">
-                                            <ngx-image-viewer [src]="[tab.img]" [(index)]="imageIndex" [config]="config" #imageViewer></ngx-image-viewer>
-                                        </div>
+                                    <div style="width: 100%;">
+                                        <ngx-image-viewer [src]="[tab.img]" [(index)]="imageIndex" [config]="config"
+                                            (customEvent)="handleEvent($event, i)">
+                                        </ngx-image-viewer>
                                     </div>
                                     <!-- <img [src]="tab.img"> -->
                                     <!-- <div echarts [options]="tab.graph[0]" [loading]="isLoading" class="divGraph"></div>
@@ -547,7 +556,7 @@
                                     <div echarts [options]="tab.graph[2]" [loading]="isLoading" class="divGraph"></div> -->
                                 </div>
 
-                                
+
 
                             </div>
 

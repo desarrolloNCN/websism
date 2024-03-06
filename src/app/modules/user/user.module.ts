@@ -13,6 +13,7 @@ import { UserProjectsComponent } from './pages/user-projects/user-projects.compo
 import { AmplitudFourierComponent } from './componentes/amplitud-fourier/amplitud-fourier.component';
 import { EspectroFourierComponent } from './componentes/espectro-fourier/espectro-fourier.component';
 import { PlotlyViaCDNModule } from 'angular-plotly.js';
+import { ImageViewerModule } from 'ngx-image-viewer';
 
 // import * as PlotlyJS from 'plotly.js-dist-min';
 // import { PlotlyModule } from 'angular-plotly.js';
@@ -38,7 +39,8 @@ PlotlyViaCDNModule.setPlotlyBundle('basic');
     ReactiveFormsModule,
     FormsModule,
     NgxEchartsModule.forChild(),
-    PlotlyViaCDNModule
+    PlotlyViaCDNModule,
+    ImageViewerModule.forRoot()
   ],
   providers: [
     DatePipe,

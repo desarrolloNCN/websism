@@ -548,5 +548,21 @@ export class ObspyAPIService {
 
   }
 
+  downloadImage(url: string, name: string){
+    const imageUrl = url;
+    const headers = new HttpHeaders().set('No-Interceptor', 'true');
+
+    this.http.get(imageUrl, { responseType: 'blob', headers })
+      .subscribe((response: Blob) => {
+        const blob = new Blob([response], { type: 'image/png' });
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.download = `${name}.png`;
+        anchor.href = url;
+        anchor.click();
+        window.URL.revokeObjectURL(url);
+      });
+  }
+
 }
 
