@@ -534,9 +534,14 @@
                                     <h3> <b>Cargando Datos ....</b> </h3>
                                 </div> -->
                                
-                                
+                                <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
                                 <div fxLayout="column" fxLayoutGap="10">
-                                    <img [src]="tab.img">
+                                    <div [class.fullscreen]="fullscreen">
+                                        <div style="width: 100%;">
+                                            <ngx-image-viewer [src]="[tab.img]" [(index)]="imageIndex" [config]="config" #imageViewer></ngx-image-viewer>
+                                        </div>
+                                    </div>
+                                    <!-- <img [src]="tab.img"> -->
                                     <!-- <div echarts [options]="tab.graph[0]" [loading]="isLoading" class="divGraph"></div>
                                     <div echarts [options]="tab.graph[1]" [loading]="isLoading" class="divGraph"></div>
                                     <div echarts [options]="tab.graph[2]" [loading]="isLoading" class="divGraph"></div> -->

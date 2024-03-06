@@ -11,6 +11,7 @@ import { ArchivoMseedComponent } from '../../componentes/archivo-mseed/archivo-m
 import { RegisterDialogComponent } from '../../componentes/register-dialog/register-dialog.component';
 import { DecimalPipe } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { ImageViewerComponent, ImageViewerConfig } from 'ngx-image-viewer';
 
 @Component({
   selector: 'app-lector-demo',
@@ -678,6 +679,23 @@ export class LectorDemoComponent implements OnInit {
 
   }
 
+  @ViewChild('imageViewer') viewer! : ImageViewerComponent
+  fullscreen:boolean = false
+  imageIndex = 0
+
+  config: ImageViewerConfig = {
+    btnClass: 'default', 
+    zoomFactor: 0.1, 
+    containerBackgroundColor: '#ccc', 
+    wheelZoom: true, 
+    allowFullscreen: true, 
+    btnShow: {
+      zoomIn: true,
+      zoomOut: true,
+      rotateClockwise: true,
+      rotateCounterClockwise: true,
+    }
+  };
   // ! Herramientas para Ploteo
 
   baseLine(menuIndex: number, index: number) {

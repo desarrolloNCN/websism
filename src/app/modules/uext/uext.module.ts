@@ -15,6 +15,8 @@ import { UserLoginComponent } from './pages/user-login/user-login.component';
 import { ArchivoTXTComponent } from './componentes/archivo-txt/archivo-txt.component';
 import { ArchivoMseedComponent } from './componentes/archivo-mseed/archivo-mseed.component';
 import { RegisterDialogComponent } from './componentes/register-dialog/register-dialog.component';
+import { ImageViewerModule } from 'ngx-image-viewer';
+
 
 
 @NgModule({
@@ -36,6 +38,7 @@ import { RegisterDialogComponent } from './componentes/register-dialog/register-
     ReactiveFormsModule,
     FormsModule,
     NgxEchartsModule.forChild(),
+    ImageViewerModule.forRoot()
   ],
   providers: [
     DecimalPipe,
