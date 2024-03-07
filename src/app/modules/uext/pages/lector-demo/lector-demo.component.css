@@ -17,7 +17,6 @@ h4 {
 }
 
 .winTitle {
-    padding-top: 10px;
     padding-bottom: 10px;
 }
 
@@ -53,7 +52,7 @@ h4 {
 .uploadbtn {
     width: 220px;
     border-radius: 5px;
-    background-color: rgb(241, 174, 72);
+    background-color: #f1ae48;
     color: white;
     box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
 }
@@ -221,3 +220,21 @@ h4 {
     color: red;
     top: 15px;
 }
+
+@keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  .pulse {
+    animation: pulse 3s infinite;
+    padding-right: 20px;
+    cursor: pointer;
+  }

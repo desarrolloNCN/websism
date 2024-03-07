@@ -16,6 +16,8 @@ import { ArchivoTXTComponent } from './componentes/archivo-txt/archivo-txt.compo
 import { ArchivoMseedComponent } from './componentes/archivo-mseed/archivo-mseed.component';
 import { RegisterDialogComponent } from './componentes/register-dialog/register-dialog.component';
 import { ImageViewerModule } from 'ngx-image-viewer';
+import { SismosHistoricosComponent } from './componentes/sismos-historicos/sismos-historicos.component';
+import { AboutUsComponent } from './pages/about-us/about-us.component';
 
 
 
@@ -28,7 +30,9 @@ import { ImageViewerModule } from 'ngx-image-viewer';
     UserLoginComponent,
     ArchivoTXTComponent,
     ArchivoMseedComponent,
-    RegisterDialogComponent
+    RegisterDialogComponent,
+    SismosHistoricosComponent,
+    AboutUsComponent
   ],
   imports: [
     CommonModule,

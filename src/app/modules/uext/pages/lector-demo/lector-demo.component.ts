@@ -13,6 +13,7 @@ import { DecimalPipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { CustomEvent, ImageViewerComponent, ImageViewerConfig } from 'ngx-image-viewer';
 import { HttpClient } from '@angular/common/http';
+import { SismosHistoricosComponent } from '../../componentes/sismos-historicos/sismos-historicos.component';
 
 @Component({
   selector: 'app-lector-demo',
@@ -1906,6 +1907,14 @@ export class LectorDemoComponent implements OnInit {
   toggleButton() {
     this.isButtonActive = !this.isButtonActive;
     this.hideStaPanel = !this.hideStaPanel
+  }
+
+  sismosHistoricos(){
+
+    const matDialogConfig = new MatDialogConfig()
+    matDialogConfig.disableClose = true;
+
+    this.matDialog.open(SismosHistoricosComponent, matDialogConfig)
   }
 
 } 

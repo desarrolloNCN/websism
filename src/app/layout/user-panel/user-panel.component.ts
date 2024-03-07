@@ -1,10 +1,19 @@
+import { trigger, state, style, transition, animate } from '@angular/animations';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-user-panel',
   templateUrl: './user-panel.component.html',
-  styleUrls: ['./user-panel.component.css']
+  styleUrls: ['./user-panel.component.css'],
+  animations: [
+    trigger('fadeInOut', [
+      state('void', style({
+        opacity: 0
+      })),
+      transition('void <=> *', animate(200)),
+    ]),
+  ]
 })
 export class UserPanelComponent implements OnInit {
 
@@ -35,8 +44,7 @@ export class UserPanelComponent implements OnInit {
 
   toggleSidenav(): void {
     this.isSidenavOpened = !this.isSidenavOpened;
-    // Ajustar el ancho del sidenav dependiendo de si está abierto o cerrado
-    this.sidenavWidth = this.isSidenavOpened ? 250 : 80; // Ajusta el ancho deseado cuando el sidenav está cerrado
+    this.sidenavWidth = this.isSidenavOpened ? 250 : 80;
   }
 
 }

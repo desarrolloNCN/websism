@@ -4,10 +4,18 @@
 
     <div style="padding: 15px;">
 
-        <div *ngIf="hideStaPanel" [@enterAnimation2] class="winTitle">
-            <h2><b>(DEMO) - Lector de Archivos Acelerográficos</b></h2>
-            <h4 fxHide.lt-sm>Podras manipular archivos de diferentes acelerografos y aplicar las diferentes herramientas
-                que ofrecemos </h4>
+        <div *ngIf="hideStaPanel" fxLayout="row" fxLayoutAlign="space-between center " [@enterAnimation2] class="winTitle">
+            <div>
+                <h2><b>(DEMO) - Lector de Archivos Acelerográficos</b></h2>
+                <h4 fxHide.lt-sm>Podras manipular archivos de diferentes acelerografos y aplicar las diferentes
+                    herramientas que ofrecemos 
+                </h4>
+            </div>
+
+            <div matTooltip="Sismos Historicos" matTooltipPosition="left" class="pulse" (click)="sismosHistoricos()">
+                <mat-icon style="font-size: 40px; overflow: visible; color: #f1ae48;" >radar</mat-icon>
+            </div>
+
         </div>
 
         <div *ngIf="hideStaPanel" [@enterAnimation2] class="dndZoneContainer">
@@ -416,8 +424,7 @@
                                         <div class="spacer"></div>
 
                                         <button mat-icon-button type="button">
-                                            <mat-icon class=" colorIconBar"
-                                                title="Descargar Datos">save_alt</mat-icon>
+                                            <mat-icon class=" colorIconBar" title="Descargar Datos">save_alt</mat-icon>
                                         </button>
 
                                         <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">

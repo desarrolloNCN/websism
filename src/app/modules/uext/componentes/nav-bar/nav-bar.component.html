@@ -12,7 +12,7 @@
     <div fxLayout="row" fxHide.lt-md fxLayoutGap="30" fxLayoutAlign="center center" class="navBar">
         <a routerLink="/home">INICIO</a>
         <a routerLink="/lectorDemo">LECTOR ACEL.</a>
-        <a>ACERCA DE</a>
+        <a routerLink="/acerca">ACERCA DE</a>
         <a>CONTACTO</a>
     </div>
 
@@ -58,7 +58,7 @@
                 <mat-icon>sensors</mat-icon>
                 <span>LECTOR ACEL.</span>
             </button>
-            <button mat-menu-item>
+            <button mat-menu-item routerLink="/acerca">
                 <mat-icon>comment_bank</mat-icon>
                 <span>ACERCA DE</span>
             </button>

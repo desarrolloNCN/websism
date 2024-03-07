@@ -1,4 +1,4 @@
-import { trigger, transition, style, animate } from '@angular/animations';
+import { trigger, transition, style, animate, keyframes } from '@angular/animations';
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -16,6 +16,7 @@ import { AmplitudFourierComponent } from '../../componentes/amplitud-fourier/amp
 import { EspectroFourierComponent } from '../../componentes/espectro-fourier/espectro-fourier.component';
 import { CustomEvent, ImageViewerConfig } from 'ngx-image-viewer';
 import { AuthService } from 'src/app/service/auth.service';
+import { SismosHistoricosComponent } from 'src/app/modules/uext/componentes/sismos-historicos/sismos-historicos.component';
 
 @Component({
   selector: 'app-visor-graph',
@@ -53,6 +54,15 @@ import { AuthService } from 'src/app/service/auth.service';
         animate('300ms', style({ transform: 'translateX(100%)', opacity: 0 }))
       ])
     ]),
+    trigger('infinitePulseAnimation', [
+      transition('* <=> *', [
+        animate('2000ms ease-in-out', keyframes([
+          style({ transform: 'scale(1)', offset: 0 }),
+          style({ transform: 'scale(1.1)', offset: 0.5 }),
+          style({ transform: 'scale(1)', offset: 1.0 })
+        ]))
+      ])
+    ])
   ],
   templateUrl: './visor-graph.component.html',
   styleUrls: ['./visor-graph.component.css'],
@@ -748,7 +758,26 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         this.graphClientOption = true
-        this.loadingBarGraph = false
+        this.obsApi.plotGraph(dataToUse, e.station, e.channel, og_unit).subscribe({
+          next: val => {
+            if (!val.url) {
+              this.createTab(e, val, '')
+            } else {
+              this.createTab(e, val, val.url)
+            }
+          },
+          error: err => {
+            this.loadingBarGraph = false
+          },
+          complete: () => {
+            this.loadingSpinnerGraph = false
+            this.loadingBarGraph = false
+            this.ToggleGraph = true
+          }
+
+        })
+        // this.graphClientOption = true
+        // this.loadingBarGraph = false
       },
      
     })
@@ -804,8 +833,6 @@ export class VisorGraphComponent implements OnInit {
   // ! Herramientas para Ploteo
 
   baseLine(menuIndex: number, index: number) {
-
-    this.reloadSettingUser()
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
@@ -917,8 +944,22 @@ export class VisorGraphComponent implements OnInit {
         }
       },
       error: err => {
-        this.graphClientOption = true
-        this.loadingBarGraph = false
+        this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+          next: value => {
+            const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+            if (indx !== -1) {
+  
+              this.tabs[indx].img = value.url
+              this.tabs[indx].base = base
+              this.cdRef.detectChanges();
+            }
+          },
+          complete: () => {
+            this.loadingSpinnerGraph = false
+            this.loadingBarGraph = false
+            this.ToggleGraph = true
+          }
+        })
       },
     })
 
@@ -926,9 +967,7 @@ export class VisorGraphComponent implements OnInit {
   }
 
   filter(index: number) {
-
-    this.reloadSettingUser()
-
+    this.filterData()
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
@@ -1041,7 +1080,22 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         this.graphClientOption = true
-        this.loadingBarGraph = false
+        this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+
+          next: value => {
+            const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+  
+            if (indx !== -1) {
+              this.tabs[indx].img = value.url
+              this.cdRef.detectChanges();
+            }
+          },
+          complete: () => {
+            this.loadingBarGraph = false
+  
+          }
+        })
+
       },
     })
 
@@ -1049,9 +1103,7 @@ export class VisorGraphComponent implements OnInit {
   }
 
   trim(index: number) {
-
-    this.reloadSettingUser()
-
+    this.toggleData()
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
@@ -1163,6 +1215,19 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         this.graphClientOption = true
+        this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+          next: value => {
+            const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+            if (indx !== -1) {
+  
+              this.tabs[indx].img = value.url
+              this.cdRef.detectChanges();
+            }
+          },
+          complete: () => {
+            this.loadingBarGraph = false
+          }
+        })
       },
       
     })
@@ -1296,6 +1361,20 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         this.graphClientOption = true
+        this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to).subscribe({
+          next: value => {
+            const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+            if (indx !== -1) {
+  
+              this.tabs[indx].img = value.url
+              this.tabs[indx].unit = unit_to
+              this.cdRef.detectChanges();
+            }
+          },
+          complete: () => {
+            this.loadingBarGraph = false
+          }
+        })
       },
 
     })
@@ -1390,6 +1469,20 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         this.graphClientOption = true
+        this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from).subscribe({
+          next: value => {
+            const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+            if (indx !== -1) {
+  
+              this.tabs[indx].img = value.url
+  
+              this.cdRef.detectChanges();
+            }
+          },
+          complete: () => {
+            this.loadingBarGraph = false
+          }
+        })
       },
     })
 
@@ -1415,11 +1508,13 @@ export class VisorGraphComponent implements OnInit {
 
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
+    let allData = this.tabs[index].dataEst
 
     let sendData = {
       "url": dataToUse,
       "station": sta,
-      "channel": cha
+      "channel": cha,
+      "allData" : allData
     }
 
     matDialogConfig.data = sendData
@@ -1445,11 +1540,13 @@ export class VisorGraphComponent implements OnInit {
 
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
+    let allData = this.tabs[index].dataEst
 
     let sendData = {
       "url": dataToUse,
       "station": sta,
-      "channel": cha
+      "channel": cha,
+      "allData" : allData
     }
 
     matDialogConfig.data = sendData
@@ -1461,7 +1558,7 @@ export class VisorGraphComponent implements OnInit {
 
   }
 
-  // -------------------------------------------------------------------------------------
+  // ------------------------------------------------------------------------------------- //
 
 
 
