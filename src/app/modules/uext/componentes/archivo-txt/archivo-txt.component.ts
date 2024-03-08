@@ -69,7 +69,7 @@ export class ArchivoTXTComponent implements OnInit {
             this.controlForm.controls['ls_line'].setValue(lineas.length);
           },
           error: err => {
-            this.snackBar.open('⚠️ Error GET-CP', 'cerrar', snackBar)
+            this.snackBar.open('⚠️ Error GET-TXT-COMP', 'cerrar', snackBar)
             this.loadingSpinnerText = false
             this.showText = false
           },

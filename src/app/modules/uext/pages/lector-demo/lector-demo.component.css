@@ -216,25 +216,21 @@ h4 {
     width: 140px;
 }
 
-.btnImageViewerx{
+.btnImageViewerx {
     color: red;
     top: 15px;
 }
 
-@keyframes pulse {
-    0% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.1);
-    }
-    100% {
-      transform: scale(1);
-    }
-  }
-  
-  .pulse {
-    animation: pulse 3s infinite;
-    padding-right: 20px;
-    cursor: pointer;
-  }
+.image-view-container {
+    width: 100%;
+}
+
+.no-zoom ngx-image-viewer {
+    pointer-events: none;
+    cursor: default;
+}
+
+.zoom-activo ngx-image-viewer {
+    pointer-events: visible;
+    cursor: default;
+}

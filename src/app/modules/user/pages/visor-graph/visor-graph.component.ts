@@ -266,9 +266,30 @@ export class VisorGraphComponent implements OnInit {
   };
 
   handleEvent(event: CustomEvent, index: number) {
+    let net = this.tabs[index].dataEst.network
+    let loc = this.tabs[index].dataEst.location
+    let sta = this.tabs[index].dataEst.station
+    let cha = this.tabs[index].dataEst.channel
 
     switch (event.name) {
       case 'descargar':
+        const url = this.tabs[index].img
+        fetch(url)
+          .then(response => response.blob())
+          .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = `IMG__${net}.${sta}.${loc}.${cha}.png`;
+
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            window.URL.revokeObjectURL(url);
+          })
+          .catch(error => console.error('Error al descargar la imagen:', error));
         break;
     }
   }
@@ -2209,4 +2230,173 @@ export class VisorGraphComponent implements OnInit {
     this.isButtonActive = !this.isButtonActive;
     this.hideStaPanel = !this.hideStaPanel
   }
+
+  sismosHistoricos() {
+
+    const matDialogConfig = new MatDialogConfig()
+    matDialogConfig.disableClose = true;
+
+    this.matDialog.open(SismosHistoricosComponent, matDialogConfig).afterClosed().subscribe({
+      next: value => {
+        if (value.endpoint == '') {
+          return
+        } else {
+          const url = `https://apiqs.ncn.pe/media/sismos_historicos/${value.endpoint}`
+          this.controlForm.controls['url'].setValue(url)
+          this.leerArchivo()
+        }
+
+      }
+    })
+  }
+
+  donwloadData(tabInfo: any, m: string) {
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.panelClass = ['snackBar-validator'];
+
+    var dataString: string = localStorage.getItem('urlSearched')!
+    var dataFile: string = localStorage.getItem('urlFileUpload')!
+    var og_unit: string = localStorage.getItem('ogUnit')!
+
+    let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
+
+    let net = tabInfo.dataEst.network
+    let loc = tabInfo.dataEst.location
+    let sta = tabInfo.dataEst.station
+    let cha = tabInfo.dataEst.channel
+    let base = tabInfo.base || ''
+    let unit_to = tabInfo.unit || ''
+
+    let type = tabInfo.FilterForm.get('type').value
+    let fmin = tabInfo.FilterForm.get('freqmin').value
+    let fmax = tabInfo.FilterForm.get('freqmax').value
+    let corn = tabInfo.FilterForm.get('order').value
+    let zero = tabInfo.FilterForm.get('zero').value
+
+    const t_min = parseFloat(tabInfo.TrimForm.get('t_min').value);
+    const t_max = parseFloat(tabInfo.TrimForm.get('t_max').value);
+
+    let utc_min: any
+    let utc_max: any
+
+    let min = ''
+    let max = ''
+
+    if (isNaN(t_min) && isNaN(t_max)) {
+      min = ''
+      max = ''
+    } else {
+      utc_min = new Date(tabInfo.sttime);
+      utc_max = new Date(tabInfo.sttime);
+
+      utc_min.setUTCSeconds(utc_min.getUTCSeconds() + t_min);
+      utc_max.setUTCSeconds(utc_max.getUTCSeconds() + t_max);
+
+      min = utc_min.toISOString()
+      max = utc_max.toISOString()
+    }
+
+    this.snackBar.open('⌛ Cargando ...', '', snackBar)
+
+    this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, og_unit, unit_to).subscribe({
+      next: value => {
+        this.proceseDataDownload(value, net, sta, loc, cha, m)
+      },
+      error: err => {
+        this.snackBar.dismiss()
+      },
+      complete: () => {
+        this.snackBar.dismiss()
+        this.snackBar.open('✔️ Carga Completa', '', { panelClass: ['snackBar-validator'], duration: 2000 })
+      }
+    })
+  }
+
+  proceseDataDownload(value: any, net: string, sta: string, loc: string, cha: string, m: string) {
+    let dataX = [];
+    let dataY = [];
+    let mag = '';
+    let unidad = '';
+    let type = '';
+    let maxVal = '';
+
+    if (m == 'acel' || m == 'vel' || m == 'des') {
+      dataX = value[0].tiempo_a;
+      if (m == 'acel') {
+        dataY = value[0].traces_a;
+        type = 'ACEL';
+        mag = 'Aceleracion';
+        unidad = value[0].trace_a_unit;
+        maxVal = 'PGA: ' + value[0].peak_a.toFixed(4);
+      } else if (m == 'vel') {
+        dataY = value[0].traces_v;
+        type = 'VEL';
+        mag = 'Velocidad';
+        unidad = value[0].trace_v_unit;
+        maxVal = 'PGV: ' + value[0].peak_v.toFixed(4);
+      } else if (m == 'des') {
+        dataY = value[0].traces_d;
+        type = 'DESP';
+        mag = 'Desplazamiento';
+        unidad = value[0].trace_d_unit;
+        maxVal = 'PGD: ' + value[0].peak_d.toFixed(4);
+      }
+    } else if (m == 'all') {
+      dataX = value[0].tiempo_a;
+      dataY = value[0].traces_a;
+      const data2Y = value[0].traces_v;
+      const data3Y = value[0].traces_d;
+      const und1 = value[0].trace_a_unit;
+      const und2 = value[0].trace_v_unit;
+      const und3 = value[0].trace_d_unit;
+      const maxV1 = value[0].peak_a.toFixed(6);
+      const maxV2 = value[0].peak_v.toFixed(6);
+      const maxV3 = value[0].peak_d.toFixed(6);
+
+      let dataText = '';
+      dataText += 'Tiempo' + '     ' + ` Aceleracion [${und1}]` + '     ' + ` Velocidad [${und2}]` + '     ' + `Desplazamiento [${und3}]` + '\n'
+      dataText += 'Tiempo[s]' + '     ' + `PGA ${maxV1}[${und1}]` + '     ' + `PGV ${maxV2}[${und2}]` + '     ' + `PGD ${maxV3}[${und3}]` + '\n'
+
+      for (let i = 0; i < dataX.length; i++) {
+        dataText += dataX[i].toFixed(3).padStart(12) + '     ' + dataY[i].toFixed(8).padStart(12) + '     ' + data2Y[i].toFixed(8).padStart(12) + '     ' + data3Y[i].toFixed(8).padStart(12) + '\n';
+      }
+
+      const downloadLink = document.createElement('a');
+      downloadLink.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(dataText);
+      downloadLink.download = `DATA_ALL__${net}.${sta}.${loc}.${cha}.txt`;
+
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+
+      return;
+    } else {
+      dataX = [];
+      dataY = [];
+      type = '';
+      m = '';
+      unidad = '';
+    }
+
+    if (dataX.length > 0 && dataY.length > 0) {
+      let dataText = '';
+      dataText += 'Tiempo [s]  ' + '     ' + `${mag} [${unidad}]` + '\n'
+      dataText += maxVal + ` [${unidad}]` + '\n'
+      dataText += 'Tiempo' + '     ' + `${cha}` + '\n'
+
+      for (let i = 0; i < dataX.length; i++) {
+        dataText += dataX[i].toFixed(3).padStart(12) + '     ' + dataY[i].toFixed(8).padStart(12) + '\n';
+      }
+
+      const downloadLink = document.createElement('a');
+      downloadLink.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(dataText);
+      downloadLink.download = `DATA_${type}__${net}.${sta}.${loc}.${cha}.txt`;
+
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
+  }
+
 }

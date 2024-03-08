@@ -1,10 +1,32 @@
 <mat-dialog-content>
-    <h3 style="margin: 0; font-size: 23px;"> <b>Sismos Historicos</b> </h3>
+    <h3 style="margin: 0; font-size: 23px; color: rgb(54, 54, 54);"> <b>Sismos Historicos</b> </h3>
     <mat-divider></mat-divider>
     <br>
-    <br>
-    <br>
-    <br>
+    <div *ngFor="let item of data">
+        <mat-card>
+            <div fxLayout="row" fxLayoutGap="15" fxLayoutAlign="center center">
+                <div class="magnitud" fxLayout="column" fxLayoutAlign="center center">
+                    <h3><b>{{item.Magnitud}}</b></h3>
+                    <h4>{{item.Ref}}</h4>
+                </div>
+                <div fxLayout="column">
+                    <h4><b style="font-weight: 600;">Estacion:</b> {{item.Estacion}} </h4>
+                    <h4><b>Ubicacion:</b> {{item.Ubicacion}} </h4>
+                    <h4><b>PGA:</b> {{item.pga}} cm/s2 [gal] </h4>
+                    <h4><b>Fecha:</b> {{item.Fecha}} </h4>
+                    <h4><b>Hora:</b> {{item.Hora}} </h4>
+                </div>
+                <div class="spacer"></div>
+                <button mat-flat-button color="primary"  style="height: 50px; width: 100px;" (click)="sendUrlData(item.Archivo)">
+                    <mat-icon>visibility</mat-icon>
+                    Ver
+                </button>
+            </div>
+        
+        </mat-card>
+        <br>
+    </div>
+
 </mat-dialog-content>
 <mat-dialog-actions>
     <button mat-flat-button color="warn" (click)="Close()">
