@@ -12,11 +12,13 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 
 import { HttpHeadersInterceptor } from './interceptor/interceptor';
 import { NgxEchartsModule } from 'ngx-echarts';
+import { OrderByPipe } from './pipe/ordenar.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
     UserPanelComponent,
+    OrderByPipe
   ],
   imports: [
     BrowserModule,
@@ -30,6 +32,9 @@ import { NgxEchartsModule } from 'ngx-echarts';
       echarts: () => import('echarts')
     }),
     
+  ],
+  exports: [
+    OrderByPipe
   ],
   providers: [{
     provide: HTTP_INTERCEPTORS,

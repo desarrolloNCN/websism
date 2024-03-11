@@ -1,30 +1,49 @@
 <mat-dialog-content>
-    <h3 style="margin: 0; font-size: 23px; color: rgb(54, 54, 54);"> <b>Sismos Historicos</b> </h3>
+    <h3 style="margin: 0; font-size: 23px; color: rgb(54, 54, 54);"> <b>Sismos Historicos</b> - Registro de Estaciones
+    </h3>
     <mat-divider></mat-divider>
+
     <br>
+
+    <div class="inputUrl" fxLayout="row" fxLayoutGap="5">
+        <mat-icon class="colorIcon">search</mat-icon>
+        <input matInput type="text" placeholder="Ejm: Estacion, Ubicacion, Magnitud"
+            [(ngModel)]="buscarTexto">
+    </div>
+
+    <br>
+
     <div *ngFor="let item of data">
-        <mat-card>
-            <div fxLayout="row" fxLayoutGap="15" fxLayoutAlign="center center">
-                <div class="magnitud" fxLayout="column" fxLayoutAlign="center center">
-                    <h3><b>{{item.Magnitud}}</b></h3>
-                    <h4>{{item.Ref}}</h4>
+
+        <mat-card *ngIf="filterDataT(item)">
+            <mat-card-header>
+                <mat-card-title>Estacion: {{item.Estacion}}</mat-card-title>
+                <mat-card-subtitle>{{item.Lugar}}, <b>{{item.Ubicacion}}</b></mat-card-subtitle>
+            </mat-card-header>
+            <mat-divider inset></mat-divider>
+            <mat-card-content>
+                <br>
+                <div fxLayout="row" fxLayoutGap="15" fxLayoutAlign="center center">
+                    <div class="magnitudContainer" [ngStyle]="{'background-color': getColor(item.Ref)}"
+                        fxLayout="column" fxLayoutAlign="center center">
+                        <h4 style="font-size: 20px;"><b>{{item.Ref}}</b></h4>
+                        <h3><b>{{item.Magnitud}}</b></h3>
+                    </div>
+                    <div fxLayout="column">
+                        <!-- <h4>{{item.Estacion}} </h4> -->
+                        <!-- <h4>{{item.pga}} cm/s2 [gal] </h4> -->
+                        <h4>Fecha: {{item.Fecha}} </h4>
+                        <h4>Hora: {{item.Hora}} UTC-5 </h4>
+                    </div>
+                    <div class="spacer"></div>
+                    <button mat-flat-button color="primary" style="height: 40px;" (click)="sendUrlData(item.Archivo)">
+                        <mat-icon>visibility</mat-icon>
+                        Ver
+                    </button>
                 </div>
-                <div fxLayout="column">
-                    <h4><b style="font-weight: 600;">Estacion:</b> {{item.Estacion}} </h4>
-                    <h4><b>Ubicacion:</b> {{item.Ubicacion}} </h4>
-                    <h4><b>PGA:</b> {{item.pga}} cm/s2 [gal] </h4>
-                    <h4><b>Fecha:</b> {{item.Fecha}} </h4>
-                    <h4><b>Hora:</b> {{item.Hora}} </h4>
-                </div>
-                <div class="spacer"></div>
-                <button mat-flat-button color="primary"  style="height: 50px; width: 100px;" (click)="sendUrlData(item.Archivo)">
-                    <mat-icon>visibility</mat-icon>
-                    Ver
-                </button>
-            </div>
-        
+            </mat-card-content>
         </mat-card>
-        <br>
+        <br *ngIf="filterDataT(item)">
     </div>
 
 </mat-dialog-content>

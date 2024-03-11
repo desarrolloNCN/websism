@@ -125,29 +125,6 @@
                                 <h3> <b>Cargando Datos ....</b> </h3>
                             </div>
 
-                            <!-- <div style="width: 100%;" *ngFor="let sta of groupedData | keyvalue; let i = index">
-
-                                <div [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
-                                    (click)="selectGroup(sta.key)" fxLayout="column" fxLayoutGap="3"
-                                    fxLayoutAlign="space-around">
-
-                                    <div *ngFor="let item of getGroupValues(sta)" fxLayout="row"
-                                        fxLayoutAlign="space-around center" (click)="leer(item)"
-                                        style="cursor: pointer; padding: 2px;">
-                                        <mat-icon style="color: white;">router</mat-icon>
-                                        <p> {{item.network}} </p>
-                                        <p> {{item.station}} </p>
-                                        <p style="padding: 1px 4px 1px 4px; border-radius: 3px;"
-                                            [ngStyle]="setColorStationChannel(item.channel)">
-                                            {{item.channel}} </p>
-                                    </div>
-
-                                </div>
-
-                                <div style="height: 5px;"></div>
-
-                            </div> -->
-
                             <ng-container style="width: 100%;"
                                 *ngFor="let sta of groupedData | keyvalue; let i = index">
                                 <div style="width: 100%;"
