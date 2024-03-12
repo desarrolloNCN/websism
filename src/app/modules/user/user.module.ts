@@ -14,6 +14,7 @@ import { AmplitudFourierComponent } from './componentes/amplitud-fourier/amplitu
 import { EspectroFourierComponent } from './componentes/espectro-fourier/espectro-fourier.component';
 import { PlotlyViaCDNModule } from 'angular-plotly.js';
 import { ImageViewerModule } from 'ngx-image-viewer';
+import { NgxMatDatetimePickerModule, NgxMatTimepickerModule, NgxMatNativeDateModule } from '@angular-material-components/datetime-picker';
 
 // import * as PlotlyJS from 'plotly.js-dist-min';
 // import { PlotlyModule } from 'angular-plotly.js';
@@ -40,7 +41,10 @@ PlotlyViaCDNModule.setPlotlyBundle('basic');
     FormsModule,
     NgxEchartsModule.forChild(),
     PlotlyViaCDNModule,
-    ImageViewerModule.forRoot()
+    ImageViewerModule.forRoot(),
+    NgxMatDatetimePickerModule,
+    NgxMatTimepickerModule,
+    NgxMatNativeDateModule,
   ],
   providers: [
     DatePipe,

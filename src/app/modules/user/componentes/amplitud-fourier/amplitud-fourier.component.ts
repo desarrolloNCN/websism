@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { VisorGraphComponent } from '../../pages/visor-graph/visor-graph.component';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
-import * as Plotly from 'plotly.js-dist-min';
+import { Icons } from 'plotly.js-dist-min';
 
 @Component({
   selector: 'app-amplitud-fourier',
@@ -145,7 +145,7 @@ export class AmplitudFourierComponent implements OnInit {
           modeBarButtonsToAdd: [
             {
               name: 'Descargar Datos',
-              icon: Plotly.Icons.disk,
+              icon: Icons.disk,
               direction: 'up',
               click: function (gd: any) {
                 const dataX = value.periodo;

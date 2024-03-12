@@ -56,6 +56,10 @@ export class ArchivoMseedComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadingSpinnerStaInfo = true
+
+    this.disableForm()
+    this.btnDisableForm = true
+
     this.obsApi.getData(this.url).subscribe({
       next: value => {
         this.tempdata = value.data
@@ -73,6 +77,11 @@ export class ArchivoMseedComponent implements OnInit {
       },
       complete: () => {
         this.loadingSpinnerStaInfo = false
+
+        this.btnDisable = false
+        this.btnDisableForm = false
+        this.controlForm.enable()
+        this.controlForm2.enable()
       }
     })
 
@@ -291,6 +300,23 @@ export class ArchivoMseedComponent implements OnInit {
     this.controlForm2.enable()
   }
 
+  rellenarFactores(event : any){
+    if(event.checked == true){
+      this.controlForm.disable()
+      this.btnDisable = true
+      this.tempdata.forEach((element : any, index: number) => {
+        this.controlForm2.get('c_' + index).setValue(1)
+      });
+    }else{
+      this.controlForm.enable()
+      this.btnDisable = false
+      this.tempdata.forEach((element : any, index: number) => {
+        this.controlForm2.get('c_' + index).setValue('')
+      });
+    }
+    
+  }
+
   clearData() {
     //localStorage.clear
     this.groupedData = {}
@@ -299,7 +325,7 @@ export class ArchivoMseedComponent implements OnInit {
   Close() {
     this.disableForm()
     let sendData = {
-      "url": this.url,
+      "url": '',
       "unit": ''
     }
     this.matDialogRef.close(sendData)

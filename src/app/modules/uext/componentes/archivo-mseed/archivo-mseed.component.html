@@ -7,9 +7,14 @@
             <mat-divider></mat-divider>
         </div>
 
-        <div fxLayout="row" fxLayoutGap="10" fxFlex>
+        <div>
+            <h3>* Si su archivo ya esta <b>Calibrado</b> marque <b>Rellenar</b>, especifique la <b>Unidad de
+                    Aceleracion</b> y <b style="color: rgb(82, 25, 134);">Calibrar Trazas</b></h3>
+        </div>
 
-            <div class="listSt" fxLayout="column" fxLayoutGap="5" fxFlex="35">
+        <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="10" fxFlex>
+
+            <div class="listSt" fxLayout="column" fxLayoutGap="5" fxFlex.lt-md="50" fxFlex="35">
 
                 <div class="scrlSta" fxLayout="column">
 
@@ -42,14 +47,29 @@
                     </ng-container>
 
                 </div>
+                <div class="scrlSta" fxLayout="column" fxLayoutAlign="center center">
 
+                    <div *ngIf="loadingSpinnerStaInfo" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+                        <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
+                            [diameter]="50"></mat-progress-spinner>
+                        <h3> <b>Cargando Datos ....</b> </h3>
+                    </div>
+
+                    <div *ngIf="!loadingSpinnerStaInfo">
+                        <h4 style="text-align: center;">Registrese para Guardar sus <b>Factores de Calibracion</b>
+                        </h4>
+                    </div>
+
+                </div>
             </div>
 
-            <div class="dndZoneContainer" fxFlex="65">
+            <div class="dndZoneContainer" fxFlex.lt-md="50" fxFlex="65">
 
-                <div class="dndZone" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center start">
-
-                    <h4>Ingrese URL o Archivo Valido (XML)</h4>
+                <div class="dndZone" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+                    <div style="width: 100%;" fxLayout="row" fxLayoutAlign="space-between center">
+                        <h4>Ingrese URL o Archivo Valido (XML)</h4>
+                        <span></span>
+                    </div>
                     <form [formGroup]="controlForm" style="width: 100%;" fxLayout="row" fxLayoutAlign="center center"
                         fxLayoutGap="10" (submit)="leerArchivo()">
 
@@ -57,9 +77,9 @@
                             fxLayoutAlign="center center" fxLayoutGap="2">
 
                             <input matInput type="text" formControlName="url"
-                                placeholder="Ejm: https://ncn.pe/files/NC.NCN01.00.HNZ.mseed">
+                                placeholder="Ejm: https://ncn.pe/files/NC.NCN01.00.HNZ.xml">
 
-                            <button type="button" mat-icon-button (click)="fileInput.click()">
+                            <button [disabled]="btnDisable" type="button" mat-icon-button (click)="fileInput.click()">
                                 <mat-icon class="colorIcon">file_upload</mat-icon>
                             </button>
 
@@ -81,28 +101,14 @@
                         </div>
                     </div>
 
-                    <h4>o Ingrese Valores de Calibracion</h4>
-                    <form [formGroup]="controlForm2" (submit)="enviarCalibracion()" fxLayout="column" fxLayoutGap="5"
-                        fxLayoutAlign="center center">
+                    <div style="width: 100%;" fxLayout="row" fxLayoutAlign="space-between center">
+                        <h4>o Ingrese Valores de Calibracion</h4>
+                        <mat-checkbox [disabled]="btnDisableForm" (change)="rellenarFactores($event)" color="primary"
+                            labelPosition="before">Rellenar</mat-checkbox>
+                    </div>
 
-                        <div class="columGen">
-                            <div *ngFor="let itm of tempdata;let i = index">
-
-                                <mat-form-field appearance="outline" class="mtff">
-                                    <mat-label>{{itm.station + '.' + itm.location + '.' + itm.channel ||
-                                        ''}}</mat-label>
-                                    <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
-                                    <input matInput type="number" formControlName='c_{{i}}'>
-                                </mat-form-field>
-
-                                <!-- <mat-form-field appearance="outline" class="mtfs">
-                                    <mat-label>C {{i+1}}</mat-label>
-                                    <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
-                                    <input matInput formControlName='cc_{{i}}' type="number">
-                                </mat-form-field> -->
-
-                            </div>
-                        </div>
+                    <form [formGroup]="controlForm2" (submit)="enviarCalibracion()" fxLayout="column"
+                        fxLayoutAlign="center center" style="width: 100%;">
 
                         <mat-form-field appearance="outline" class="mtff">
                             <mat-label>Unidad de Aceleracion</mat-label>
@@ -122,8 +128,28 @@
                             </mat-select>
                         </mat-form-field>
 
-                        <button [disabled]="btnDisableForm" type="submit" mat-flat-button style="background-color: rgb(67, 160, 67); color: white;">
-                            <mat-icon style="color: white;">check</mat-icon>
+                        <div class="columGen">
+                            <div *ngFor="let itm of tempdata;let i = index">
+
+                                <mat-form-field appearance="outline" class="mtff">
+                                    <mat-label>{{itm.station + '.' + itm.location + '.' + itm.channel ||
+                                        ''}}</mat-label>
+                                    <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
+                                    <input matInput type="number" formControlName='c_{{i}}'>
+                                </mat-form-field>
+
+                                <!-- <mat-form-field appearance="outline" class="mtfs">
+                                    <mat-label>C {{i+1}}</mat-label>
+                                    <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
+                                    <input matInput formControlName='cc_{{i}}' type="number">
+                                </mat-form-field> -->
+
+                            </div>
+                        </div>
+                        <br>
+
+                        <button [disabled]="btnDisableForm" type="submit" mat-flat-button color="primary">
+                            <mat-icon>check</mat-icon>
                             Calibrar Trazas
                         </button>
                     </form>
@@ -131,10 +157,6 @@
 
             </div>
 
-        </div>
-
-        <div>
-            <h3>* Si su archivo ya esta <b>calibrado</b>, cierre esta Ventana</h3>
         </div>
 
         <div *ngIf="loadingBarSpinner">

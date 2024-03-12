@@ -36,26 +36,6 @@
                 </mat-form-field>
             </div>
 
-            <h4> Datos del Acelerografo </h4>
-            <div fxLayout="row" fxLayoutGap="5">
-                <mat-form-field appearance="outline" class="mtff">
-                    <mat-label>Network</mat-label>
-                    <input matInput formControlName="network">
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="mtff">
-                    <mat-label>Station</mat-label>
-                    <input matInput formControlName="station">
-                </mat-form-field>
-            </div>
-
-            <div fxLayout="row">
-                <mat-form-field appearance="outline">
-                    <mat-label>Location</mat-label>
-                    <input matInput formControlName="location">
-                </mat-form-field>
-            </div>
-
             <h4> Muestreo y Unidad </h4>
             <div fxLayout="row" fxLayoutGap="5">
                 <mat-form-field appearance="outline" class="mtff">
@@ -125,7 +105,38 @@
 
 
             </div>
+            <br>
 
+            <div fxLayout="row" fxLayoutGap="10" fxLayoutAlign="center center" >
+                <mat-checkbox labelPosition="before"  formControlName="ckInfo" >Datos del Acelerografo </mat-checkbox>
+            </div>
+
+            <div *ngIf="this.controlForm.get('ckInfo').value" fxLayout="row" fxLayoutGap="5">
+                <mat-form-field appearance="outline" class="mtff">
+                    <mat-label>Network</mat-label>
+                    <input matInput formControlName="network">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="mtff">
+                    <mat-label>Station</mat-label>
+                    <input matInput formControlName="station">
+                </mat-form-field>
+
+            </div>
+
+            <div *ngIf="this.controlForm.get('ckInfo').value" fxLayout="row" fxLayoutGap="5">
+                <mat-form-field appearance="outline" class="mtff">
+                    <mat-label>Location</mat-label>
+                    <input matInput formControlName="location">
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="mtff">
+                    <mat-label>Start Time</mat-label>
+                    <input matInput formControlName="starttime" [ngxMatDatetimePicker]="picker">
+                    <mat-datepicker-toggle matSuffix [for]="$any(picker)"></mat-datepicker-toggle>
+                    <ngx-mat-datetime-picker [showSpinners]='true' #picker color="primary">
+                    </ngx-mat-datetime-picker>
+                </mat-form-field>
+            </div>
 
             <!-- <div *ngFor="let itm of columnDetector;let i = index" style="padding-bottom: 10px;">
                 <mat-form-field appearance="outline">

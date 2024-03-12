@@ -18,7 +18,11 @@ import { RegisterDialogComponent } from './componentes/register-dialog/register-
 import { ImageViewerModule } from 'ngx-image-viewer';
 import { SismosHistoricosComponent } from './componentes/sismos-historicos/sismos-historicos.component';
 import { AboutUsComponent } from './pages/about-us/about-us.component';
-
+import {
+  NgxMatDatetimePickerModule,
+  NgxMatNativeDateModule,
+  NgxMatTimepickerModule
+} from '@angular-material-components/datetime-picker';
 
 
 @NgModule({
@@ -42,7 +46,10 @@ import { AboutUsComponent } from './pages/about-us/about-us.component';
     ReactiveFormsModule,
     FormsModule,
     NgxEchartsModule.forChild(),
-    ImageViewerModule.forRoot()
+    ImageViewerModule.forRoot(),
+    NgxMatDatetimePickerModule,
+    NgxMatTimepickerModule,
+    NgxMatNativeDateModule,
   ],
   providers: [
     DecimalPipe,

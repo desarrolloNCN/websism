@@ -6,10 +6,8 @@ import {
   HttpRequest,
   HttpHandler,
   HttpEvent,
-  HttpHeaders,
-  HttpResponse
 } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable()

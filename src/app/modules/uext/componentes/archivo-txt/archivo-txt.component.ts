@@ -13,6 +13,8 @@ import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 })
 export class ArchivoTXTComponent implements OnInit {
 
+  @ViewChild('picker') picker: any;
+
   infoText = ''
   maxRows = 0
 
@@ -25,6 +27,8 @@ export class ArchivoTXTComponent implements OnInit {
 
   showTooltip = false
   showText = true
+
+  hideStaInfo = false
 
   loadingSpinnerText = false
 
@@ -43,6 +47,8 @@ export class ArchivoTXTComponent implements OnInit {
       network: new FormControl('NC'),
       station: new FormControl('NCN01', Validators.required),
       location: new FormControl('00', Validators.required),
+      starttime: new FormControl(''),
+      ckInfo: new FormControl(false),
     })
 
     this.controlForm_2 = new FormGroup({
@@ -138,14 +144,14 @@ export class ArchivoTXTComponent implements OnInit {
 
     if (encabezados.length < datosPrimeraLinea.length) {
       for (let i = encabezados.length; i < datosPrimeraLinea.length; i++) {
-        if(i == 0){
+        if (i == 0) {
           encabezados.push('Z')
-        }else if(i == 1){
+        } else if (i == 1) {
           encabezados.push('N')
-        }else if(i == 2){
+        } else if (i == 2) {
           encabezados.push('E')
-        }else{
-          encabezados.push(`C${i+1}`);
+        } else {
+          encabezados.push(`C${i + 1}`);
         }
       }
     } else if (encabezados.length > datosPrimeraLinea.length) {
@@ -169,12 +175,10 @@ export class ArchivoTXTComponent implements OnInit {
       }
     }
 
-   this.columnDetector = valoresAgrupados
-   this.columHead = encabezados
-   this.encabezados(valoresAgrupados, encabezados)
+    this.columnDetector = valoresAgrupados
+    this.columHead = encabezados
+    this.encabezados(valoresAgrupados, encabezados)
 
-   
-   
   }
 
 
@@ -191,7 +195,7 @@ export class ArchivoTXTComponent implements OnInit {
   //     this.channels.push('C' + (index + 3))}; 
 
 
-  encabezados(valores : any, headers : any){
+  encabezados(valores: any, headers: any) {
 
     // ! Remueve los controles que empiezan por 'c_'
 
@@ -210,12 +214,12 @@ export class ArchivoTXTComponent implements OnInit {
     });
 
     // ! Añade los controles que empiezan por 'c_'
-    headers.forEach( (header: any, index: string) => {
-      this.controlForm.addControl('c_' + index, new FormControl('', Validators.required));
-    }); 
+    valores.forEach((valores: any, index: string) => {
+      this.controlForm.addControl('c_' + index, new FormControl(valores, Validators.required));
+    });
 
     // ! Añade los controles que empiezan por 'c_'
-    valores.forEach( (valores: any, index: string) => {
+    headers.forEach((headers: any, index: string) => {
       this.controlForm.addControl('cc_' + index, new FormControl('', Validators.required));
     });
 
@@ -254,7 +258,32 @@ export class ArchivoTXTComponent implements OnInit {
   buscarCoincidencia(): void {
     // const regex = /^\s*(?:-?\d+\.\d+|[.,;]?\d+(?:\.\d+)?(?:[.,;]\d+)?(?:\.\d+)?)\s*(?:[.,;]?(?:-?\d+\.\d+|[.,;]?\d+(?:\.\d+)?(?:[.,;]\d+)?(?:\.\d+)?)\s*)*$/;
     const regex = /^\s*(?:-?\d+(?:[.,;]\d+)?(?:\s*[.,;]?\s*-?\d+(?:[.,;]\d+)?)*\s*)$/
+    const regexFecha = /(\d{4}[-/]\d{2}[-/]\d{2}|\d{1,2}[-/]\d{1,2}[-/]\d{4})/
+    const regexHora = /([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]/
+
     const lineas = this.infoText.split(/\r?\n/);
+
+    let fecha = ''
+    let hora = ''
+    let fechaHora: Date | any
+    
+    lineas.forEach((linea, index) => {
+      const coincidencias = linea.match(regexFecha);
+      const coincidenciasH = linea.match(regexHora)
+      if (coincidencias && coincidenciasH) {
+        fecha = coincidencias[0];
+        hora = coincidenciasH[0];
+      }
+      fechaHora = new Date(fecha + ' ' + hora)
+    });
+    
+    if(fechaHora instanceof Date && !isNaN(fechaHora.getTime())){
+      this.controlForm.controls['starttime'].setValue(fechaHora)
+    }else{
+      let fechaHoy = new Date()
+      this.controlForm.controls['starttime'].setValue(fechaHoy)
+    }
+
     let fila = 0;
 
     for (let i = 0; i < lineas.length; i++) {
