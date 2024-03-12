@@ -5,6 +5,7 @@ import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { LectorDemoComponent } from '../../pages/lector-demo/lector-demo.component';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
+import { RegisterUserService } from 'src/app/service/register-user.service';
 
 @Component({
   selector: 'app-archivo-mseed',
@@ -25,6 +26,8 @@ export class ArchivoMseedComponent implements OnInit {
   urlXml = ''
   stringdata = ''
 
+  userId = 1
+
   hideStaPanel = true
 
   loadingSpinner = false
@@ -32,16 +35,22 @@ export class ArchivoMseedComponent implements OnInit {
 
   loadingBarSpinner = false
 
+  showCalib = false
+  showRegUser = false
+
   arch: File[] | any = ''
   buscarTexto: string = '';
 
   tempdata: any = []
+  calibTraces: any = []
+  calibCoinc: any = []
 
   constructor(
     private matDialogRef: MatDialogRef<LectorDemoComponent>,
     private http: HttpClient,
     private snackBar: MatSnackBar,
     private obsApi: ObspyAPIService,
+    private userApi: RegisterUserService,
     @Inject(MAT_DIALOG_DATA) public url: any
   ) {
 
@@ -50,7 +59,7 @@ export class ArchivoMseedComponent implements OnInit {
     })
 
     this.controlForm2 = new FormGroup({
-      unitst : new FormControl('', Validators.required)
+      unitst: new FormControl('', Validators.required)
     })
   }
 
@@ -63,6 +72,8 @@ export class ArchivoMseedComponent implements OnInit {
     this.obsApi.getData(this.url).subscribe({
       next: value => {
         this.tempdata = value.data
+
+        this.getCalib(value.data)
 
         this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
 
@@ -85,7 +96,50 @@ export class ArchivoMseedComponent implements OnInit {
       }
     })
 
+
+
   }
+
+  getCalib(data: any) {
+
+    this.showRegUser = false
+
+    //TODO: Cambiar usuario ID
+
+    this.userApi.mseedListCalibration(this.userId).subscribe({
+      next: value => {
+
+        this.calibTraces = value
+
+        this.calibCoinc = this.calibTraces.filter((obj1: any) =>
+          data.some((obj2: any) => this.encontrarCoincidencias(obj1, obj2))
+        );
+
+        this.showCalib = true
+      },
+      error: err => {
+        this.showCalib = false
+        this.showRegUser = true
+      },
+      complete: () => {
+      }
+    })
+  }
+
+  encontrarCoincidencias(obj1: any, obj2: any): boolean {
+    return obj1.network === obj2.network &&
+      obj1.station === obj2.station &&
+      obj1.channel === obj2.channel
+  }
+
+  rellenarFactoresUser(){
+    this.calibCoinc.forEach((e: any, index: number) => {
+      const control = `c_${index}`
+      this.controlForm2.controls[control].setValue(e.calib)
+    });
+  }
+
+  // Filtrar las coincidencias entre los dos arrays
 
   onFileSelected(event: any) {
 
@@ -208,7 +262,7 @@ export class ArchivoMseedComponent implements OnInit {
     this.loadingBarSpinner = true
 
     if (this.controlForm2.invalid) {
-      
+
       this.loadingBarSpinner = false
       this.snackBar.open('No se Ingresado factor de Calibracion', 'cerrar', snackBar)
 
@@ -218,25 +272,52 @@ export class ArchivoMseedComponent implements OnInit {
 
       this.disableForm()
 
-      this.obsApi.addCalibrationMseed(this.url, '', data).subscribe({
-        next: value => {
-          let sendData = {
-            "url": value.url,
-            "unit": this.controlForm2.get('unitst').value
-          }
+      if (this.userId == -1) {
+        this.obsApi.addCalibrationMseed(this.url, '', data).subscribe({
+          next: value => {
+            let sendData = {
+              "url": value.url,
+              "unit": this.controlForm2.get('unitst').value
+            }
 
-          this.matDialogRef.close(sendData)
-        },
-        error: err => {
-          this.loadingSpinner = false
-          this.loadingBarSpinner = false
-          this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
-        },
-        complete: () => {
-          this.loadingBarSpinner = false
-          this.loadingBarSpinner = false
-        }
-      })
+            this.matDialogRef.close(sendData)
+          },
+          error: err => {
+            this.loadingSpinner = false
+            this.loadingBarSpinner = false
+            this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
+          },
+          complete: () => {
+            this.loadingBarSpinner = false
+            this.loadingBarSpinner = false
+          }
+        })
+      } else {
+
+        this.userApi.addCalibrationMseedUser(this.url, '', data).subscribe({
+          next: value => {
+            let sendData = {
+              "url": value.url,
+              "unit": this.controlForm2.get('unitst').value
+            }
+
+            this.matDialogRef.close(sendData)
+          },
+          error: err => {
+            this.loadingSpinner = false
+            this.loadingBarSpinner = false
+            this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
+          },
+          complete: () => {
+            this.loadingBarSpinner = false
+            this.loadingBarSpinner = false
+          }
+        })
+      }
+
+
+
+
     }
   }
 
@@ -282,7 +363,7 @@ export class ArchivoMseedComponent implements OnInit {
     }
   }
 
-  disableForm(){
+  disableForm() {
     this.btnDisable = true
     this.controlForm.disable()
     this.controlForm2.disable()
@@ -300,21 +381,21 @@ export class ArchivoMseedComponent implements OnInit {
     this.controlForm2.enable()
   }
 
-  rellenarFactores(event : any){
-    if(event.checked == true){
+  rellenarFactores(event: any) {
+    if (event.checked == true) {
       this.controlForm.disable()
       this.btnDisable = true
-      this.tempdata.forEach((element : any, index: number) => {
+      this.tempdata.forEach((element: any, index: number) => {
         this.controlForm2.get('c_' + index).setValue(1)
       });
-    }else{
+    } else {
       this.controlForm.enable()
       this.btnDisable = false
-      this.tempdata.forEach((element : any, index: number) => {
+      this.tempdata.forEach((element: any, index: number) => {
         this.controlForm2.get('c_' + index).setValue('')
       });
     }
-    
+
   }
 
   clearData() {

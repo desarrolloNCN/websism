@@ -55,9 +55,24 @@
                         <h3> <b>Cargando Datos ....</b> </h3>
                     </div>
 
-                    <div *ngIf="!loadingSpinnerStaInfo">
+                    <div *ngIf="showRegUser">
                         <h4 style="text-align: center;">Registrese para Guardar sus <b>Factores de Calibracion</b>
-                        </h4>
+                        </h4>                        
+                    </div>
+
+                    <div *ngIf="showCalib" style="width: 100%;">
+                        <button mat-flat-button color="primary" (click)="rellenarFactoresUser()">
+                            Encontrar Factores
+                        </button>
+                        <div *ngFor="let item of calibCoinc">
+                            <div fxLayout="row" fxLayoutAlign="space-around" >
+                                <h5> {{item.network}} </h5>
+                                <h5> {{item.station}} </h5>
+                                <h5> {{item.location || '-'}}</h5>
+                                <h5> {{item.channel}} </h5>
+                                <h5>{{item.calib}}</h5>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
