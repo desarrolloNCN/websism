@@ -14,7 +14,7 @@
 
         <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="10" fxFlex>
 
-            <div class="listSt" fxLayout="column" fxLayoutGap="5" fxFlex.lt-md="50" fxFlex="35">
+            <div class="listSt" fxLayout="column" fxLayoutGap="5" fxFlex.lt-md="50" fxFlex="40">
 
                 <div class="scrlSta" fxLayout="column">
 
@@ -22,7 +22,7 @@
                         style="padding-top: 20%;">
                         <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                             [diameter]="50"></mat-progress-spinner>
-                        <h3> <b>Cargando Datos ....</b> </h3>
+                        <h3> <b>Cargando Estaciones ....</b> </h3>
                     </div>
 
                     <ng-container style="width: 100%;" *ngFor="let sta of groupedData | keyvalue; let i = index">
@@ -47,30 +47,60 @@
                     </ng-container>
 
                 </div>
-                <div class="scrlSta" fxLayout="column" fxLayoutAlign="center center">
 
-                    <div *ngIf="loadingSpinnerStaInfo" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+                <div class="scrlSta2" fxLayout="column" fxLayoutAlign="start center">
+
+                    <div *ngIf="loadingSpinnerStaInfo" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center"
+                        style="padding-top: 20%;">
                         <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                             [diameter]="50"></mat-progress-spinner>
-                        <h3> <b>Cargando Datos ....</b> </h3>
+                        <h3> <b>Cargando Factores ....</b> </h3>
                     </div>
 
-                    <div *ngIf="showRegUser">
-                        <h4 style="text-align: center;">Registrese para Guardar sus <b>Factores de Calibracion</b>
-                        </h4>                        
+                    <div *ngIf="showRegUser" style="padding-top: 20%;">
+                        <h4 style="text-align: center;">Registrese para Guardar sus <br><b>Factores de Calibracion</b>
+                        </h4>
                     </div>
 
-                    <div *ngIf="showCalib" style="width: 100%;">
-                        <button mat-flat-button color="primary" (click)="rellenarFactoresUser()">
-                            Encontrar Factores
-                        </button>
+                    <div *ngIf="showCalib" fxLayout="column" fxLayoutGap="5" style="width: 100%;">
+                        <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="space-between center" style="padding: 5px;">
+                            <h3><b>Factores de Calibracion</b></h3>
+                            <button mat-flat-button color="primary" style="height: 30px;"
+                                (click)="rellenarFactoresUser()">
+                                Rellenar
+                            </button>
+                        </div>
+
+                        <div class="inputUrl" fxLayout="row" fxLayoutGap="5">
+                            <mat-icon class="colorIcon">search</mat-icon>
+                            <input matInput type="text" placeholder="Ejm: Estacion, Canal" [(ngModel)]="buscarTexto">
+                        </div>
+
+                        <div fxLayout="row" fxLayoutAlign="space-around"
+                            style="background-color: white; border-radius: 5px; padding: 5px;">
+                            <h5> NET. </h5>
+                            <h5> STA. </h5>
+                            <h5> LOC. </h5>
+                            <h5> CHA. </h5>
+                            <h5> CAL. </h5>
+                        </div>
+
                         <div *ngFor="let item of calibCoinc">
-                            <div fxLayout="row" fxLayoutAlign="space-around" >
+                            <div *ngIf="filterDataT(item)" fxLayout="row" fxLayoutAlign="space-around"
+                                style="background-color: white; border-radius: 5px; padding: 5px;">
                                 <h5> {{item.network}} </h5>
                                 <h5> {{item.station}} </h5>
                                 <h5> {{item.location || '-'}}</h5>
-                                <h5> {{item.channel}} </h5>
-                                <h5>{{item.calib}}</h5>
+                                <h5 style="padding: 1px 4px 1px 4px; border-radius: 3px; color: white; font-weight: bold;"
+                                    [ngStyle]="setColorStationChannel(item.channel)"> {{item.channel}} </h5>
+                                <h5> {{
+                                    (item.calib === 1) ?
+                                    1 :
+                                    (item.calib < 1 && item.calib>= 0.001) ?
+                                        item.calib.toFixed(3) :
+                                        item.calib.toExponential(2)
+                                        }}
+                                </h5>
                             </div>
                         </div>
                     </div>
@@ -78,7 +108,7 @@
                 </div>
             </div>
 
-            <div class="dndZoneContainer" fxFlex.lt-md="50" fxFlex="65">
+            <div class="dndZoneContainer" fxFlex.lt-md="50" fxFlex="60">
 
                 <div class="dndZone" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
                     <div style="width: 100%;" fxLayout="row" fxLayoutAlign="space-between center">

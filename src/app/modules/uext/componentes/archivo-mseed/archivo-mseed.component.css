@@ -1,11 +1,18 @@
 p,
 h2,
-h4,h3 {
+h4,
+h3 {
     margin: 0;
 }
 
 h2 {
     color: #444444
+}
+
+h5 {
+    margin: 0;
+    font-weight: bold;
+    color: rgb(73, 73, 73);
 }
 
 .dndZoneContainer {
@@ -50,7 +57,7 @@ h2 {
     box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
 }
 
-.uploadbtnComplete > .mat-icon-button{
+.uploadbtnComplete>.mat-icon-button {
     height: 20px;
     width: 20px;
     line-height: 20px;
@@ -72,7 +79,6 @@ h2 {
     padding: 5px;
     background-color: rgb(248, 248, 248);
     height: 100%;
-    width: 300px;
 }
 
 .scrlSta {
@@ -80,7 +86,7 @@ h2 {
     border: 0.5px dashed #B6B6B6;
     border-radius: 5px;
     padding: 3px;
-    height: 205px;
+    height: 220px;
 }
 
 .scrlSta *>p {
@@ -88,6 +94,22 @@ h2 {
 }
 
 .scrlSta::-webkit-scrollbar {
+    display: none;
+}
+
+.scrlSta2 {
+    overflow: scroll;
+    border: 0.5px dashed #B6B6B6;
+    border-radius: 5px;
+    padding: 3px;
+    height: 300px;
+}
+
+.scrlSta2 *>p {
+    color: white;
+}
+
+.scrlSta2::-webkit-scrollbar {
     display: none;
 }
 
@@ -139,4 +161,12 @@ h2 {
 
 .mtfs {
     width: 60px;
+}
+
+.inputUrl {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0px 1px rgba(128, 124, 124, 0.25);
 }

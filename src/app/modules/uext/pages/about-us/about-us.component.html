@@ -1,11 +1,102 @@
 <div class="home">
 
     <app-nav-bar></app-nav-bar>
-    
-    <div style="height: 500px;">
-        
+
+    <div style="height: 500px ; position: relative; width: 100%;">
+
+        <img src="/assets/acerca.jpg" class="topImage">
+
+        <div fxHide.lt-md style="position: absolute; top: 250px; padding-inline: 80px;" fxLayout="row"
+            fxLayoutAlign="space-around">
+
+            <div fxLayout="column" fxLayoutGap="15">
+                <p style="color: white; font-size: 30px;">
+                    Equipo a Cargo de
+                    <strong style="color: white; font-size: 38px;">
+                        QuakeSense
+                    </strong>
+                </p>
+                <mat-divider class="separator"></mat-divider>
+                <p style="color: rgb(238, 238, 238); font-size: 18px; width: 600px;"> <b>QuakeSense</b> fue creado en
+                    busqueda de un
+                    servicio que aborde la lectura y análisis de diversos archivos acelerográficos.
+
+            </div>
+
+        </div>
+
+        <div fxHide="true" fxShow.lt-md style="position: absolute; top: 250px; width: 100%;">
+
+            <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="15">
+                <p style="color: white; font-size: 22px;">
+                    Equipo a Cargo de
+                    <strong style="color: white; font-size: 30px;">
+                        QuakeSense
+                    </strong>
+                </p>
+                <mat-divider class="separator"></mat-divider>
+                <p style="color: rgb(238, 238, 238); font-size: 18px; width: 425px; text-align: center;">
+                    <b>QuakeSense</b> fue creado ante la necesidad de lectura de archivos acelerograficos de diversos
+                    dispositivos
+                </p>
+
+            </div>
+
+        </div>
+
     </div>
 
+    <div style="padding: 20px 0 20px 0; background-color: white;" fxLayout="row" fxLayoutGap="150"
+        fxLayoutAlign="center center" fxLayout.lt-md="column" fxLayoutGap.lt-md="50">
+        <p style="text-align: center; width:  60%; font-size: 17px;">Este equipo está compuesto por ingenieros civiles
+            especializados en sismología, desarrolladores de
+            software y analistas de datos, quienes han unido sus conocimientos y habilidades para ofrecer una solución
+            integral y efectiva en el análisis de eventos sísmicos.
+        </p>
+    </div>
+
+    <div style="padding-top: 50px; background-color: white;" fxLayout="row" fxLayoutGap="150"
+        fxLayoutAlign="center center" fxLayout.lt-md="column" fxLayoutGap.lt-md="50">
+
+        <div *ngFor="let item of team;  let i = index" fxLayout="column" fxLayoutAlign="center center">
+
+            <div class="imgContainer">
+                <div class="imgPerson">
+                    <img class="imgSrc" src="{{item.img}}">
+                    <div class="contPerson"></div>
+                </div>
+            </div>
+
+            <div style="padding-top: 70px;" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center center">
+                <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
+                    <h4> {{item.name}} </h4>
+                    <h4> <b>{{item.lastname}}</b> </h4>
+                </div>
+                <h5> {{item.cargo}} </h5>
+            </div>
+
+            <div style="padding-top: 10px;" fxLayout="column" fxLayoutAlign="center center">
+                <mat-divider class="separatorTeam"></mat-divider>
+            </div>
+
+            <br>
+
+            <div fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center center" >
+                <p style="text-align: center; width: 300px;">
+                    {{ mostrarTextosCompleto[i] ? item.descripcion : item.descripcion.slice(0, 100) }}
+                    {{ mostrarTextosCompleto[i] ? '' : '...' }}
+                </p>
+                <button mat-flat-button color="warn" (click)="toggleTextoCompleto(i)">
+                    {{ mostrarTextoCompleto ? 'Ver menos' : 'Ver más' }}
+                </button>
+
+                <!-- <p style="text-align: center; width: 300px;"> {{item.descripcion}} </p> -->
+            </div>
+
+        </div>
+
+    </div>
+    <br>
     <app-footer-bar></app-footer-bar>
 
 </div>

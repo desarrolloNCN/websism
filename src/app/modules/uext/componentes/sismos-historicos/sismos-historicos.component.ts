@@ -452,7 +452,8 @@ export class SismosHistoricosComponent implements OnInit {
     const searchLower = this.buscarTexto.toLowerCase();
     return data.Ref.toLowerCase().includes(searchLower) ||
       data.Estacion.toLowerCase().includes(searchLower) ||
-      data.Ubicacion.toLowerCase().includes(searchLower);
+      data.Ubicacion.toLowerCase().includes(searchLower)||
+      data.Fecha.toLowerCase().includes(searchLower) ;
   }
 
   Close() {

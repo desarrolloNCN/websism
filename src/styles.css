@@ -70,6 +70,23 @@ body {
 
 .pulse {
     animation: pulse 2s infinite;
-    padding-right: 20px;
-    cursor: pointer;
 }
+
+.button-12 {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 8px 5px 5px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+    border-radius: 5px;
+    border: none;
+    background: #6e6d70c9;
+    
+    color: #DFDEDF;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    cursor: pointer;
+  }
+  

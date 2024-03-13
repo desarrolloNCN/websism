@@ -6,6 +6,7 @@ import { LectorDemoComponent } from '../../pages/lector-demo/lector-demo.compone
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 import { RegisterUserService } from 'src/app/service/register-user.service';
+import { AuthService } from 'src/app/service/auth.service';
 
 @Component({
   selector: 'app-archivo-mseed',
@@ -26,7 +27,7 @@ export class ArchivoMseedComponent implements OnInit {
   urlXml = ''
   stringdata = ''
 
-  userId = 1
+  userId = -1
 
   hideStaPanel = true
 
@@ -51,6 +52,7 @@ export class ArchivoMseedComponent implements OnInit {
     private snackBar: MatSnackBar,
     private obsApi: ObspyAPIService,
     private userApi: RegisterUserService,
+    private authApi: AuthService,
     @Inject(MAT_DIALOG_DATA) public url: any
   ) {
 
@@ -64,35 +66,82 @@ export class ArchivoMseedComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // this.matDialogRef.updateSize('60%', 'auto')
     this.loadingSpinnerStaInfo = true
 
     this.disableForm()
     this.btnDisableForm = true
 
-    this.obsApi.getData(this.url).subscribe({
+    this.authApi.getToken().subscribe({
       next: value => {
-        this.tempdata = value.data
-
-        this.getCalib(value.data)
-
-        this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-
-        value.data.forEach((columna: any, index: string) => {
-          this.controlForm2.addControl('c_' + index, new FormControl('', Validators.required));
-          // this.controlForm.addControl('cc_' + index, new FormControl('', Validators.required));
-        });
+        if (value.username == null || value.email == null) {
+          this.userId == -1
+        } else {
+          this.authApi.nUser(value.username, value.email).subscribe({
+            next: nvalue => {
+              this.userId = nvalue
+            }
+          })
+        }
       },
       error: err => {
-        // this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-        this.loadingSpinnerStaInfo = false
+        this.userId = -1
+        this.obsApi.getData(this.url).subscribe({
+          next: value => {
+            this.tempdata = value.data
+
+            this.getCalib(value.data)
+
+            this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+
+            value.data.forEach((columna: any, index: string) => {
+              this.controlForm2.addControl('c_' + index, new FormControl('', Validators.required));
+              // this.controlForm.addControl('cc_' + index, new FormControl('', Validators.required));
+            });
+          },
+          error: err => {
+            // this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+            this.loadingSpinnerStaInfo = false
+          },
+          complete: () => {
+            this.loadingSpinnerStaInfo = false
+
+            this.btnDisable = false
+            this.btnDisableForm = false
+            this.controlForm.enable()
+            this.controlForm2.enable()
+          }
+        })
       },
       complete: () => {
-        this.loadingSpinnerStaInfo = false
+        console.log('Complete');
 
-        this.btnDisable = false
-        this.btnDisableForm = false
-        this.controlForm.enable()
-        this.controlForm2.enable()
+        this.obsApi.getData(this.url).subscribe({
+          next: value => {
+            this.tempdata = value.data
+
+            this.getCalib(value.data)
+
+            this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+
+            value.data.forEach((columna: any, index: string) => {
+              this.controlForm2.addControl('c_' + index, new FormControl('', Validators.required));
+              // this.controlForm.addControl('cc_' + index, new FormControl('', Validators.required));
+            });
+          },
+          error: err => {
+            // this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+            this.loadingSpinnerStaInfo = false
+          },
+          complete: () => {
+            this.loadingSpinnerStaInfo = false
+
+            this.btnDisable = false
+            this.btnDisableForm = false
+            this.controlForm.enable()
+            this.controlForm2.enable()
+          }
+        })
       }
     })
 
@@ -106,24 +155,32 @@ export class ArchivoMseedComponent implements OnInit {
 
     //TODO: Cambiar usuario ID
 
-    this.userApi.mseedListCalibration(this.userId).subscribe({
-      next: value => {
+    if (this.userId == -1) {
+      this.showCalib = false
+      this.showRegUser = true
+      return
+    } else {
+      this.userApi.mseedListCalibration(this.userId).subscribe({
+        next: value => {
 
-        this.calibTraces = value
+          this.calibTraces = value
+          this.calibCoinc.push(['NET.', 'STA.', 'CHA.', 'CALIB.'])
+          this.calibCoinc = this.calibTraces.filter((obj1: any) =>
+            data.some((obj2: any) => this.encontrarCoincidencias(obj1, obj2))
+          );
 
-        this.calibCoinc = this.calibTraces.filter((obj1: any) =>
-          data.some((obj2: any) => this.encontrarCoincidencias(obj1, obj2))
-        );
+          this.showCalib = true
+        },
+        error: err => {
+          this.showCalib = false
+          this.showRegUser = true
+        },
+        complete: () => {
+        }
+      })
+    }
 
-        this.showCalib = true
-      },
-      error: err => {
-        this.showCalib = false
-        this.showRegUser = true
-      },
-      complete: () => {
-      }
-    })
+
   }
 
   encontrarCoincidencias(obj1: any, obj2: any): boolean {
@@ -132,11 +189,18 @@ export class ArchivoMseedComponent implements OnInit {
       obj1.channel === obj2.channel
   }
 
-  rellenarFactoresUser(){
+  rellenarFactoresUser() {
     this.calibCoinc.forEach((e: any, index: number) => {
       const control = `c_${index}`
       this.controlForm2.controls[control].setValue(e.calib)
     });
+  }
+
+  filterDataT(data: any): boolean {
+    const searchLower = this.buscarTexto.toLowerCase();
+    return data.network.toLowerCase().includes(searchLower) ||
+      data.station.toLowerCase().includes(searchLower) ||
+      data.location.toLowerCase().includes(searchLower);
   }
 
   // Filtrar las coincidencias entre los dos arrays
@@ -293,8 +357,7 @@ export class ArchivoMseedComponent implements OnInit {
           }
         })
       } else {
-
-        this.userApi.addCalibrationMseedUser(this.url, '', data).subscribe({
+        this.userApi.addCalibrationMseedUser(this.userId, this.url, '', data).subscribe({
           next: value => {
             let sendData = {
               "url": value.url,
@@ -314,10 +377,6 @@ export class ArchivoMseedComponent implements OnInit {
           }
         })
       }
-
-
-
-
     }
   }
 
@@ -386,7 +445,9 @@ export class ArchivoMseedComponent implements OnInit {
       this.controlForm.disable()
       this.btnDisable = true
       this.tempdata.forEach((element: any, index: number) => {
-        this.controlForm2.get('c_' + index).setValue(1)
+        if (this.controlForm2.get('c_' + index).value == '') {
+          this.controlForm2.get('c_' + index).setValue(1)
+        } 
       });
     } else {
       this.controlForm.enable()

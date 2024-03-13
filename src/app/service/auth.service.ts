@@ -33,4 +33,20 @@ export class AuthService {
     )
   }
 
+  nUser(username: string, email: string): Observable<any> {
+
+    const url = 'user/'
+
+    const sendData = {
+      "username": username,
+      "email": email
+    }
+
+    return this.http.post<any>(url, sendData).pipe(
+      catchError(error => {
+        return throwError(() => error);
+      })
+    )
+  }
+
 }
