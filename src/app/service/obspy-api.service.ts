@@ -74,7 +74,8 @@ export class ObspyAPIService {
     data: string, 
     station_selected: string, 
     channel_selected: string,
-    unit?:string
+    unit?:string,
+    color_graph?: string
     ): Observable<any> {
 
     const formData = new FormData();
@@ -88,6 +89,7 @@ export class ObspyAPIService {
       formData.append('station_selected', station_selected)
       formData.append('channel_selected', channel_selected)
       formData.append('unit', unit)
+      formData.append('graph_color', color_graph || '')
     } else {
       throw new Error('SREV-GET-02: Se espera un archivo datos para Lectura');
     }
@@ -113,7 +115,8 @@ export class ObspyAPIService {
     t_min: string, 
     t_max: string,
     unit_from: string,
-    unit_to: string
+    unit_to: string,
+    color_graph?: string
     ): Observable<any> {
     const formData = new FormData();
     const url = 'trace_baseline_data/'
@@ -132,6 +135,7 @@ export class ObspyAPIService {
       formData.append('t_max', t_max)
       formData.append('unit_from', unit_from)
       formData.append('unit_to', unit_to)
+      formData.append('graph_color', color_graph || '')
     } else {
       throw new Error('SREV-GET-03: Se espera un archivo datos para Lectura');
     }
@@ -157,7 +161,8 @@ export class ObspyAPIService {
     t_min: string, 
     t_max: string,
     unit_from: string,
-    unit_to: string
+    unit_to: string,
+    color_graph?: string
     ): Observable<any> {
     const formData = new FormData();
     const url = 'trace_filter_data/'
@@ -176,6 +181,7 @@ export class ObspyAPIService {
       formData.append('t_max', t_max)
       formData.append('unit_from', unit_from)
       formData.append('unit_to', unit_to)
+      formData.append('graph_color', color_graph || '')
     } else {
       throw new Error('SREV-GET-04: Se espera un archivo datos para Lectura');
     }
@@ -201,7 +207,9 @@ export class ObspyAPIService {
     t_min: string, 
     t_max: string,
     unit_from: string,
-    unit_to: string): Observable<any> {
+    unit_to: string,
+    color_graph?: string
+    ): Observable<any> {
     const formData = new FormData();
     const url = 'trace_trim_data/'
 
@@ -219,6 +227,7 @@ export class ObspyAPIService {
       formData.append('t_max', t_max)
       formData.append('unit_from', unit_from)
       formData.append('unit_to', unit_to)
+      formData.append('graph_color', color_graph || '')
     } else {
       throw new Error('SREV-GET-05: Se espera un archivo datos para Lectura');
     }
@@ -244,7 +253,8 @@ export class ObspyAPIService {
     t_min: string, 
     t_max: string,
     unit_from: string,
-    unit_to: string
+    unit_to: string,
+    color_graph?: string
     ): Observable<any> {
     const formData = new FormData();
     const url = 'convert-unit/'
@@ -263,6 +273,7 @@ export class ObspyAPIService {
       formData.append('t_max', t_max)
       formData.append('unit_from', unit_from)
       formData.append('unit_to', unit_to)
+      formData.append('graph_color', color_graph || '')
     } else {
       throw new Error('SREV-GET-03: Se espera un archivo datos para Lectura');
     }
@@ -298,7 +309,8 @@ export class ObspyAPIService {
     corner?: string, 
     zero?: string, 
     t_min?: string, 
-    t_max?: string
+    t_max?: string,
+    color_graph?: string
     ): Observable<any> {
     const formData = new FormData();
     const url = 'auto-adjust/'
@@ -325,6 +337,7 @@ export class ObspyAPIService {
       formData.append('t_min', t_min)
       formData.append('t_max', t_max)
       formData.append('unit_from', unit)
+      formData.append('graph_color', color_graph || '')
     } else {
       throw new Error('SREV-GET-04: Se espera un archivo datos para Lectura');
     }
@@ -427,7 +440,8 @@ export class ObspyAPIService {
   plotGraph(data: string, 
     station_selected: string, 
     channel_selected: string,
-    unit?:string
+    unit?:string,
+    color_graph?: string
     ): Observable<any>{ 
 
       const formData = new FormData();
@@ -441,6 +455,7 @@ export class ObspyAPIService {
         formData.append('station_selected', station_selected)
         formData.append('channel_selected', channel_selected)
         formData.append('unit_from', unit)
+        formData.append('graph_color', color_graph || '')
       } else {
         throw new Error('SREV-GET-02: Se espera un archivo datos para Lectura');
       }
@@ -466,7 +481,8 @@ export class ObspyAPIService {
     t_min: string, 
     t_max: string,
     unit_from: string,
-    unit_to: string
+    unit_to: string,
+    color_graph?: string
     ): Observable<any> {
     const formData = new FormData();
     const url = 'plot-tool/'
@@ -485,6 +501,7 @@ export class ObspyAPIService {
       formData.append('t_max', t_max)
       formData.append('unit_from', unit_from)
       formData.append('unit_to', unit_to)
+      formData.append('graph_color', color_graph || '')
     } else {
       throw new Error('SREV-GET-03: Se espera un archivo datos para Lectura');
     }
@@ -502,6 +519,7 @@ export class ObspyAPIService {
     station_selected: string, 
     channel_selected: string,
     unit: string,
+    color_graph?: string,
     base_line?: string, 
     filter?: string, 
     freqmin?: string, 
@@ -509,7 +527,7 @@ export class ObspyAPIService {
     corner?: string, 
     zero?: string, 
     t_min?: string, 
-    t_max?: string
+    t_max?: string,
     ): Observable<any> {
     const formData = new FormData();
     const url = 'plot-tool-auto/'
@@ -536,6 +554,7 @@ export class ObspyAPIService {
       formData.append('t_min', t_min)
       formData.append('t_max', t_max)
       formData.append('unit_from', unit)
+      formData.append('graph_color', color_graph || '')
     } else {
       throw new Error('SREV-GET-04: Se espera un archivo datos para Lectura');
     }

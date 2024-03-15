@@ -1773,8 +1773,14 @@ export class LectorDemoComponent implements OnInit {
   }
 
   togglePanel() {
-    this.hideStaPanel = !this.hideStaPanel
-    this.hideStaPanel2 = !this.hideStaPanel2
+    if (this.hideStaPanel2 == false) {
+      this.hideStaPanel = true
+      this.hideStaPanel2 = true
+    }
+    else {
+      this.hideStaPanel = false
+      this.hideStaPanel2 = false
+    }
   }
 
   filterData() {
