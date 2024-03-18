@@ -219,7 +219,7 @@
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> START TIME:</p>
                     </div>
-                    <P><b>{{stationInfo.starttime | date: 'short'}} </b></P>
+                    <P><b>{{stationInfo.starttime | date: 'yyyy-MM-dd HH:mm:ss' : 'UTC'}} </b></P>
                 </div>
 
                 <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
@@ -227,7 +227,7 @@
                         <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                         <p> END TIME:</p>
                     </div>
-                    <P><b>{{stationInfo.endtime | date: 'short'}} </b></P>
+                    <P><b>{{stationInfo.endtime | date: 'yyyy-MM-dd HH:mm:ss' : 'UTC'}} </b></P>
                 </div>
 
                 <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">

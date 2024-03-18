@@ -89,6 +89,9 @@ export class AmplitudFourierComponent implements OnInit {
 
         const [rangoNumeros, rangoStrings] = this.encontrarRango(value.amplitud);
 
+        console.log(rangoNumeros, rangoStrings);
+        
+
         this.layout = {
           title: {
             text: `Amplitud de Fourier [cm/s]`,
@@ -191,7 +194,8 @@ export class AmplitudFourierComponent implements OnInit {
     const rangeStrings: string[] = [];
 
     for (let i = minExp; i <= maxExp; i++) {
-      const num = Math.pow(10, i);
+      let num = Math.pow(10, i);
+      num = parseFloat(num.toFixed(10))
       rangeNumbers.push(num);
       rangeStrings.push(num.toString());
     }

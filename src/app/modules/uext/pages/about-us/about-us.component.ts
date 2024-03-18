@@ -21,7 +21,7 @@ export class AboutUsComponent implements OnInit {
       "lastname": "Cruz",
       "cargo": "Junior Developer",
       "titulo": "Egresado URP (ESC-INF)",
-      "descripcion": "Desarrollador de servicios web para el análisis de eventos acelerográficos, aplicando conocimientos previos en el manejo de datos en tiempo real y la implementación de soluciones escalables.",
+      "descripcion": "Egresado de la Facultad de Ingeniería Informática de la Universidad Ricardo Palma (URP). Ha realizado proyectos para la logística administrativa de pequeñas empresas. Actualmente es desarrollador de servicios web para el análisis de eventos acelerográficos, aplicando conocimientos previos en el manejo de datos en tiempo real y la implementación de soluciones escalables en Nuevo Control EIRL.",
       "img": "/assets/pedro.jpeg"
     },
   ]

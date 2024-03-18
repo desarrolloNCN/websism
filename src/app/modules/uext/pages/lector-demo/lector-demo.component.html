@@ -204,7 +204,7 @@
                                 <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                                 <p> START TIME:</p>
                             </div>
-                            <P><b>{{stationInfo.starttime | date: 'short'}} </b></P>
+                            <P><b>{{stationInfo.starttime | date: 'yyyy-MM-dd HH:mm:ss' : 'UTC'}} </b></P>
                         </div>
 
                         <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
@@ -212,7 +212,7 @@
                                 <mat-icon class="iconstainfo">settings_input_antenna</mat-icon>
                                 <p> END TIME:</p>
                             </div>
-                            <P><b>{{stationInfo.endtime | date: 'short'}} </b></P>
+                            <P><b>{{stationInfo.endtime | date: 'yyyy-MM-dd HH:mm:ss' : 'UTC'}} </b></P>
                         </div>
 
                         <div class="stainfospan" fxLayout="row" fxLayoutAlign="space-between">
@@ -540,7 +540,6 @@
                                             (customEvent)="handleEvent($event, i)">
                                         </ngx-image-viewer>
                                     </div>
-                                    <!-- <img [src]="tab.img"> -->
                                     <!-- <div echarts [options]="tab.graph[0]" [loading]="isLoading" class="divGraph"></div>
                                     <div echarts [options]="tab.graph[1]" [loading]="isLoading" class="divGraph"></div>
                                     <div echarts [options]="tab.graph[2]" [loading]="isLoading" class="divGraph"></div> -->

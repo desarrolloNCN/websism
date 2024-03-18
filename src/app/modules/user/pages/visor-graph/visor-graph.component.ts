@@ -688,7 +688,7 @@ export class VisorGraphComponent implements OnInit {
                 this.leer(value.data[0])
               },
               error: err => {
-                this.snackBar.open('⚠️ Error CTS-DT', 'cerrar', snackBar)
+                this.snackBar.open('⚠️ Error al leer el XML', 'cerrar', snackBar)
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
                 this.btnDisable = false
@@ -2183,14 +2183,15 @@ export class VisorGraphComponent implements OnInit {
 
     const fechaHora = new Date(date);
 
-    const año = fechaHora.getFullYear();
-    const mes = ("0" + (fechaHora.getMonth() + 1)).slice(-2);
-    const dia = ("0" + fechaHora.getDate()).slice(-2);
-    const horas = ("0" + fechaHora.getHours()).slice(-2);
-    const minutos = ("0" + fechaHora.getMinutes()).slice(-2);
-    const segundos = ("0" + fechaHora.getSeconds()).slice(-2);
+    // const año = fechaHora.getFullYear();
+    // const mes = ("0" + (fechaHora.getMonth() + 1)).slice(-2);
+    // const dia = ("0" + fechaHora.getDate()).slice(-2);
+    // const horas = ("0" + fechaHora.getHours()).slice(-2);
+    // const minutos = ("0" + fechaHora.getMinutes()).slice(-2);
+    // const segundos = ("0" + fechaHora.getSeconds()).slice(-2);
 
-    const formatoFechaHora = `${año}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
+    // const formatoFechaHora = `${año}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
+    const formatoFechaHora = fechaHora.toISOString().replace('T', ' ').replace(/\.\d+Z$/, '');
 
     return formatoFechaHora
   }

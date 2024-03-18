@@ -361,7 +361,7 @@ export class ObspyAPIService {
 
     return this.http.post<any>(url, data).pipe(
       catchError(error => {
-        return of(error)
+        return throwError(() => error);
       })
     );
   }

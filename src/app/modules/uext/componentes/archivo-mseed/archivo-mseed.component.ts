@@ -85,7 +85,9 @@ export class ArchivoMseedComponent implements OnInit {
         }
       },
       error: err => {
-        this.userId = -1
+        // TODO: CAMBIAR EN MODO PROD a -1
+        this.userId = 1
+        
         this.obsApi.getData(this.url).subscribe({
           next: value => {
             this.tempdata = value.data
@@ -114,7 +116,6 @@ export class ArchivoMseedComponent implements OnInit {
         })
       },
       complete: () => {
-        console.log('Complete');
 
         this.obsApi.getData(this.url).subscribe({
           next: value => {
@@ -227,11 +228,14 @@ export class ArchivoMseedComponent implements OnInit {
         this.arch = null;
         return
       } else {
+        this.arch = ''
         this.arch = archivos[0];
+        this.snackBar.open(' ✅ Archivo Cargado', 'cerrar', snackBar)
+        // this.leerArchivo()
+        this.btnCancel = false
         this.controlForm2.disable()
         this.btnDisableForm = true
         this.btnShow = true;
-        this.btnCancel = false;
         this.controlForm.get('url').disable()
       }
 
@@ -247,6 +251,7 @@ export class ArchivoMseedComponent implements OnInit {
   leerArchivo() {
 
     // this.clearData()
+    // this.btnCancel = false
     this.btnDisable = true
 
     const snackBar = new MatSnackBarConfig();
@@ -283,23 +288,36 @@ export class ArchivoMseedComponent implements OnInit {
           this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
         },
         complete: () => {
+          let sendData = {}
 
           this.obsApi.addCalibrationMseed(this.url, this.urlXml, '').subscribe({
             next: value => {
 
-              let sendData = {
+              sendData = {
                 "url": value.url,
                 "unit": value.unit
               }
 
-              this.matDialogRef.close(sendData)
+              value.xmlData.forEach((element: any, index: number) => {
+                this.controlForm2.controls[`c_${index}`].setValue(element.calib)
+              });
+              
+              this.controlForm2.controls['unitst'].setValue(value.unit)
+
             },
-            error: err => {
+            error: err => {   
+              this.snackBar.open(`⚠️ ${err.error.error}`, 'cerrar', snackBar)
+              this.controlForm.enable()
+              this.controlForm2.enable()
               this.loadingSpinner = false
+              this.loadingBarSpinner = false
               this.btnDisable = false
-              this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
             },
             complete: () => {
+              // this.matDialogRef.close(sendData)
+              this.controlForm.enable()
+              this.controlForm2.enable()
+              this.btnDisableForm = false
               this.loadingBarSpinner = false
               this.btnDisable = false
 
@@ -310,7 +328,6 @@ export class ArchivoMseedComponent implements OnInit {
       })
 
     } else {
-      console.log(this.controlForm.value);
       this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
       this.loadingSpinner = false
       this.loadingBarSpinner = false

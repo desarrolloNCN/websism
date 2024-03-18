@@ -59,7 +59,7 @@ export class EspectroFourierComponent implements OnInit {
         this.data = [this.trace1];
 
         this.layout = {
-          title: 'Espectro de Fourier (5% Amortiguamiento)',
+          title: 'Espectro de Respuesta (5% Amortiguamiento)',
           annotations: [
             {
               xref: 'paper',

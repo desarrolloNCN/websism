@@ -51,8 +51,6 @@ export class RegisterUserService {
   addCalibrationMseedUser(user:number, mseed:string, xml:string, dataCal: any){
     const url = `mseed_xml_user/`
 
-    //TODO : CAMBIAR USER ID
-
     const data = {
       "user" : user,
       "mseed_file" : mseed ,
