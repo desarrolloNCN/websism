@@ -93,10 +93,18 @@
                             <mat-label>Canal {{i+1}}</mat-label>
                             <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
                             <mat-select formControlName='cc_{{i}}'>
-                                <mat-option value="T">Tiempo</mat-option>
-                                <mat-option *ngFor="let itms of columHead;let i = index" [value]="itms">
-                                    {{itms}}
-                                </mat-option>
+                                <mat-optgroup label="Canales Default">
+                                    <mat-option value="T">Tiempo</mat-option>
+                                    <mat-option value="E">E</mat-option>
+                                    <mat-option value="N">N</mat-option>
+                                    <mat-option value="Z">Z</mat-option>
+                                </mat-optgroup>
+                                <mat-optgroup label="Encabezados">
+                                    <mat-option *ngFor="let itms of columHead;let i = index" [value]="itms">
+                                        {{itms}}
+                                    </mat-option>
+                                </mat-optgroup>
+
                             </mat-select>
                         </mat-form-field>
                     </div>
@@ -107,8 +115,8 @@
             </div>
             <br>
 
-            <div fxLayout="row" fxLayoutGap="10" fxLayoutAlign="center center" >
-                <mat-checkbox labelPosition="before"  formControlName="ckInfo" >Datos Adicionales </mat-checkbox>
+            <div fxLayout="row" fxLayoutGap="10" fxLayoutAlign="center center">
+                <mat-checkbox labelPosition="before" formControlName="ckInfo">Datos Adicionales </mat-checkbox>
             </div>
 
             <div *ngIf="this.controlForm.get('ckInfo').value" fxLayout="row" fxLayoutGap="5">

@@ -144,19 +144,29 @@ export class ArchivoTXTComponent implements OnInit {
 
     if (encabezados.length < datosPrimeraLinea.length) {
       for (let i = encabezados.length; i < datosPrimeraLinea.length; i++) {
-        if (i == 0) {
-          encabezados.push('Z')
-        } else if (i == 1) {
-          encabezados.push('N')
-        } else if (i == 2) {
-          encabezados.push('E')
-        } else {
-          encabezados.push(`C${i + 1}`);
-        }
+        // TODO: Verificar si es necesario
+        // if (i == 0) {
+        //   encabezados.push('Z')
+        // } else if (i == 1) {
+        //   encabezados.push('N')
+        // } else if (i == 2) {
+        //   encabezados.push('E')
+        // } else {
+        encabezados.push(`C${i + 1}`);
+        // }
       }
-    } else if (encabezados.length > datosPrimeraLinea.length) {
-      this.snackBar.open('✅ Verificar Encabezados', 'cerrar', snackBar)
     }
+
+    if (encabezados.length > datosPrimeraLinea.length) {
+      this.snackBar.open('✅ Verificar Encabezados', 'cerrar', snackBar)
+      console.log(datosPrimeraLinea);
+      encabezados = []
+      for (let i = 0; i < datosPrimeraLinea.length; i++) {
+        encabezados.push(`C${i + 1}`);
+      }
+    }
+
+    console.log(encabezados.length, datosPrimeraLinea.length);
 
     const numeroColumnas = datosPrimeraLinea.length;
 
@@ -177,7 +187,7 @@ export class ArchivoTXTComponent implements OnInit {
 
     this.columnDetector = valoresAgrupados
     this.columHead = encabezados
-    this.encabezados(valoresAgrupados, encabezados)
+    this.encabezadosGen(valoresAgrupados, encabezados)
 
   }
 
@@ -195,7 +205,7 @@ export class ArchivoTXTComponent implements OnInit {
   //     this.channels.push('C' + (index + 3))}; 
 
 
-  encabezados(valores: any, headers: any) {
+  encabezadosGen(valores: any, headers: any) {
 
     // ! Remueve los controles que empiezan por 'c_'
 
@@ -266,7 +276,7 @@ export class ArchivoTXTComponent implements OnInit {
     let fecha = ''
     let hora = ''
     let fechaHora: Date | any
-    
+
     lineas.forEach((linea, index) => {
       const coincidencias = linea.match(regexFecha);
       const coincidenciasH = linea.match(regexHora)
@@ -276,10 +286,10 @@ export class ArchivoTXTComponent implements OnInit {
       }
       fechaHora = new Date(fecha + ' ' + hora)
     });
-    
-    if(fechaHora instanceof Date && !isNaN(fechaHora.getTime())){
+
+    if (fechaHora instanceof Date && !isNaN(fechaHora.getTime())) {
       this.controlForm.controls['starttime'].setValue(fechaHora)
-    }else{
+    } else {
       let fechaHoy = new Date()
       this.controlForm.controls['starttime'].setValue(fechaHoy)
     }

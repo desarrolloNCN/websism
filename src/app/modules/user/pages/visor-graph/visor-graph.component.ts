@@ -17,6 +17,7 @@ import { EspectroFourierComponent } from '../../componentes/espectro-fourier/esp
 import { CustomEvent, ImageViewerConfig } from 'ngx-image-viewer';
 import { AuthService } from 'src/app/service/auth.service';
 import { SismosHistoricosComponent } from 'src/app/modules/uext/componentes/sismos-historicos/sismos-historicos.component';
+import { RegisterUserService } from 'src/app/service/register-user.service';
 
 @Component({
   selector: 'app-visor-graph',
@@ -112,6 +113,9 @@ export class VisorGraphComponent implements OnInit {
   idFile = ''
   stringdata = ''
 
+  // TODO: cambiar esto en Produccion a -1
+  userId = 1
+
   plotedimages: any = []
 
   toogleTrim = false
@@ -139,6 +143,8 @@ export class VisorGraphComponent implements OnInit {
 
   constructor(
     private obsApi: ObspyAPIService,
+    private obsUser: RegisterUserService,
+
     private auth: AuthService,
     private snackBar: MatSnackBar,
     private cdRef: ChangeDetectorRef,
@@ -180,6 +186,18 @@ export class VisorGraphComponent implements OnInit {
   reloadSettingUser() {
     this.auth.getToken().subscribe({
       next: value => {
+
+        if (value.username == null || value.email == null) {
+          // TODO: cambiar esto en Produccion a -1
+          this.userId == 1
+        } else {
+          this.auth.nUser(value.username, value.email).subscribe({
+            next: nvalue => {
+              this.userId = nvalue
+            }
+          })
+        }
+
         if (value.modo_grafico == null || value.modo_grafico == 'no') {
           this.colorGraph = value.color_grafico
           this.graphClientOption = true
@@ -188,11 +206,9 @@ export class VisorGraphComponent implements OnInit {
         }
       },
       error: err => {
+        this.userId == -1
         this.graphClientOption = true
       },
-      complete: () => {
-
-      }
     })
   }
 
@@ -353,7 +369,7 @@ export class VisorGraphComponent implements OnInit {
 
         } catch (error) {
 
-          this.obsApi.uploadFile(valorNoVacio).subscribe({
+          this.obsUser.uploadFileUser(valorNoVacio, this.userId.toString() ).subscribe({
             next: value => {
 
               this.idFile = value.id
@@ -808,7 +824,7 @@ export class VisorGraphComponent implements OnInit {
         // this.graphClientOption = true
         // this.loadingBarGraph = false
       },
-     
+
     })
 
   }
@@ -915,7 +931,7 @@ export class VisorGraphComponent implements OnInit {
 
     this.ToggleGraph = false
     this.isLoading =
-    this.loadingBarGraph = true
+      this.loadingBarGraph = true
 
     this.auth.getToken().subscribe({
       next: value => {
@@ -930,7 +946,7 @@ export class VisorGraphComponent implements OnInit {
             next: value => {
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
               if (indx !== -1) {
-    
+
                 this.tabs[indx].img = value.url
                 this.tabs[indx].base = base
                 this.cdRef.detectChanges();
@@ -944,23 +960,23 @@ export class VisorGraphComponent implements OnInit {
           this.graphClientOption = false
           this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
             next: value => {
-    
+
               this.ToggleGraph = false
-    
-    
+
+
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-    
+
               if (indx !== -1) {
-    
+
                 const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)', this.colorGraph)
-    
+
                 this.tabs[indx].graph = graph;
                 this.tabs[indx].base = base
-    
+
                 this.cdRef.detectChanges();
               }
-    
-    
+
+
             },
             error: err => {
               this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
@@ -982,7 +998,7 @@ export class VisorGraphComponent implements OnInit {
           next: value => {
             const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
             if (indx !== -1) {
-  
+
               this.tabs[indx].img = value.url
               this.tabs[indx].base = base
               this.cdRef.detectChanges();
@@ -1066,7 +1082,7 @@ export class VisorGraphComponent implements OnInit {
 
             next: value => {
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-    
+
               if (indx !== -1) {
                 this.tabs[indx].img = value.url
                 this.cdRef.detectChanges();
@@ -1074,29 +1090,29 @@ export class VisorGraphComponent implements OnInit {
             },
             complete: () => {
               this.loadingBarGraph = false
-    
+
             }
           })
         } else {
           this.graphClientOption = false
           this.obsApi.getTraceDataFilter(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
             next: value => {
-    
+
               this.ToggleGraph = false
               this.loadingSpinnerData = true
-    
+
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-    
+
               if (indx !== -1) {
-    
+
                 const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)', this.colorGraph)
-    
+
                 this.tabs[indx].graph = graph;
-    
+
                 // Manualmente activar la detección de cambios para la pestaña actualizada
                 this.cdRef.detectChanges();
               }
-    
+
             },
             error: err => {
               this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
@@ -1105,7 +1121,7 @@ export class VisorGraphComponent implements OnInit {
             },
             complete: () => {
               this.actApli.push(`Filtro: ${type} a ${sta}.${cha}`)
-    
+
               this.loadingSpinnerData = false
               this.loadingBarGraph = false
               this.ToggleGraph = true
@@ -1117,12 +1133,12 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         this.graphClientOption = true
-        
+
         this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit, this.colorGraph).subscribe({
 
           next: value => {
             const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-  
+
             if (indx !== -1) {
               this.tabs[indx].img = value.url
               this.cdRef.detectChanges();
@@ -1130,7 +1146,7 @@ export class VisorGraphComponent implements OnInit {
           },
           complete: () => {
             this.loadingBarGraph = false
-  
+
           }
         })
 
@@ -1203,7 +1219,7 @@ export class VisorGraphComponent implements OnInit {
             next: value => {
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
               if (indx !== -1) {
-    
+
                 this.tabs[indx].img = value.url
                 this.cdRef.detectChanges();
               }
@@ -1216,22 +1232,22 @@ export class VisorGraphComponent implements OnInit {
           this.graphClientOption = false
           this.obsApi.getTraceDataTrim(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
             next: value => {
-    
+
               this.ToggleGraph = false
               this.loadingSpinnerData = true
-    
+
               // const indx = this.tabs.findIndex((tab: { index: number; }) => tab.index === index)
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-    
+
               if (indx !== -1) {
-    
+
                 const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)', this.colorGraph)
-    
+
                 this.tabs[indx].graph = graph;
-    
+
                 this.cdRef.detectChanges();
               }
-    
+
             },
             error: err => {
               this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
@@ -1240,15 +1256,15 @@ export class VisorGraphComponent implements OnInit {
             },
             complete: () => {
               this.actApli.push(`Trim: ${t_max - t_min}seg a ${sta}.${cha}`)
-    
+
               this.loadingSpinnerData = false
-    
+
               this.loadingBarGraph = false
-    
+
               this.ToggleGraph = true
-    
+
               this.isLoading = false
-    
+
               this.toogleFilter = false
             }
           })
@@ -1260,7 +1276,7 @@ export class VisorGraphComponent implements OnInit {
           next: value => {
             const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
             if (indx !== -1) {
-  
+
               this.tabs[indx].img = value.url
               this.cdRef.detectChanges();
             }
@@ -1270,7 +1286,7 @@ export class VisorGraphComponent implements OnInit {
           }
         })
       },
-      
+
     })
 
   }
@@ -1356,7 +1372,7 @@ export class VisorGraphComponent implements OnInit {
             next: value => {
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
               if (indx !== -1) {
-    
+
                 this.tabs[indx].img = value.url
                 this.tabs[indx].unit = unit_to
                 this.cdRef.detectChanges();
@@ -1370,23 +1386,23 @@ export class VisorGraphComponent implements OnInit {
           this.graphClientOption = false
           this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to).subscribe({
             next: value => {
-    
+
               this.ToggleGraph = false
-    
-    
+
+
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-    
+
               if (indx !== -1) {
-    
+
                 const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)', this.colorGraph)
-    
+
                 this.tabs[indx].graph = graph;
                 this.tabs[indx].unit = unit_to
-    
+
                 this.cdRef.detectChanges();
               }
-    
-    
+
+
             },
             error: err => {
               this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
@@ -1409,7 +1425,7 @@ export class VisorGraphComponent implements OnInit {
           next: value => {
             const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
             if (indx !== -1) {
-  
+
               this.tabs[indx].img = value.url
               this.tabs[indx].unit = unit_to
               this.cdRef.detectChanges();
@@ -1466,9 +1482,9 @@ export class VisorGraphComponent implements OnInit {
             next: value => {
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
               if (indx !== -1) {
-    
+
                 this.tabs[indx].img = value.url
-    
+
                 this.cdRef.detectChanges();
               }
             },
@@ -1480,22 +1496,22 @@ export class VisorGraphComponent implements OnInit {
           this.graphClientOption = false
           this.obsApi.autoAdjust(dataToUse, sta, cha, unit_from).subscribe({
             next: value => {
-    
+
               this.ToggleGraph = false
               this.loadingSpinnerData = true
-    
+
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-    
+
               if (indx !== -1) {
-    
+
                 const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)', this.colorGraph)
-    
+
                 this.tabs[indx].graph = graph;
-    
+
                 // Manualmente activar la detección de cambios para la pestaña actualizada
                 this.cdRef.detectChanges();
               }
-    
+
             },
             error: err => {
               this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
@@ -1504,14 +1520,14 @@ export class VisorGraphComponent implements OnInit {
             },
             complete: () => {
               this.actApli.push(`AutoAjuste a ${sta}.${cha}`)
-    
+
               this.loadingSpinnerData = false
               this.loadingBarGraph = false
               this.ToggleGraph = true
               this.toogleFilter = false
               this.isLoading = false
             }
-          })          
+          })
         }
       },
       error: err => {
@@ -1520,9 +1536,9 @@ export class VisorGraphComponent implements OnInit {
           next: value => {
             const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
             if (indx !== -1) {
-  
+
               this.tabs[indx].img = value.url
-  
+
               this.cdRef.detectChanges();
             }
           },
@@ -1561,7 +1577,7 @@ export class VisorGraphComponent implements OnInit {
       "url": dataToUse,
       "station": sta,
       "channel": cha,
-      "allData" : allData
+      "allData": allData
     }
 
     matDialogConfig.data = sendData
@@ -1593,7 +1609,7 @@ export class VisorGraphComponent implements OnInit {
       "url": dataToUse,
       "station": sta,
       "channel": cha,
-      "allData" : allData
+      "allData": allData
     }
 
     matDialogConfig.data = sendData
@@ -2222,7 +2238,7 @@ export class VisorGraphComponent implements OnInit {
           const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`)
           if (indx !== -1) {
 
-            const graph = this.graphGenerator(this.stationInfo, value, '(RAWDATA)' , this.colorGraph)
+            const graph = this.graphGenerator(this.stationInfo, value, '(RAWDATA)', this.colorGraph)
 
             this.tabs[indx].graph = graph
             this.tabs[indx].base = ''

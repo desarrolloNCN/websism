@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { RegisterUserService } from 'src/app/service/register-user.service';
+import { NewProjectComponent } from '../../componentes/new-project/new-project.component';
 
 @Component({
   selector: 'app-user-projects',
@@ -12,7 +14,8 @@ export class UserProjectsComponent implements OnInit {
   ud = '75d0aa04-8001-4812-86ea-33f686eead0e'
   loadingSpinner = false
   constructor(
-    private userService : RegisterUserService
+    private userService : RegisterUserService,
+    private matDialog : MatDialog,
   ) { }
 
   ngOnInit(): void {
@@ -38,6 +41,8 @@ export class UserProjectsComponent implements OnInit {
   }
 
   crearProyecto(){
+
+    this.matDialog.open(NewProjectComponent)
     // this.userService.postProjectUser(this.ud).subscribe({
     //   next: value => {
         

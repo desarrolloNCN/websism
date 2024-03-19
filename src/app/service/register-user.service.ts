@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, catchError, of, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -61,6 +61,29 @@ export class RegisterUserService {
     return this.http.post<any>(url, data).pipe(
       catchError(error => {
         return of(error)
+      })
+    );
+  }
+
+  uploadFileUser(data: File | string | undefined, iduser?: string): Observable<any> {
+
+
+    const formData = new FormData();
+
+    const url = `upload_user/`;
+
+    if (data instanceof File) {
+      formData.append('user', iduser!)
+      formData.append('file', data);
+    } else if (typeof data === 'string') {
+      formData.append('string_data', data);
+    } else {
+      throw new Error('SREV-POST-99: Se espera un archivo (File) o una cadena (string).');
+    }
+
+    return this.http.post<any>(url, formData).pipe(
+      catchError(error => {
+        return throwError(() => error);
       })
     );
   }

@@ -1,0 +1,101 @@
+<mat-dialog-content>
+
+    <div style="padding-bottom: 5px;">
+        <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>Nuevo Proyecto</b></h2>
+        <mat-divider></mat-divider>
+    </div>
+
+    <div>
+        <h3>Asigne un nombre a su proyecto, añada sus archivos con loq ue va a trabajar <b style="color: rgb(82, 25, 134);">Calibrar Trazas</b></h3>
+    </div>
+
+    <form [formGroup]="controlForm" fxLayout="column">
+
+        <div fxLayout="row" fxLayoutGap="5" class="formFRow">
+
+            <img class="thumbnail" src="/assets/ncnLogoColor.png">
+
+            <div fxLayout="column" fxFlex="70">
+                <mat-form-field appearance="outline">
+                    <mat-label>Nombre del Proyecto</mat-label>
+                    <input matInput type="text" formControlName="projectName">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Descripcion</mat-label>
+                    <textarea #descript matInput maxlength="256" type="text" formControlName="descript"></textarea>
+                    <mat-hint align="end">{{descript.value.length}} / 256</mat-hint>
+                </mat-form-field>
+            </div>
+
+        </div>
+
+        <form [formGroup]="controlForm2">
+            <div class="dndZoneContainer">
+
+                <div class="dndZone" fxLayout="row" fxLayoutGap="5">
+
+                    <div class="inputUrl" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="2" fxFlex="80">
+
+                        <input matInput type="text" formControlName="url"
+                            placeholder="Ejm: https://ncn.pe/files/NC.NCN01.00.HNZ.xml">
+
+                        <button [disabled]="btnDisable" type="button" mat-icon-button (click)="fileInput.click()">
+                            <mat-icon class="colorIcon">file_upload</mat-icon>
+                        </button>
+
+                        <input hidden (change)="onFileSelected($event)" #fileInput [accept]="aceeptedFiles" type="file"
+                            id="file">
+                    </div>
+
+                    <button [disabled]="btnDisable" type="button" mat-flat-button color="primary" fxFlex="20" (click)="addUrl()">
+                        <mat-icon>add</mat-icon>
+                        <span fxHide.lt-md="true">Añadir</span>
+                    </button>
+
+                </div>
+
+            </div>
+        </form>
+
+
+        <div class="filesContainer">
+
+            <div fxLayout="row" fxLayoutAlign="space-around center"
+                style="background-color: rgb(245, 245, 245); border-radius: 5px; padding: 5px;">
+                <p class="filename"> <b>NOMB.</b> </p>
+                <p class="filename"> <b>EXTENSION</b> </p>
+                <p class="filename"> <b>ESTADO</b> </p>
+                <p class="filename"> <b>ACCION</b> </p>
+            </div>
+
+            <div *ngFor="let item of addedFiles" fxLayout="row" fxLayoutAlign="space-around center"
+                style="width: 100%; ">
+                <p class="filename"> {{item.fileName}} </p>
+                <p class="filename"> {{item.extension}} </p>
+                <p class="filename"> {{item.status}} </p>
+
+                <div fxLayout="row">
+                    <button mat-icon-button type="button" matTooltip="Calibrar"
+                        [disabled]="item.status == 'Calibrado' " (click)="calibrarFile(item)">
+                        <mat-icon>construction</mat-icon>
+                    </button>
+                    <button mat-icon-button type="button" matTooltip="Borrar" (click)="delFile(item)">
+                        <mat-icon>clear</mat-icon>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button mat-flat-button color="primary" type="button">
+            Crear Proyecto
+        </button>
+
+    </form>
+
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button mat-flat-button color="warn" (click)="close()">
+        Cerrar
+    </button>
+</mat-dialog-actions>
