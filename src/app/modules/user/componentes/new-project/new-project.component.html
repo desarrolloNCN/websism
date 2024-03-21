@@ -6,7 +6,8 @@
     </div>
 
     <div>
-        <h3>Asigne un nombre a su proyecto, añada sus archivos con loq ue va a trabajar <b style="color: rgb(82, 25, 134);">Calibrar Trazas</b></h3>
+        <h3>Asigne un nombre a su proyecto, añada sus archivos con los que va a trabajar y <b
+                style="color: rgb(82, 25, 134);">Crear Proyecto</b></h3>
     </div>
 
     <form [formGroup]="controlForm" fxLayout="column">
@@ -48,7 +49,8 @@
                             id="file">
                     </div>
 
-                    <button [disabled]="btnDisable" type="button" mat-flat-button color="primary" fxFlex="20" (click)="addUrl()">
+                    <button [disabled]="btnDisable" type="button" mat-flat-button color="primary" fxFlex="20"
+                        (click)="addUrl()">
                         <mat-icon>add</mat-icon>
                         <span fxHide.lt-md="true">Añadir</span>
                     </button>
@@ -63,21 +65,21 @@
 
             <div fxLayout="row" fxLayoutAlign="space-around center"
                 style="background-color: rgb(245, 245, 245); border-radius: 5px; padding: 5px;">
-                <p class="filename"> <b>NOMB.</b> </p>
+                <p class="filename"> <b>NOMBRE</b> </p>
                 <p class="filename"> <b>EXTENSION</b> </p>
                 <p class="filename"> <b>ESTADO</b> </p>
                 <p class="filename"> <b>ACCION</b> </p>
             </div>
 
-            <div *ngFor="let item of addedFiles" fxLayout="row" fxLayoutAlign="space-around center"
-                style="width: 100%; ">
-                <p class="filename"> {{item.fileName}} </p>
+            <div *ngFor="let item of addedFiles" fxLayout="row" fxLayoutAlign="space-around center">
+                <p class="filename"> {{item.fileName}}  </p>
                 <p class="filename"> {{item.extension}} </p>
-                <p class="filename"> {{item.status}} </p>
+                <p class="filename"> {{item.status}} <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                </p>
 
-                <div fxLayout="row">
-                    <button mat-icon-button type="button" matTooltip="Calibrar"
-                        [disabled]="item.status == 'Calibrado' " (click)="calibrarFile(item)">
+                <div fxLayout="row" fxLayoutAlign="space-around center" style="width: 110px;">
+                    <button mat-icon-button type="button" matTooltip="Calibrar" [disabled]="item.status == 'Calibrado' "
+                        (click)="calibrarFile(item)">
                         <mat-icon>construction</mat-icon>
                     </button>
                     <button mat-icon-button type="button" matTooltip="Borrar" (click)="delFile(item)">

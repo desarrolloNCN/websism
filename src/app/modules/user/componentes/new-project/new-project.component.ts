@@ -23,26 +23,29 @@ export class NewProjectComponent implements OnInit {
 
   addedFiles: any = []
 
+  regexURL = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/;
+
   constructor(
     private matDailogRef: MatDialogRef<VisorGraphComponent>,
     private snackBar: MatSnackBar,
     private matdialog: MatDialog,
   ) {
 
-    const regexURL = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/;
-
+   
     this.controlForm = new FormGroup({
       projectName: new FormControl(),
       descript: new FormControl()
     })
 
-    this.controlForm2 = new FormGroup({
-      url: new FormControl('', [Validators.pattern(regexURL)])
-    })
+   
 
   }
 
   ngOnInit(): void {
+
+    this.controlForm2 = new FormGroup({
+      url: new FormControl('', [Validators.pattern(this.regexURL)])
+    })
   }
 
   @ViewChild('fileInput') fileInput!: ElementRef
@@ -82,6 +85,7 @@ export class NewProjectComponent implements OnInit {
       this.addedFiles.push({
         "file": archivos[0],
         "fileName": formatoNombre,
+        "originalName" : archivos[0].name,
         "status": statusCalib,
         "extension": extension.toLocaleUpperCase() || 'NO EXT',
         "url": ''
@@ -110,18 +114,41 @@ export class NewProjectComponent implements OnInit {
     snackBar.duration = 5 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
+    let statusCalib = ''
+
     if (this.controlForm2.invalid) {
       this.snackBar.open('⚠️ URL invalida', 'cerrar', snackBar)
     }
 
-    const urlData = this.controlForm2.get('url').value()
+    const urlData = this.controlForm2.get('url').value
 
     if (urlData != '') {
 
       let nombreArchivo: string = urlData.substring(urlData.lastIndexOf('/') + 1);
       let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
+      if (extension == 'seed' || extension == 'evt') {
+        statusCalib = 'Calibrado'
+      } else if (extension == nombreArchivo) {
+        extension = ''
+      } else {
+        statusCalib = 'No Calibrado'
+      }
 
+      let formatoNombre = this.formatearNombreArchivo(nombreArchivo, extension, 7)
+
+      this.addedFiles.push({
+        "file": '',
+        "fileName": formatoNombre,
+        "originalName" : nombreArchivo,
+        "status": statusCalib,
+        "extension": extension.toLocaleUpperCase() || 'NO EXT',
+        "url": urlData
+      })
+      
+      console.log(this.addedFiles);
+      
+      this.controlForm2.get('url').setValue('')
 
     } else {
       this.snackBar.open('Ingrese URL valida')
