@@ -12,16 +12,16 @@ import { AuthService } from 'src/app/service/auth.service';
 export class UserProjectsComponent implements OnInit {
 
   proyectos: any = []
-  
+
   loadingSpinner = false
 
   private username = ''
   private email = ''
 
   constructor(
-    private userService : RegisterUserService,
-    private authService : AuthService,
-    private matDialog : MatDialog,
+    private userService: RegisterUserService,
+    private authService: AuthService,
+    private matDialog: MatDialog,
   ) { }
 
   ngOnInit(): void {
@@ -30,16 +30,43 @@ export class UserProjectsComponent implements OnInit {
         this.username = value.email
         this.email = value.email
       },
-      error: err =>{
+      error: err => {
         this.username = 'ga'
         this.email = 'test@example.com'
+
+        // TODO: Borrar en Produccion
+
+        this.userService.getProjectuser(this.username, this.email).subscribe({
+          next: value => {
+            this.proyectos = value
+            console.log(value);
+
+          },
+          error: err => {
+
+          }
+        })
+      },
+      complete: () => {
+        console.log(this.username, this.email)
+
+        this.userService.getProjectuser(this.username, this.email).subscribe({
+          next: value => {
+            this.proyectos = value
+            console.log(value);
+
+          },
+          error: err => {
+
+          }
+        })
       }
     })
     // this.getProyectos()
   }
 
 
-  crearProyecto(){
+  crearProyecto() {
 
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
@@ -48,18 +75,19 @@ export class UserProjectsComponent implements OnInit {
       next: value => {
         matDialogConfig.data = value
       },
-      error: err =>{
-        
+      error: err => {
+
       },
-      complete: () =>{
+      complete: () => {
         this.matDialog.open(NewProjectComponent, matDialogConfig)
       }
     })
 
-    
+
+
     // this.userService.postProjectUser(this.ud).subscribe({
     //   next: value => {
-        
+
     //   },
     //   error: err => {
     //     this.loadingSpinner = false
@@ -68,6 +96,34 @@ export class UserProjectsComponent implements OnInit {
     //     this.getProyectos()
     //   }
     // })
+  }
+
+  abrirLector(item: any) {
+    console.log(item);
+
+    let addFiles : any[] = []
+
+    item.files.forEach((e: any) => {
+      let url = e.file || e.string_data
+      let nombreArchivo: string = url.substring(url.lastIndexOf('/') + 1);
+      let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+
+      addFiles.push({
+        "originalName": nombreArchivo,
+        "extension": extension.toLocaleUpperCase() || 'NO EXT',
+        "unit": e.unit,
+        "url": url
+      })
+
+    });
+
+    this.sendData(addFiles, '/user/lectorAcel')
+
+
+  }
+
+  sendData(data: any, route?: string) {
+    this.userService.sendData(data, route);
   }
 
 

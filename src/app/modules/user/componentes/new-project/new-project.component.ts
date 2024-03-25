@@ -129,7 +129,7 @@ export class NewProjectComponent implements OnInit {
 
       let formatoNombre = this.formatearNombreArchivo(archivos[0].name, extension, 7)
 
-      this.regApi.uploadProjectFileUser(this.arch, this.idUser, this.data.id).subscribe({
+      this.regApi.uploadProjectFileUser(this.arch, this.idUser, this.data.id, archivos[0].name, statusCalib).subscribe({
         next: value => {
           this.addedFiles.push({
             "file": archivos[0],
@@ -209,12 +209,12 @@ export class NewProjectComponent implements OnInit {
 
       let formatoNombre = this.formatearNombreArchivo(nombreArchivo, extension, 7)
 
-      this.regApi.uploadProjectFileUser(urlData, this.idUser, this.data.id).subscribe({
+      this.regApi.uploadProjectFileUser(urlData, this.idUser, this.data.id, nombreArchivo, statusCalib).subscribe({
         next: value => {
           this.addedFiles.push({
             "file": '',
             "fileName": formatoNombre,
-            "originalName": urlData,
+            "originalName": nombreArchivo,
             "status": statusCalib,
             "extension": extension.toLocaleUpperCase() || 'NO EXT',
             "id": value.id,
@@ -268,21 +268,40 @@ export class NewProjectComponent implements OnInit {
           if (value.url == '') {
             this.addedFiles[index].status = 'Error'
           } else {
-            this.addedFiles[index].status = 'Calibrado'
-            this.addedFiles[index].unit = value.unit
-            this.addedFiles[index].url = value.url
+
+            this.regApi.putFileProject(this.addedFiles[index].id, value.unit, 'Calibrado', this.addedFiles[index]).subscribe({
+              error: err => {
+                this.addedFiles[index].status = 'Error'
+              },
+              complete: () => {
+                this.addedFiles[index].status = 'Calibrado'
+                this.addedFiles[index].unit = value.unit
+                this.addedFiles[index].url = value.url
+              }
+            })
           }
         }
       })
     } else if (item.extension == 'MSEED') {
       this.matdialog.open(ArchivoMseedComponent, matDialogConfig).afterClosed().subscribe({
         next: value => {
+          console.log(value);
+
           if (value.url == '') {
             this.addedFiles[index].status = 'Error'
           } else {
-            this.addedFiles[index].status = 'Calibrado'
-            this.addedFiles[index].unit = value.unit
-            this.addedFiles[index].url = value.url
+
+            this.regApi.putFileProject(this.addedFiles[index].id, value.unit, 'Calibrado', this.addedFiles[index], value.url).subscribe({
+              error: err => {
+                this.addedFiles[index].status = 'Error'
+              },
+              complete: () => {
+                this.addedFiles[index].status = 'Calibrado'
+                this.addedFiles[index].unit = value.unit
+                this.addedFiles[index].url = value.url
+              }
+            })
+
           }
         }
       })
@@ -304,8 +323,25 @@ export class NewProjectComponent implements OnInit {
           this.snackBar.open('⚠️ Eliminar Archivos', 'cerrar', snackBar)
           return
         } else {
-          this.sendData(this.addedFiles, '/user/lectorAcel')
-          this.matDailogRef.close()
+
+          let projName = this.controlForm.get('projectName').value
+          let projDesp = this.controlForm.get('descript').value
+
+          console.log(this.data);
+          
+
+          this.regApi.putProject(this.data.id, projName, projDesp).subscribe({
+            error: err => {
+              this.snackBar.open('⚠️ Problema con el Registro ', 'cerrar', snackBar)
+              this.sendData(this.addedFiles, '/user/lectorAcel')
+              this.matDailogRef.close()
+            },
+            complete: () => {
+              this.sendData(this.addedFiles, '/user/lectorAcel')
+              this.matDailogRef.close()
+            }
+          })
+
         }
       });
     }

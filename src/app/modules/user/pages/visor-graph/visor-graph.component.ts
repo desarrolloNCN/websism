@@ -96,7 +96,7 @@ export class VisorGraphComponent implements OnInit {
   loadingSpinnerGraph = false
   loadingSpinnerData = false
   loadingPanelInfo = false
-  
+
   isLoading = false
 
   ToggleGraph = false
@@ -142,10 +142,10 @@ export class VisorGraphComponent implements OnInit {
 
   formGroups: FormGroup[] = [];
 
-  stopXmr  : Subscription | any
+  stopXmr: Subscription | any
   stopMseed: Subscription | any
-  stopTxt  : Subscription | any
-  stopData : Subscription | any
+  stopTxt: Subscription | any
+  stopData: Subscription | any
   graphClientOption = false
 
   proyectData: any[] = [];
@@ -224,34 +224,34 @@ export class VisorGraphComponent implements OnInit {
   ngOnInit(): void {
     localStorage.clear()
 
-    this.stopData = this.obsUser.data$.subscribe({
+    this.obsUser.data.subscribe({
       next: valueD => {
         if (valueD == null) {
           this.proyectData = []
         } else {
-          this.loadingPanelInfo = true          
+          this.loadingPanelInfo = true
           this.proyectData = valueD
-          
-          this.proyectData.forEach((e: any, index : number) => {
+
+          this.proyectData.forEach((e: any, index: number) => {
 
             this.obsApi.getData(e.url).subscribe({
               next: value => {
-                                
+
                 if (value.data[0].und_calib == 'M/S**2') {
-                  e.unit = 'm'                  
+                  e.unit = 'm'
                 } else if (value.data[0].und_calib == 'CM/S**2' || e.extension == 'EVT' || e.extension == 'MSEED') {
-                  e.unit = 'gal'                  
+                  e.unit = 'gal'
                 } else if (value.data[0].und_calib == 'G') {
-                  e.unit = 'g'                  
+                  e.unit = 'g'
                 } else {
-                  e.unit = ''                 
+                  e.unit = ''
                 }
 
                 this.toggleTabs = true
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
 
               },
-              complete: () =>{
+              complete: () => {
                 this.loadingPanelInfo = false
               }
             })
@@ -261,7 +261,7 @@ export class VisorGraphComponent implements OnInit {
 
         }
 
-        
+
       },
       error: err => {
         console.log(err);
@@ -285,13 +285,14 @@ export class VisorGraphComponent implements OnInit {
   ngOnDestroy() {
     if (this.navigationSubscription) {
       this.navigationSubscription.unsubscribe();
-      this.stopData.unsubscribe()
+      this.obsUser.resetService()
     }
   }
 
   showWarning() {
     const confirmed = window.confirm('-¿Estás seguro de que deseas abandonar esta página?');
     if (!confirmed) {
+      this.obsUser.resetService()
       this.router.navigate(['/user/lectorAcel']);
     } else {
       return
@@ -437,7 +438,7 @@ export class VisorGraphComponent implements OnInit {
               "originalName": na,
               "url": value.file || value.string_data,
               "format": value.f,
-              "unit" : ''
+              "unit": ''
             })
 
             localStorage.setItem('urlFileUpload', value.file)
@@ -965,7 +966,7 @@ export class VisorGraphComponent implements OnInit {
     this.toggleTabs = false
 
     this.stationInfo = e
-    
+
     var dataString, dataFile = this.proyectData[0].url
     var og_unit: string = this.proyectData[0].unit
     // var dataString: string = localStorage.getItem('urlSearched')!
@@ -1246,7 +1247,7 @@ export class VisorGraphComponent implements OnInit {
 
     var dataString, dataFile = this.proyectData[0].url
     var unit_from: string = this.proyectData[0].unit
-    
+
     // TODO: descomentar luego de evaluacion
     // var dataString: string = localStorage.getItem('urlSearched')!
     // var dataFile: string = localStorage.getItem('urlFileUpload')!
@@ -1390,7 +1391,7 @@ export class VisorGraphComponent implements OnInit {
 
     var dataString, dataFile = this.proyectData[0].url
     var unit_from: string = this.proyectData[0].unit
-    
+
     // TODO: descomentar luego de evaluacion
     // var dataString: string = localStorage.getItem('urlSearched')!
     // var dataFile: string = localStorage.getItem('urlFileUpload')!
@@ -1549,7 +1550,7 @@ export class VisorGraphComponent implements OnInit {
 
     var dataString, dataFile = this.proyectData[0].url
     var unit_from: string = this.proyectData[0].unit
-    
+
     // TODO: descomentar luego de evaluacion
 
     // let unit_from = localStorage.getItem('ogUnit')!
@@ -1686,7 +1687,7 @@ export class VisorGraphComponent implements OnInit {
 
     var dataString, dataFile = this.proyectData[0].url
     var unit_from: string = this.proyectData[0].unit
-    
+
     // TODO: descomentar luego de evaluacion
     // var dataString: string = localStorage.getItem('urlSearched')!
     // var dataFile: string = localStorage.getItem('urlFileUpload')!
@@ -1804,7 +1805,7 @@ export class VisorGraphComponent implements OnInit {
 
     var dataString, dataFile = this.proyectData[0].url
     var unit_from: string = this.proyectData[0].unit
-    
+
     // TODO: descomentar luego de evaluacion
     // var dataString: string = localStorage.getItem('urlSearched')!
     // var dataFile: string = localStorage.getItem('urlFileUpload')!
@@ -1840,7 +1841,7 @@ export class VisorGraphComponent implements OnInit {
 
     var dataString, dataFile = this.proyectData[0].url
     var unit_from: string = this.proyectData[0].unit
-    
+
     // TODO: descomentar luego de evaluacion
     // var dataString: string = localStorage.getItem('urlSearched')!
     // var dataFile: string = localStorage.getItem('urlFileUpload')!
@@ -2471,7 +2472,7 @@ export class VisorGraphComponent implements OnInit {
 
     var dataString, dataFile = this.proyectData[0].url
     var unit_from: string = this.proyectData[0].unit
-    
+
     // TODO: descomentar luego de evaluacion
     // var dataString: string = localStorage.getItem('urlSearched')!
     // var dataFile: string = localStorage.getItem('urlFileUpload')!
@@ -2559,7 +2560,7 @@ export class VisorGraphComponent implements OnInit {
 
     var dataString, dataFile = this.proyectData[0].url
     var unit_from: string = this.proyectData[0].unit
-    
+
     // TODO: descomentar luego de evaluacion
     // var dataString: string = localStorage.getItem('urlSearched')!
     // var dataFile: string = localStorage.getItem('urlFileUpload')!

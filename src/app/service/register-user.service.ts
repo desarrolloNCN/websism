@@ -9,7 +9,7 @@ import { BehaviorSubject, Observable, catchError, of, throwError } from 'rxjs';
 export class RegisterUserService {
 
   private dataSubject = new BehaviorSubject<any>(null);
-  data$ = this.dataSubject.asObservable();
+  data = this.dataSubject.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -88,37 +88,28 @@ export class RegisterUserService {
     );
   }
 
-  uploadProjectFileUser(data: File | string | undefined, iduser?: string, idproj?: string, unit?: string, status?: string, ext?: any): Observable<any> {
+  uploadProjectFileUser(data: File | string | undefined, iduser?: string, idproj?: string, filename?: string, status? : string): Observable<any> {
     const formData = new FormData();
     const url = `new_f_pro/`;
-    let send = {}
+
+
     if (data instanceof File) {
-      send = {
-        "user": iduser!,
-        "pro": idproj!,
-        "file": data,
-        "unit": unit,
-        "status": status,
-      }
-      // formData.append('user', iduser!)
-      // formData.append('pro', idproj!)
-      // formData.append('file', data);
+      formData.append('user', iduser!)
+      formData.append('pro', idproj!)
+      formData.append('file', data);
+      formData.append('filename', filename || '');
+      formData.append('status', status || '');
     } else if (typeof data === 'string') {
-      send = {
-        "user": iduser!,
-        "pro": idproj!,
-        "string_data": data,
-        "unit": unit,
-        "status": status,
-      }
-      // formData.append('user', iduser!)
-      // formData.append('pro', idproj!)
-      // formData.append('string_data', data);
+      formData.append('user', iduser!)
+      formData.append('pro', idproj!)
+      formData.append('string_data', data);
+      formData.append('filename', filename || '');
+      formData.append('status', status || '');
     } else {
       throw new Error('SREV-POST: Se espera un archivo (File) o una cadena (String).');
     }
 
-    return this.http.post<any>(url, send).pipe(
+    return this.http.post<any>(url, formData).pipe(
       catchError(error => {
         return throwError(() => error);
       })
@@ -150,17 +141,65 @@ export class RegisterUserService {
     this.dataSubject.next(data)
   }
 
-  getProjectuser() {
+  resetService() {
+    this.dataSubject.next(null);
+  }
 
+  getProjectuser(user:string, email:string) {
+    const url = `pro/`
+    
+    const sendData = {
+      "username" : user,
+      "email": email
+    }
+
+    return this.http.post<any>(url, sendData).pipe(
+      catchError(error => {
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getProjectIdUser(idproj: string, user:string, email:string) {
+    const url = `proid/?id=${idproj}`
+    
+    const sendData = {
+      "username" : user,
+      "email": email
+    }
+
+    return this.http.post<any>(url, sendData).pipe(
+      catchError(error => {
+        return throwError(() => error);
+      })
+    );
   }
 
   putProject(idPro: string, name: String, desp: string) {
     const url = `new_pro/?id=${idPro}`
+    
     const sendData = {
       "name": name,
       "desp": desp
     }
-    return this.http.post<any>(url, sendData).pipe(
+    return this.http.put<any>(url, sendData).pipe(
+      catchError(error => {
+        return throwError(() => error);
+      })
+    );
+  }
+
+  putFileProject(idFile: string,  unit?: string, status?: string, ext?: any, file?: string ) {
+    const url = `new_f_pro/?id=${idFile}`
+
+    const sendData = {
+      "string_data": file,
+      "unit": unit,
+      "status": status,
+      "extra": ext
+    }
+
+    return this.http.put<any>(url, sendData).pipe(
       catchError(error => {
         return throwError(() => error);
       })

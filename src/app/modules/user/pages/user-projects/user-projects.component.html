@@ -9,17 +9,29 @@
         <mat-icon class="colorIcon">add</mat-icon>
     </button>
 
-    <div class="projectContainer" fxLayout="row wrap" fxLayoutAlign="center center" fxLayoutGap="10">
+    <div class="projectContainer" fxLayout="column" fxLayoutAlign="start start" fxLayoutGap="10">
 
         <div *ngFor="let proj of proyectos; let i = index">
-            <div class="newProject" fxLayout="column" fxLayoutAlign="start center">
+            <div class="newProject" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
                 <!-- <mat-icon class="colorIcon">add</mat-icon> -->
-                <h4> {{proj.proyecto.uuid}} </h4>
-                <h4> Fecha: {{proj.proyecto.fecha_creacion | date: 'short'}}</h4>
-
+                <div fxLayout="row" fxLayoutGap="10">
+                    <img class="thumbnail" src="/assets/ncnLogoColor.png">
+                    <div fxLayout="column">
+                        <h4> <b>{{proj.name}}</b> </h4>
+                        <h5> {{proj.descrip}} </h5>
+                        <h4> {{proj.fecha_creacion | date: 'short'}}</h4>
+                    </div>
+                </div>
+                <h4>Archivos</h4>
                 <div *ngFor="let item of proj.files" style="width: 100%; padding-bottom: 2px;">
-                    <h5>Filename: <b>{{item.filename}}</b> </h5>
-                    <h6>Filetype: <b>{{item.typeFile}}</b> </h6>
+                    <h5><b>{{item.filename}}</b> </h5>
+                </div>
+                <div fxLayout="row">
+                    <div class="spacer"></div>
+                    <button mat-flat-button color="primary" (click)="abrirLector(proj)">
+                        <mat-icon>open_in_new</mat-icon>
+                        Abrir Proyecto
+                    </button>
                 </div>
 
             </div>
