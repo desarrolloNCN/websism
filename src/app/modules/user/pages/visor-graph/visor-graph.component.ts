@@ -84,16 +84,19 @@ export class VisorGraphComponent implements OnInit {
   enproges = false
 
   arch: File[] | any = ''
+  archFilter = ''
   buscarTexto: string = '';
 
   stationInfo: any = {}
-  colorGraph = '#5470c6'
+  colorGraph = '#0000ff'
 
   loadingSpinner = false
   loadingBarGraph = false
   loadingSpinnerStaInfo = false
   loadingSpinnerGraph = false
   loadingSpinnerData = false
+  loadingPanelInfo = false
+  
   isLoading = false
 
   ToggleGraph = false
@@ -103,15 +106,19 @@ export class VisorGraphComponent implements OnInit {
   btnCancel = true
   btnDisable = false
   isButtonActive = false
+  panelOpenState = false
 
   hideStaPanel = true
   hideStaPanel2 = true
   showResponsivebar = false
 
+
   urlFile = ''
   original_unit = ''
   idFile = ''
   stringdata = ''
+  formatFile = ''
+  private userInfo = ''
 
   // TODO: cambiar esto en Produccion a -1
   userId = 1
@@ -135,11 +142,13 @@ export class VisorGraphComponent implements OnInit {
 
   formGroups: FormGroup[] = [];
 
-  stopXmr: Subscription | any
+  stopXmr  : Subscription | any
   stopMseed: Subscription | any
-  stopTxt: Subscription | any
-
+  stopTxt  : Subscription | any
+  stopData : Subscription | any
   graphClientOption = false
+
+  proyectData: any[] = [];
 
   constructor(
     private obsApi: ObspyAPIService,
@@ -174,7 +183,7 @@ export class VisorGraphComponent implements OnInit {
         let archivoValue = this.arch;
         let valorNoVacio = archivoValue || textoValue
 
-        if (valorNoVacio != '') {
+        if (valorNoVacio != '' || this.proyectData.length > 0) {
           this.showWarning();
         }
 
@@ -215,6 +224,57 @@ export class VisorGraphComponent implements OnInit {
   ngOnInit(): void {
     localStorage.clear()
 
+    this.stopData = this.obsUser.data$.subscribe({
+      next: valueD => {
+        if (valueD == null) {
+          this.proyectData = []
+        } else {
+          this.loadingPanelInfo = true          
+          this.proyectData = valueD
+          
+          this.proyectData.forEach((e: any, index : number) => {
+
+            this.obsApi.getData(e.url).subscribe({
+              next: value => {
+                                
+                if (value.data[0].und_calib == 'M/S**2') {
+                  e.unit = 'm'                  
+                } else if (value.data[0].und_calib == 'CM/S**2' || e.extension == 'EVT' || e.extension == 'MSEED') {
+                  e.unit = 'gal'                  
+                } else if (value.data[0].und_calib == 'G') {
+                  e.unit = 'g'                  
+                } else {
+                  e.unit = ''                 
+                }
+
+                this.toggleTabs = true
+                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+
+              },
+              complete: () =>{
+                this.loadingPanelInfo = false
+              }
+            })
+
+          });
+          // TODO: Agregar controlador para mostrar "dndzone"
+
+        }
+
+        
+      },
+      error: err => {
+        console.log(err);
+        this.proyectData = []
+      },
+    });
+
+    this.obsApi.getIpAddress().subscribe({
+      next: value => {
+        this.userInfo = value.ip
+      }
+    })
+
     this.controlForm = new FormGroup({
       url: new FormControl(''),
 
@@ -225,6 +285,7 @@ export class VisorGraphComponent implements OnInit {
   ngOnDestroy() {
     if (this.navigationSubscription) {
       this.navigationSubscription.unsubscribe();
+      this.stopData.unsubscribe()
     }
   }
 
@@ -251,6 +312,8 @@ export class VisorGraphComponent implements OnInit {
 
     if (archivos && archivos.length > 0) {
       this.arch = archivos[0];
+      let ext: string = archivos[0].name.substring(archivos[0].name.lastIndexOf('.') + 1);
+      this.archFilter = this.txtElip(archivos[0].name, ext, 20)
       this.btnShow = true;
       this.btnCancel = false;
       this.controlForm.get('url').disable()
@@ -317,6 +380,156 @@ export class VisorGraphComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef
 
   leerArchivo() {
+    this.clearData()
+
+    this.btnDisable = true
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 5 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    let textoValue = this.controlForm.get('url').value;
+    this.controlForm.disable();
+    let archivoValue = this.arch;
+
+
+    let valorNoVacio: string | File | undefined;
+
+    this.loadingSpinner = true
+    this.loadingSpinnerStaInfo = true
+
+    this.snackBar.open('⌛ Cargando Datos ...', '', snackBar)
+
+    if (archivoValue instanceof File || typeof textoValue === 'string' && textoValue.trim() !== '') {
+
+      valorNoVacio = archivoValue || textoValue
+
+      let nvr: string = archivoValue.name || textoValue
+      let na: string = nvr.substring(nvr.lastIndexOf('/') + 1);
+      let ext: string = na.substring(na.lastIndexOf('.') + 1);
+      let forFi: string = ''
+
+      try {
+        if (ext == 'XMR') {
+          this.stopXmr = this.obsApi.covertionXMR(archivoValue).subscribe({
+            next: value => {
+              this.leerTxt(value.url)
+            },
+            error: err => {
+              this.snackBar.open('⚠️ Error al Leer Archivo', 'cerrar', snackBar)
+              this.loadingSpinner = false
+              this.loadingSpinnerStaInfo = false
+            },
+            complete: () => {
+              this.loadingSpinner = false
+              this.loadingSpinnerStaInfo = false
+            }
+          })
+        } else {
+          this.stopXmr.unsubscribe()
+          throw new Error('')
+        }
+      } catch (err) {
+        this.obsUser.uploadFileUser(valorNoVacio, this.userId.toString()).subscribe({
+          next: value => {
+
+            this.proyectData.push({
+              "originalName": na,
+              "url": value.file || value.string_data,
+              "format": value.f,
+              "unit" : ''
+            })
+
+            localStorage.setItem('urlFileUpload', value.file)
+            localStorage.setItem('urlSearched', value.string_data)
+
+            this.formatFile = value.f
+
+          },
+          error: err => {
+            this.controlForm.enable()
+            this.loadingSpinner = false
+            this.loadingSpinnerStaInfo = false
+            this.btnDisable = false
+            this.snackBar.open('⚠️ ' + err.error.error, 'cerrar', snackBar)
+          },
+          complete: () => {
+
+            let url = this.proyectData[0].url
+
+            // TODO: se comento verificacion LocalStorage
+            // if(localStorage.getItem('urlFileUpload')! == null || localStorage.getItem('urlFileUpload')! == 'null'){
+            //   url = localStorage.getItem('urlSearched')!
+            // }else if(localStorage.getItem('urlSearched')! == null || localStorage.getItem('urlSearched')! == 'null'){
+            //   url = localStorage.getItem('urlFileUpload')!
+            // }
+
+            if (ext == 'txt') {
+              this.leerTxt(url)
+            } else if (this.formatFile == 'MSEED' || ext == 'mseed') {
+              this.leerMseed(url)
+            } else {
+              this.obsApi.getData(url).subscribe({
+                next: value => {
+
+                  if (value.data[0].und_calib == 'M/S**2') {
+                    this.proyectData[0].unit = 'm'
+                    localStorage.setItem('ogUnit', 'm')
+                  } else if (value.data[0].und_calib == 'CM/S**2' || ext == 'evt' || this.formatFile == 'REFTEK130') {
+                    this.proyectData[0].unit = 'gal'
+                    localStorage.setItem('ogUnit', 'gal')
+                  } else if (value.data[0].und_calib == 'G') {
+                    this.proyectData[0].unit = 'g'
+                    localStorage.setItem('ogUnit', 'g')
+                  } else {
+                    this.proyectData[0].unit = ''
+                    localStorage.setItem('ogUnit', '')
+                  }
+                  this.toggleTabs = true
+                  this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                  this.leer(value.data[0])
+                },
+                error: err => {
+                  this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                  this.loadingSpinner = false
+                  this.loadingSpinnerStaInfo = false
+                  this.btnDisable = false
+                },
+                complete: () => {
+                  this.loadingSpinner = false
+                  this.loadingSpinnerStaInfo =
+                    this.btnDisable = false
+                }
+              })
+            }
+          }
+        })
+      }
+
+    } else {
+      this.snackBar.open('❗ No se encontro ARCHIVO o URL', 'cerrar', snackBar)
+      this.controlForm.enable()
+      this.loadingSpinner = false
+      this.loadingSpinnerStaInfo = false
+      this.btnDisable = false
+    }
+
+
+  }
+
+  txtElip(nombre: string, extension: string, longitudVisible: number) {
+    const longitudExtension = extension.length + 1;
+    const longitudSinExtension = nombre.length - longitudExtension;
+
+    if (longitudSinExtension > longitudVisible) {
+      const parteVisible = nombre.substring(0, longitudVisible);
+      return parteVisible + '...' + extension;
+    } else {
+      return nombre;
+    }
+  }
+
+  leerArchivoTest() {
 
     this.clearData()
 
@@ -369,7 +582,7 @@ export class VisorGraphComponent implements OnInit {
 
         } catch (error) {
 
-          this.obsUser.uploadFileUser(valorNoVacio, this.userId.toString() ).subscribe({
+          this.obsUser.uploadFileUser(valorNoVacio, this.userId.toString()).subscribe({
             next: value => {
 
               this.idFile = value.id
@@ -596,6 +809,9 @@ export class VisorGraphComponent implements OnInit {
     }
   }
 
+
+
+
   async leerTxt(url: string) {
 
     const snackBar = new MatSnackBarConfig();
@@ -749,10 +965,12 @@ export class VisorGraphComponent implements OnInit {
     this.toggleTabs = false
 
     this.stationInfo = e
-
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
-    var og_unit: string = localStorage.getItem('ogUnit')!
+    
+    var dataString, dataFile = this.proyectData[0].url
+    var og_unit: string = this.proyectData[0].unit
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
+    //var og_unit: string = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -891,9 +1109,13 @@ export class VisorGraphComponent implements OnInit {
     let base = this.baseLineOptions[menuIndex]
     let unit = this.tabs[index].unit || ''
 
-    let dataString: string = localStorage.getItem('urlSearched')!
-    let dataFile: string = localStorage.getItem('urlFileUpload')!
-    let unit_from = localStorage.getItem('ogUnit')!
+    var dataString, dataFile = this.proyectData[0].url
+    var unit_from: string = this.proyectData[0].unit
+
+    // TODO: descomentar luego de evaluacion
+    // let dataString: string = localStorage.getItem('urlSearched')!
+    // let dataFile: string = localStorage.getItem('urlFileUpload')!
+    // let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -1022,9 +1244,13 @@ export class VisorGraphComponent implements OnInit {
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
-    let unit_from = localStorage.getItem('ogUnit')!
+    var dataString, dataFile = this.proyectData[0].url
+    var unit_from: string = this.proyectData[0].unit
+    
+    // TODO: descomentar luego de evaluacion
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
+    // let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -1162,9 +1388,13 @@ export class VisorGraphComponent implements OnInit {
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
-    let unit_from = localStorage.getItem('ogUnit')!
+    var dataString, dataFile = this.proyectData[0].url
+    var unit_from: string = this.proyectData[0].unit
+    
+    // TODO: descomentar luego de evaluacion
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
+    // let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -1317,10 +1547,15 @@ export class VisorGraphComponent implements OnInit {
     let unit_to = this.unitConvertOptions[menuIndex];
     unit_to = unitMap[unit_to] || '';
 
-    let unit_from = localStorage.getItem('ogUnit')!
+    var dataString, dataFile = this.proyectData[0].url
+    var unit_from: string = this.proyectData[0].unit
+    
+    // TODO: descomentar luego de evaluacion
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
+    // let unit_from = localStorage.getItem('ogUnit')!
+
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -1449,9 +1684,13 @@ export class VisorGraphComponent implements OnInit {
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
-    let unit_from = localStorage.getItem('ogUnit')!
+    var dataString, dataFile = this.proyectData[0].url
+    var unit_from: string = this.proyectData[0].unit
+    
+    // TODO: descomentar luego de evaluacion
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
+    // let unit_from = localStorage.getItem('ogUnit')!
 
     this.tabs[index].base = 'linear'
     this.tabs[index].unit = 'gal'
@@ -1563,9 +1802,12 @@ export class VisorGraphComponent implements OnInit {
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
 
-
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
+    var dataString, dataFile = this.proyectData[0].url
+    var unit_from: string = this.proyectData[0].unit
+    
+    // TODO: descomentar luego de evaluacion
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -1596,8 +1838,12 @@ export class VisorGraphComponent implements OnInit {
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
+    var dataString, dataFile = this.proyectData[0].url
+    var unit_from: string = this.proyectData[0].unit
+    
+    // TODO: descomentar luego de evaluacion
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -2223,9 +2469,13 @@ export class VisorGraphComponent implements OnInit {
 
   resetGraph(tabInfo: any) {
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
-    let unit_from = localStorage.getItem('ogUnit')!
+    var dataString, dataFile = this.proyectData[0].url
+    var unit_from: string = this.proyectData[0].unit
+    
+    // TODO: descomentar luego de evaluacion
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
+    // let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -2307,9 +2557,13 @@ export class VisorGraphComponent implements OnInit {
     const snackBar = new MatSnackBarConfig();
     snackBar.panelClass = ['snackBar-validator'];
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
-    var og_unit: string = localStorage.getItem('ogUnit')!
+    var dataString, dataFile = this.proyectData[0].url
+    var unit_from: string = this.proyectData[0].unit
+    
+    // TODO: descomentar luego de evaluacion
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
+    // var og_unit: string = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -2351,9 +2605,9 @@ export class VisorGraphComponent implements OnInit {
 
     this.snackBar.open('⌛ Cargando ...', '', snackBar)
 
-    this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, og_unit, unit_to).subscribe({
+    this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to).subscribe({
       next: value => {
-        this.proceseDataDownload(value, net, sta, loc, cha, m)
+        this.proceseDataDownload(value, net, sta, loc, cha, m, tabInfo.dataEst)
       },
       error: err => {
         this.snackBar.dismiss()
@@ -2365,7 +2619,7 @@ export class VisorGraphComponent implements OnInit {
     })
   }
 
-  proceseDataDownload(value: any, net: string, sta: string, loc: string, cha: string, m: string) {
+  proceseDataDownload(value: any, net: string, sta: string, loc: string, cha: string, m: string, extrData: any) {
     let dataX = [];
     let dataY = [];
     let mag = '';
@@ -2373,26 +2627,35 @@ export class VisorGraphComponent implements OnInit {
     let type = '';
     let maxVal = '';
 
+    let title = 'QuakeSense | NCN Nuevo Control'
+    let gentxt = 'Este archivo de texto fue generado por QuakeSense.'
+    let mark = 'Descubre cómo nuestras soluciones avanzadas pueden proporcionar información crucial para el procesamiento sísmico y la seguridad estructural.'
+    let contact = 'Contacto: informes@ncn.pe'
+    let web = 'Website: https://qs.ncn.pe'
+
+    const samples = extrData.sampling_rate
+    const npts = extrData.npts
+
     if (m == 'acel' || m == 'vel' || m == 'des') {
       dataX = value[0].tiempo_a;
       if (m == 'acel') {
         dataY = value[0].traces_a;
         type = 'ACEL';
-        mag = 'Aceleracion';
+        mag = 'ACELERACION';
         unidad = value[0].trace_a_unit;
-        maxVal = 'PGA: ' + value[0].peak_a.toFixed(4);
+        maxVal = 'PGA: ' + value[0].peak_a.toFixed(6);
       } else if (m == 'vel') {
         dataY = value[0].traces_v;
         type = 'VEL';
-        mag = 'Velocidad';
+        mag = 'VELOCIDAD';
         unidad = value[0].trace_v_unit;
-        maxVal = 'PGV: ' + value[0].peak_v.toFixed(4);
+        maxVal = 'PGV: ' + value[0].peak_v.toFixed(6);
       } else if (m == 'des') {
         dataY = value[0].traces_d;
         type = 'DESP';
-        mag = 'Desplazamiento';
+        mag = 'DESPLAZAMIENTO';
         unidad = value[0].trace_d_unit;
-        maxVal = 'PGD: ' + value[0].peak_d.toFixed(4);
+        maxVal = 'PGD: ' + value[0].peak_d.toFixed(6);
       }
     } else if (m == 'all') {
       dataX = value[0].tiempo_a;
@@ -2407,9 +2670,28 @@ export class VisorGraphComponent implements OnInit {
       const maxV3 = value[0].peak_d.toFixed(6);
 
       let dataText = '';
-      dataText += 'Tiempo' + '     ' + ` Aceleracion [${und1}]` + '     ' + ` Velocidad [${und2}]` + '     ' + `Desplazamiento [${und3}]` + '\n'
-      dataText += 'Tiempo[s]' + '     ' + `PGA ${maxV1}[${und1}]` + '     ' + `PGV ${maxV2}[${und2}]` + '     ' + `PGD ${maxV3}[${und3}]` + '\n'
-
+      dataText += title + '\n'
+      dataText += gentxt + '\n'
+      dataText += mark + '\n'
+      dataText += contact + '\n'
+      dataText += web + '\n \n'
+      dataText += '1. INFORMACION' + '\n'
+      dataText += `    NETWORK        : ${net}` + '\n'
+      dataText += `    ESTACION       : ${sta}` + '\n'
+      dataText += `    LOCACION       : ${loc}` + '\n'
+      dataText += `    CANAL          : ${cha}` + '\n'
+      dataText += `    NRO. DATOS     : ${npts}` + '\n'
+      dataText += `    FRECUENCIA     : ${samples} Hz` + '\n'
+      dataText += '2. UNIDADES' + '\n'
+      dataText += '    TIEMPO         : Segundos [s]' + '\n'
+      dataText += `    ACELERACION    : [${und1}]` + '\n'
+      dataText += `    VELOCIDAD      : [${und2}]` + '\n'
+      dataText += `    DESPLAZAMIENTO : [${und3}]` + '\n'
+      dataText += '3. VALORES MAXIMOS' + '\n'
+      dataText += `    PGA            : ${maxV1} [${und1}]` + '\n'
+      dataText += `    PGV            : ${maxV2} [${und2}]` + '\n'
+      dataText += `    PGD            : ${maxV3} [${und3}]` + '\n'
+      dataText += '4. DATOS DE LA ACELERACION Y COMPONENTES' + '\n\n'
       for (let i = 0; i < dataX.length; i++) {
         dataText += dataX[i].toFixed(3).padStart(12) + '     ' + dataY[i].toFixed(8).padStart(12) + '     ' + data2Y[i].toFixed(8).padStart(12) + '     ' + data3Y[i].toFixed(8).padStart(12) + '\n';
       }
@@ -2433,9 +2715,28 @@ export class VisorGraphComponent implements OnInit {
 
     if (dataX.length > 0 && dataY.length > 0) {
       let dataText = '';
-      dataText += 'Tiempo [s]  ' + '     ' + `${mag} [${unidad}]` + '\n'
-      dataText += maxVal + ` [${unidad}]` + '\n'
-      dataText += 'Tiempo' + '     ' + `${cha}` + '\n'
+      dataText += title + '\n'
+      dataText += gentxt + '\n'
+      dataText += mark + '\n'
+      dataText += contact + '\n'
+      dataText += web + '\n'
+      dataText += '\n'
+      dataText += '1. INFORMACION DE LA ESTACION' + '\n'
+      dataText += `    NETWORK        : ${net}` + '\n'
+      dataText += `    ESTACION       : ${sta}` + '\n'
+      dataText += `    LOCACION       : ${loc}` + '\n'
+      dataText += `    CANAL          : ${cha}` + '\n'
+      dataText += `    NRO. DATOS     : ${npts}` + '\n'
+      dataText += `    FRECUENCIA     : ${samples} Hz` + '\n'
+      dataText += '\n'
+      dataText += '2. UNIDADES' + '\n'
+      dataText += '    TIEMPO         : Segundos [s]' + '\n'
+      dataText += `    ${mag}         : [${unidad}]` + '\n'
+      dataText += '\n'
+      dataText += '3. VALORES MAXIMOS' + '\n'
+      dataText += `    ${maxVal}      : [${unidad}]` + '\n\n'
+      dataText += '4. DATOS DE LA ACELERACION' + '\n'
+      dataText += '    T' + '     ' + `${cha}` + '\n'
 
       for (let i = 0; i < dataX.length; i++) {
         dataText += dataX[i].toFixed(3).padStart(12) + '     ' + dataY[i].toFixed(8).padStart(12) + '\n';

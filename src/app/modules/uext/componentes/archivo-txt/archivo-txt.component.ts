@@ -46,7 +46,7 @@ export class ArchivoTXTComponent implements OnInit {
       unidad: new FormControl('', Validators.required),
       network: new FormControl('NC'),
       station: new FormControl('NCN01', Validators.required),
-      location: new FormControl('00', Validators.required),
+      location: new FormControl('',),
       starttime: new FormControl(''),
       ckInfo: new FormControl(false),
     })
@@ -159,14 +159,11 @@ export class ArchivoTXTComponent implements OnInit {
 
     if (encabezados.length > datosPrimeraLinea.length) {
       this.snackBar.open('✅ Verificar Encabezados', 'cerrar', snackBar)
-      console.log(datosPrimeraLinea);
       encabezados = []
       for (let i = 0; i < datosPrimeraLinea.length; i++) {
         encabezados.push(`C${i + 1}`);
       }
     }
-
-    console.log(encabezados.length, datosPrimeraLinea.length);
 
     const numeroColumnas = datosPrimeraLinea.length;
 

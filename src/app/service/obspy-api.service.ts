@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http'
-import { Observable, catchError, of, throwError } from 'rxjs';
+import { Observable, catchError, map, of, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +12,7 @@ export class ObspyAPIService {
   constructor(private http: HttpClient) { }
 
 
-  uploadFile(data: File | string | undefined): Observable<any> {
+  uploadFile(data: File | string | undefined, ip?: string): Observable<any> {
 
 
     const formData = new FormData();
@@ -20,8 +20,10 @@ export class ObspyAPIService {
 
     if (data instanceof File) {
       formData.append('file', data);
+      formData.append('info', ip || '')
     } else if (typeof data === 'string') {
       formData.append('string_data', data);
+      formData.append('info', ip || '')
     } else {
       throw new Error('SREV-POST-99: Se espera un archivo (File) o una cadena (string).');
     }
@@ -71,15 +73,15 @@ export class ObspyAPIService {
   }
 
   getTraceData(
-    data: string, 
-    station_selected: string, 
+    data: string,
+    station_selected: string,
     channel_selected: string,
-    unit?:string,
+    unit?: string,
     color_graph?: string
-    ): Observable<any> {
+  ): Observable<any> {
 
     const formData = new FormData();
-    
+
     const url = 'trace_data/'
 
     unit = unit || ''
@@ -103,21 +105,21 @@ export class ObspyAPIService {
   }
 
   getTraceDataBaseLine(
-    data: string, 
-    station_selected: string, 
-    channel_selected: string, 
-    base_line: string, 
-    filter: string, 
-    freqmin: string, 
-    freqmax: string, 
-    corner: string, 
-    zero: string, 
-    t_min: string, 
+    data: string,
+    station_selected: string,
+    channel_selected: string,
+    base_line: string,
+    filter: string,
+    freqmin: string,
+    freqmax: string,
+    corner: string,
+    zero: string,
+    t_min: string,
     t_max: string,
     unit_from: string,
     unit_to: string,
     color_graph?: string
-    ): Observable<any> {
+  ): Observable<any> {
     const formData = new FormData();
     const url = 'trace_baseline_data/'
 
@@ -148,22 +150,22 @@ export class ObspyAPIService {
 
   }
 
-  getTraceDataFilter( 
-    data: string, 
-    station_selected: string, 
-    channel_selected: string, 
-    base_line: string, 
-    filter: string, 
-    freqmin: string, 
-    freqmax: string, 
-    corner: string, 
-    zero: string, 
-    t_min: string, 
+  getTraceDataFilter(
+    data: string,
+    station_selected: string,
+    channel_selected: string,
+    base_line: string,
+    filter: string,
+    freqmin: string,
+    freqmax: string,
+    corner: string,
+    zero: string,
+    t_min: string,
     t_max: string,
     unit_from: string,
     unit_to: string,
     color_graph?: string
-    ): Observable<any> {
+  ): Observable<any> {
     const formData = new FormData();
     const url = 'trace_filter_data/'
 
@@ -195,21 +197,21 @@ export class ObspyAPIService {
   }
 
   getTraceDataTrim(
-    data: string, 
-    station_selected: string, 
-    channel_selected: string, 
-    base_line: string, 
-    filter: string, 
-    freqmin: string, 
-    freqmax: string, 
+    data: string,
+    station_selected: string,
+    channel_selected: string,
+    base_line: string,
+    filter: string,
+    freqmin: string,
+    freqmax: string,
     corner: string,
-    zero: string, 
-    t_min: string, 
+    zero: string,
+    t_min: string,
     t_max: string,
     unit_from: string,
     unit_to: string,
     color_graph?: string
-    ): Observable<any> {
+  ): Observable<any> {
     const formData = new FormData();
     const url = 'trace_trim_data/'
 
@@ -241,21 +243,21 @@ export class ObspyAPIService {
   }
 
   unitConvertion(
-    data: string, 
-    station_selected: string, 
-    channel_selected: string, 
-    base_line: string, 
-    filter: string, 
-    freqmin: string, 
-    freqmax: string, 
-    corner: string, 
-    zero: string, 
-    t_min: string, 
+    data: string,
+    station_selected: string,
+    channel_selected: string,
+    base_line: string,
+    filter: string,
+    freqmin: string,
+    freqmax: string,
+    corner: string,
+    zero: string,
+    t_min: string,
     t_max: string,
     unit_from: string,
     unit_to: string,
     color_graph?: string
-    ): Observable<any> {
+  ): Observable<any> {
     const formData = new FormData();
     const url = 'convert-unit/'
 
@@ -286,9 +288,9 @@ export class ObspyAPIService {
 
   }
 
-  convertToStream(data : any){
+  convertToStream(data: any) {
     const url = 'convert_stream/'
-    const sendData = {data} 
+    const sendData = { data }
 
     return this.http.post<any>(url, sendData).pipe(
       catchError(error => {
@@ -297,32 +299,32 @@ export class ObspyAPIService {
     );
   }
 
-  autoAdjust( 
-    data: string, 
-    station_selected: string, 
+  autoAdjust(
+    data: string,
+    station_selected: string,
     channel_selected: string,
     unit: string,
-    base_line?: string, 
-    filter?: string, 
-    freqmin?: string, 
-    freqmax?: string, 
-    corner?: string, 
-    zero?: string, 
-    t_min?: string, 
+    base_line?: string,
+    filter?: string,
+    freqmin?: string,
+    freqmax?: string,
+    corner?: string,
+    zero?: string,
+    t_min?: string,
     t_max?: string,
     color_graph?: string
-    ): Observable<any> {
+  ): Observable<any> {
     const formData = new FormData();
     const url = 'auto-adjust/'
 
-    base_line = '', 
-    filter    = '', 
-    freqmin   = '', 
-    freqmax   = '', 
-    corner    = '', 
-    zero      = '', 
-    t_min     = '', 
-    t_max     = ''
+    base_line = '',
+      filter = '',
+      freqmin = '',
+      freqmax = '',
+      corner = '',
+      zero = '',
+      t_min = '',
+      t_max = ''
 
     if (typeof data === 'string') {
       formData.append('data', data);
@@ -350,12 +352,12 @@ export class ObspyAPIService {
 
   }
 
-  addCalibrationMseed(mseed:string, xml:string, dataCal: any){
+  addCalibrationMseed(mseed: string, xml: string, dataCal: any) {
     const url = `calibration/`
 
     const data = {
-      "mseed_file" : mseed ,
-      "xml_file" : xml,
+      "mseed_file": mseed,
+      "xml_file": xml,
       "calib_factor": dataCal
     }
 
@@ -370,12 +372,12 @@ export class ObspyAPIService {
     data: string,
     station: string,
     channel: string
-  ){
+  ) {
 
     const url = 'fourier/'
 
     let senData = {
-      "data" : data,
+      "data": data,
       "station_selected": station,
       "channel_selected": channel
     }
@@ -392,12 +394,12 @@ export class ObspyAPIService {
     data: string,
     station: string,
     channel: string
-  ){
+  ) {
 
     const url = 'espectro-fourier/'
 
     let senData = {
-      "data" : data,
+      "data": data,
       "station_selected": station,
       "channel_selected": channel
     }
@@ -410,10 +412,10 @@ export class ObspyAPIService {
 
   }
 
-  covertionXMR(file: File | string | undefined){
+  covertionXMR(file: File | string | undefined) {
     const url = `convert/`
     let formData = new FormData()
-    
+
     if (file instanceof File) {
       formData.append('file', file);
     } else {
@@ -427,9 +429,9 @@ export class ObspyAPIService {
     );
   }
 
-  testuser(){
+  testuser() {
     const url = `users/`
-   
+
     return this.http.get<any>(url).pipe(
       catchError(error => {
         return throwError(() => error);
@@ -437,53 +439,53 @@ export class ObspyAPIService {
     );
   }
 
-  plotGraph(data: string, 
-    station_selected: string, 
+  plotGraph(data: string,
+    station_selected: string,
     channel_selected: string,
-    unit?:string,
+    unit?: string,
     color_graph?: string
-    ): Observable<any>{ 
+  ): Observable<any> {
 
-      const formData = new FormData();
-    
-      const url = 'plot/'
-  
-      unit = unit || ''
-  
-      if (typeof data === 'string') {
-        formData.append('data', data);
-        formData.append('station_selected', station_selected)
-        formData.append('channel_selected', channel_selected)
-        formData.append('unit_from', unit)
-        formData.append('graph_color', color_graph || '')
-      } else {
-        throw new Error('SREV-GET-02: Se espera un archivo datos para Lectura');
-      }
-  
-      return this.http.post<any>(url, formData).pipe(
-        catchError(error => {
-          return of(error)
-        })
-      );
-    
+    const formData = new FormData();
+
+    const url = 'plot/'
+
+    unit = unit || ''
+
+    if (typeof data === 'string') {
+      formData.append('data', data);
+      formData.append('station_selected', station_selected)
+      formData.append('channel_selected', channel_selected)
+      formData.append('unit_from', unit)
+      formData.append('graph_color', color_graph || '')
+    } else {
+      throw new Error('SREV-GET-02: Se espera un archivo datos para Lectura');
+    }
+
+    return this.http.post<any>(url, formData).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    );
+
   }
 
   plotToolGraph(
-    data: string, 
-    station_selected: string, 
-    channel_selected: string, 
-    base_line: string, 
-    filter: string, 
-    freqmin: string, 
-    freqmax: string, 
-    corner: string, 
-    zero: string, 
-    t_min: string, 
+    data: string,
+    station_selected: string,
+    channel_selected: string,
+    base_line: string,
+    filter: string,
+    freqmin: string,
+    freqmax: string,
+    corner: string,
+    zero: string,
+    t_min: string,
     t_max: string,
     unit_from: string,
     unit_to: string,
     color_graph?: string
-    ): Observable<any> {
+  ): Observable<any> {
     const formData = new FormData();
     const url = 'plot-tool/'
 
@@ -514,32 +516,32 @@ export class ObspyAPIService {
 
   }
 
-  plotToolauto( 
-    data: string, 
-    station_selected: string, 
+  plotToolauto(
+    data: string,
+    station_selected: string,
     channel_selected: string,
     unit: string,
     color_graph?: string,
-    base_line?: string, 
-    filter?: string, 
-    freqmin?: string, 
-    freqmax?: string, 
-    corner?: string, 
-    zero?: string, 
-    t_min?: string, 
+    base_line?: string,
+    filter?: string,
+    freqmin?: string,
+    freqmax?: string,
+    corner?: string,
+    zero?: string,
+    t_min?: string,
     t_max?: string,
-    ): Observable<any> {
+  ): Observable<any> {
     const formData = new FormData();
     const url = 'plot-tool-auto/'
 
-    base_line = '', 
-    filter    = '', 
-    freqmin   = '', 
-    freqmax   = '', 
-    corner    = '', 
-    zero      = '', 
-    t_min     = '', 
-    t_max     = ''
+    base_line = '',
+      filter = '',
+      freqmin = '',
+      freqmax = '',
+      corner = '',
+      zero = '',
+      t_min = '',
+      t_max = ''
 
     if (typeof data === 'string') {
       formData.append('data', data);
@@ -567,7 +569,7 @@ export class ObspyAPIService {
 
   }
 
-  downloadImage(url: string, name: string){
+  downloadImage(url: string, name: string) {
     const imageUrl = url;
     const headers = new HttpHeaders().set('No-Interceptor', 'true');
 
@@ -581,6 +583,16 @@ export class ObspyAPIService {
         anchor.click();
         window.URL.revokeObjectURL(url);
       });
+  }
+
+  getIpAddress() {
+    const headers = new HttpHeaders().set('No-Interceptor', 'true');
+    const url = 'https://api.ipify.org?format=json'
+    return this.http.get(url, {headers}).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    );
   }
 
 }

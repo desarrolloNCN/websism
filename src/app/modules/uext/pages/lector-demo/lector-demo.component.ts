@@ -51,6 +51,12 @@ import { SismosHistoricosComponent } from '../../componentes/sismos-historicos/s
         animate('300ms', style({ transform: 'translateX(100%)', opacity: 0 }))
       ])
     ]),
+    trigger('aparecer', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('500ms ease-in', style({ opacity: 1 })),
+      ]),
+    ]),
   ],
   templateUrl: './lector-demo.component.html',
   styleUrls: ['./lector-demo.component.css']
@@ -69,9 +75,11 @@ export class LectorDemoComponent implements OnInit {
   enproges = false
 
   arch: File[] | any = ''
+  archFilter = ''
   buscarTexto: string = '';
 
   stationInfo: any = {}
+  private userInfo = ''
 
   loadingSpinner = false
   loadingSpinnerStaInfo = false
@@ -94,9 +102,10 @@ export class LectorDemoComponent implements OnInit {
   showResponsivebar = false
 
   urlFile = ''
-  original_unit = ''
   idFile = ''
+  original_unit = ''
   stringdata = ''
+  formatFile = ''
 
   plotedimages: any = []
 
@@ -148,9 +157,14 @@ export class LectorDemoComponent implements OnInit {
   ngOnInit(): void {
     localStorage.clear()
 
+    this.obsApi.getIpAddress().subscribe({
+      next: value =>{
+        this.userInfo = value.ip
+      }
+    })
+    
     this.controlForm = new FormGroup({
       url: new FormControl(''),
-
     })
   }
 
@@ -162,6 +176,8 @@ export class LectorDemoComponent implements OnInit {
 
     if (archivos && archivos.length > 0) {
       this.arch = archivos[0];
+      let ext: string = archivos[0].name.substring(archivos[0].name.lastIndexOf('.') + 1);
+      this.archFilter = this.txtElip( archivos[0].name, ext, 20)
       this.btnShow = true;
       this.btnCancel = false;
       this.controlForm.get('url').disable()
@@ -174,7 +190,149 @@ export class LectorDemoComponent implements OnInit {
 
   @ViewChild('fileInput') fileInput!: ElementRef
 
+
+
+
   leerArchivo() {
+    this.clearData()
+
+    this.btnDisable = true
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 5 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    let textoValue = this.controlForm.get('url').value;
+    this.controlForm.disable();
+    let archivoValue = this.arch;
+
+
+    let valorNoVacio: string | File | undefined;
+
+    this.loadingSpinner = true
+    this.loadingSpinnerStaInfo = true
+
+    this.snackBar.open('⌛ Cargando Datos ...', '', snackBar)
+
+    if (archivoValue instanceof File || typeof textoValue === 'string' && textoValue.trim() !== '') {
+
+      valorNoVacio = archivoValue || textoValue
+
+      let nvr: string = archivoValue.name || textoValue
+      let na: string = nvr.substring(nvr.lastIndexOf('/') + 1);
+      let ext: string = na.substring(na.lastIndexOf('.') + 1);
+      let forFi: string = ''
+
+      try {
+        if (ext == 'XMR') {
+          this.stopXmr = this.obsApi.covertionXMR(archivoValue).subscribe({
+            next: value => {
+              this.leerTxt(value.url)
+            },
+            error: err => {
+              this.snackBar.open('⚠️Error al Leer Archivo', 'cerrar', snackBar)
+              this.loadingSpinner = false
+              this.loadingSpinnerStaInfo = false
+            },
+            complete: () => {
+              this.loadingSpinner = false
+              this.loadingSpinnerStaInfo = false
+            }
+          })
+        } else {
+          this.stopXmr.unsubscribe()
+          throw new Error('')
+        }
+      } catch (err) {
+        this.obsApi.uploadFile(valorNoVacio, this.userInfo).subscribe({
+          next: value => {
+
+            localStorage.setItem('urlFileUpload', value.file)
+            localStorage.setItem('urlSearched', value.string_data)
+            this.formatFile = value.f
+
+          },
+          error: err => {
+            this.controlForm.enable()
+            this.loadingSpinner = false
+            this.loadingSpinnerStaInfo = false
+            this.btnDisable = false
+            this.snackBar.open('⚠️ ' + err.error.error, 'cerrar', snackBar)
+          },
+          complete: () => {
+
+            let url = ''
+
+            if(localStorage.getItem('urlFileUpload')! == null || localStorage.getItem('urlFileUpload')! == 'null'){
+              url = localStorage.getItem('urlSearched')!
+            }else if(localStorage.getItem('urlSearched')! == null || localStorage.getItem('urlSearched')! == 'null'){
+              url = localStorage.getItem('urlFileUpload')!
+            }
+            
+            if (ext == 'txt') {
+              this.leerTxt(url)
+            } else if (this.formatFile == 'MSEED' || ext == 'mseed') {
+              this.leerMseed(url)
+            } else {
+              this.obsApi.getData(url).subscribe({
+                next: value => {
+
+                  if (value.data[0].und_calib == 'M/S**2') {
+                    localStorage.setItem('ogUnit', 'm')
+                  } else if (value.data[0].und_calib == 'CM/S**2' || ext == 'evt' || this.formatFile == 'REFTEK130') {
+                    localStorage.setItem('ogUnit', 'gal')
+                  } else if (value.data[0].und_calib == 'G') {
+                    localStorage.setItem('ogUnit', 'g')
+                  } else {
+                    localStorage.setItem('ogUnit', '')
+                  }
+                  this.toggleTabs = true
+                  this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                  this.leer(value.data[0])
+                },
+                error: err => {
+                  this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+                  this.loadingSpinner = false
+                  this.loadingSpinnerStaInfo = false
+                  this.btnDisable = false
+                },
+                complete: () => {
+                  this.loadingSpinner = false
+                  this.loadingSpinnerStaInfo = false
+                  this.btnDisable = false
+                }
+              })
+            }
+          }
+        })
+      }
+
+    } else {
+      this.snackBar.open('❗ No se encontro ARCHIVO o URL', 'cerrar', snackBar)
+      this.controlForm.enable()
+      this.loadingSpinner = false
+      this.loadingSpinnerStaInfo = false
+      this.btnDisable = false
+    }
+
+
+  }
+
+  txtElip(nombre: string, extension: string, longitudVisible: number) {
+    const longitudExtension = extension.length + 1;
+    const longitudSinExtension = nombre.length - longitudExtension;
+
+    if (longitudSinExtension > longitudVisible) {
+      const parteVisible = nombre.substring(0, longitudVisible);
+      return parteVisible + '...' + extension;
+    } else {
+      return nombre;
+    }
+  }
+
+
+
+  leerArchivoTest() {
 
     this.clearData()
 
@@ -199,12 +357,11 @@ export class LectorDemoComponent implements OnInit {
 
       if (this.urlFile == '' && this.stringdata == '') {
 
+        let valorNoVacio_recived: any = archivoValue.name
+        let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+        let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+
         try {
-
-          let valorNoVacio_recived: any = archivoValue.name
-          let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
-          let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
-
 
           if (extension == 'XMR') {
             this.stopXmr = this.obsApi.covertionXMR(archivoValue).subscribe({
@@ -255,7 +412,7 @@ export class LectorDemoComponent implements OnInit {
 
                   this.leerTxt(valorNoVacio_recived)
 
-                } else if (extension == 'mseed') {
+                } else if (extension == 'mseed' || extension == 'msd') {
 
                   this.leerMseed(valorNoVacio_recived)
 
@@ -263,7 +420,7 @@ export class LectorDemoComponent implements OnInit {
 
                   this.obsApi.getData(this.stringdata).subscribe({
                     next: value => {
-                      
+
                       if (value.data[0].und_calib == 'M/S**2') {
                         localStorage.setItem('ogUnit', 'm')
                       } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
@@ -300,7 +457,7 @@ export class LectorDemoComponent implements OnInit {
 
                   this.leerTxt(valorNoVacio_recived)
 
-                } else if (extension == 'mseed') {
+                } else if (extension == 'mseed' || extension == 'msd') {
 
                   this.leerMseed(valorNoVacio_recived)
 
@@ -350,8 +507,10 @@ export class LectorDemoComponent implements OnInit {
       } else {
 
         let valorNoVacio_recived: any = this.urlFile || this.stringdata
-        let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
-        let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+
+        let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1)
+
+        let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1)
 
         if (this.urlFile == null || '') {
 
@@ -359,7 +518,7 @@ export class LectorDemoComponent implements OnInit {
 
             this.leerTxt(valorNoVacio_recived)
 
-          } else if (extension == 'mseed') {
+          } else if (extension == 'mseed' || extension == 'msd') {
 
             this.leerMseed(valorNoVacio_recived)
 
@@ -401,7 +560,7 @@ export class LectorDemoComponent implements OnInit {
 
             this.leerTxt(valorNoVacio_recived)
 
-          } else if (extension == 'mseed') {
+          } else if (extension == 'mseed' || extension == 'msd') {
 
             this.leerMseed(valorNoVacio_recived)
 
@@ -454,6 +613,11 @@ export class LectorDemoComponent implements OnInit {
       this.btnDisable = false
     }
   }
+
+
+
+
+
 
   async leerTxt(url: string) {
 
@@ -2004,7 +2168,7 @@ export class LectorDemoComponent implements OnInit {
 
     this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, og_unit, unit_to).subscribe({
       next: value => {
-        this.proceseDataDownload(value, net, sta, loc, cha, m)
+        this.proceseDataDownload(value, net, sta, loc, cha, m, tabInfo.dataEst)
       },
       error: err => {
         this.snackBar.dismiss()
@@ -2016,7 +2180,7 @@ export class LectorDemoComponent implements OnInit {
     })
   }
 
-  proceseDataDownload(value: any, net: string, sta: string, loc: string, cha: string, m: string) {
+  proceseDataDownload(value: any, net: string, sta: string, loc: string, cha: string, m: string, extrData: any) {
     let dataX = [];
     let dataY = [];
     let mag = '';
@@ -2024,26 +2188,35 @@ export class LectorDemoComponent implements OnInit {
     let type = '';
     let maxVal = '';
 
+    let title = 'QuakeSense | NCN Nuevo Control'
+    let gentxt = 'Este archivo de texto fue generado por QuakeSense.'
+    let mark = 'Descubre cómo nuestras soluciones avanzadas pueden proporcionar información crucial para el procesamiento sísmico y la seguridad estructural.'
+    let contact = 'Contacto: informes@ncn.pe'
+    let web = 'Website: https://qs.ncn.pe'
+
+    const samples = extrData.sampling_rate
+      const npts = extrData.npts
+
     if (m == 'acel' || m == 'vel' || m == 'des') {
       dataX = value[0].tiempo_a;
       if (m == 'acel') {
         dataY = value[0].traces_a;
         type = 'ACEL';
-        mag = 'Aceleracion';
+        mag = 'ACELERACION';
         unidad = value[0].trace_a_unit;
-        maxVal = 'PGA: ' + value[0].peak_a.toFixed(4);
+        maxVal = 'PGA: ' + value[0].peak_a.toFixed(6);
       } else if (m == 'vel') {
         dataY = value[0].traces_v;
         type = 'VEL';
-        mag = 'Velocidad';
+        mag = 'VELOCIDAD';
         unidad = value[0].trace_v_unit;
-        maxVal = 'PGV: ' + value[0].peak_v.toFixed(4);
+        maxVal = 'PGV: ' + value[0].peak_v.toFixed(6);
       } else if (m == 'des') {
         dataY = value[0].traces_d;
         type = 'DESP';
-        mag = 'Desplazamiento';
+        mag = 'DESPLAZAMIENTO';
         unidad = value[0].trace_d_unit;
-        maxVal = 'PGD: ' + value[0].peak_d.toFixed(4);
+        maxVal = 'PGD: ' + value[0].peak_d.toFixed(6);
       }
     } else if (m == 'all') {
       dataX = value[0].tiempo_a;
@@ -2056,11 +2229,30 @@ export class LectorDemoComponent implements OnInit {
       const maxV1 = value[0].peak_a.toFixed(6);
       const maxV2 = value[0].peak_v.toFixed(6);
       const maxV3 = value[0].peak_d.toFixed(6);
-
+      
       let dataText = '';
-      dataText += 'Tiempo' + '     ' + ` Aceleracion [${und1}]` + '     ' + ` Velocidad [${und2}]` + '     ' + `Desplazamiento [${und3}]` + '\n'
-      dataText += 'Tiempo[s]' + '     ' + `PGA ${maxV1}[${und1}]` + '     ' + `PGV ${maxV2}[${und2}]` + '     ' + `PGD ${maxV3}[${und3}]` + '\n'
-
+      dataText += title + '\n'
+      dataText += gentxt + '\n'
+      dataText += mark + '\n'
+      dataText += contact + '\n'
+      dataText += web + '\n \n'
+      dataText += '1. INFORMACION' + '\n'
+      dataText += `    NETWORK        : ${net}`        + '\n'
+      dataText += `    ESTACION       : ${sta}`        + '\n'
+      dataText += `    LOCACION       : ${loc}`        + '\n'
+      dataText += `    CANAL          : ${cha}`        + '\n'
+      dataText += `    NRO. DATOS     : ${npts}`        + '\n'
+      dataText += `    FRECUENCIA     : ${samples} Hz`  + '\n'
+      dataText += '2. UNIDADES' + '\n'
+      dataText += '    TIEMPO         : Segundos [s]' + '\n'
+      dataText += `    ACELERACION    : [${und1}]`    + '\n'
+      dataText += `    VELOCIDAD      : [${und2}]`    + '\n'
+      dataText += `    DESPLAZAMIENTO : [${und3}]`    + '\n'
+      dataText += '3. VALORES MAXIMOS' + '\n'
+      dataText += `    PGA            : ${maxV1} [${und1}]` + '\n'
+      dataText += `    PGV            : ${maxV2} [${und2}]` + '\n'
+      dataText += `    PGD            : ${maxV3} [${und3}]` + '\n'
+      dataText += '4. DATOS DE LA ACELERACION Y COMPONENTES' + '\n\n'
       for (let i = 0; i < dataX.length; i++) {
         dataText += dataX[i].toFixed(3).padStart(12) + '     ' + dataY[i].toFixed(8).padStart(12) + '     ' + data2Y[i].toFixed(8).padStart(12) + '     ' + data3Y[i].toFixed(8).padStart(12) + '\n';
       }
@@ -2084,9 +2276,28 @@ export class LectorDemoComponent implements OnInit {
 
     if (dataX.length > 0 && dataY.length > 0) {
       let dataText = '';
-      dataText += 'Tiempo [s]  ' + '     ' + `${mag} [${unidad}]` + '\n'
-      dataText += maxVal + ` [${unidad}]` + '\n'
-      dataText += 'Tiempo' + '     ' + `${cha}` + '\n'
+      dataText += title   + '\n'
+      dataText += gentxt  + '\n'
+      dataText += mark    + '\n'
+      dataText += contact + '\n'
+      dataText += web     + '\n'
+      dataText += '\n'
+      dataText += '1. INFORMACION DE LA ESTACION' + '\n'
+      dataText += `    NETWORK        : ${net}`        + '\n'
+      dataText += `    ESTACION       : ${sta}`        + '\n'
+      dataText += `    LOCACION       : ${loc}`        + '\n'
+      dataText += `    CANAL          : ${cha}`        + '\n'
+      dataText += `    NRO. DATOS     : ${npts}`        + '\n'
+      dataText += `    FRECUENCIA     : ${samples} Hz`  + '\n'
+      dataText += '\n'
+      dataText += '2. UNIDADES' + '\n'
+      dataText += '    TIEMPO         : Segundos [s]' + '\n'
+      dataText += `    ${mag}         : [${unidad}]`  + '\n'
+      dataText += '\n'
+      dataText += '3. VALORES MAXIMOS' + '\n'
+      dataText += `    ${maxVal}      : [${unidad}]` + '\n\n'
+      dataText += '4. DATOS DE LA ACELERACION' + '\n'
+      dataText += '    T' + '     ' + `${cha}` + '\n'
 
       for (let i = 0; i < dataX.length; i++) {
         dataText += dataX[i].toFixed(3).padStart(12) + '     ' + dataY[i].toFixed(8).padStart(12) + '\n';

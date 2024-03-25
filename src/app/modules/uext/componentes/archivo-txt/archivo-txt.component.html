@@ -141,7 +141,7 @@
                     <mat-label>Start Time</mat-label>
                     <input matInput formControlName="starttime" [ngxMatDatetimePicker]="picker">
                     <mat-datepicker-toggle matSuffix [for]="$any(picker)"></mat-datepicker-toggle>
-                    <ngx-mat-datetime-picker [showSpinners]='true' #picker color="primary">
+                    <ngx-mat-datetime-picker [showSeconds]="true" [showSpinners]='true' #picker color="primary">
                     </ngx-mat-datetime-picker>
                 </mat-form-field>
             </div>

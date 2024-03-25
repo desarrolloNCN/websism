@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { RegisterUserService } from 'src/app/service/register-user.service';
 import { NewProjectComponent } from '../../componentes/new-project/new-project.component';
+import { AuthService } from 'src/app/service/auth.service';
 
 @Component({
   selector: 'app-user-projects',
@@ -11,38 +12,51 @@ import { NewProjectComponent } from '../../componentes/new-project/new-project.c
 export class UserProjectsComponent implements OnInit {
 
   proyectos: any = []
-  ud = '75d0aa04-8001-4812-86ea-33f686eead0e'
+  
   loadingSpinner = false
+
+  private username = ''
+  private email = ''
+
   constructor(
     private userService : RegisterUserService,
+    private authService : AuthService,
     private matDialog : MatDialog,
   ) { }
 
   ngOnInit(): void {
+    this.authService.getToken().subscribe({
+      next: value => {
+        this.username = value.email
+        this.email = value.email
+      },
+      error: err =>{
+        this.username = 'ga'
+        this.email = 'test@example.com'
+      }
+    })
     // this.getProyectos()
   }
 
-  getProyectos(){
-
-    this.loadingSpinner = true
-
-    this.userService.getProjectUser(this.ud).subscribe({
-      next: value => {
-        this.proyectos = value
-      },
-      error: err => {
-        this.loadingSpinner = false
-        
-      },
-      complete: () => {
-        this.loadingSpinner = false
-      }
-    })
-  }
 
   crearProyecto(){
 
-    this.matDialog.open(NewProjectComponent)
+    const matDialogConfig = new MatDialogConfig()
+    matDialogConfig.disableClose = true;
+
+    this.userService.newProject(this.username, this.email).subscribe({
+      next: value => {
+        matDialogConfig.data = value
+      },
+      error: err =>{
+        
+      },
+      complete: () =>{
+        this.matDialog.open(NewProjectComponent, matDialogConfig)
+      }
+    })
+
+    
     // this.userService.postProjectUser(this.ud).subscribe({
     //   next: value => {
         

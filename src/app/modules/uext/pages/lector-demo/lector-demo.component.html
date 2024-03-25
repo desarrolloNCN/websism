@@ -22,15 +22,23 @@
 
         <div *ngIf="hideStaPanel" [@enterAnimation2] class="dndZoneContainer">
 
-            <div class="dndZone" fxLayout="row" fxLayoutAlign="center start">
+            <div class="dndZone" fxLayout="column" fxLayoutAlign="center center">
 
-                <form [formGroup]="controlForm" fxLayout="row" fxLayout.lt-md="column" fxLayoutAlign="center center"
-                    fxLayoutGap="10" (submit)="leerArchivo()">
+                <form [formGroup]="controlForm" fxLayout="row" fxLayout.lt-md="column"
+                    fxLayoutAlign="space-between center" fxLayoutGap="10" (submit)="leerArchivo()">
 
-                    <div class="inputUrl" [ngStyle.lt-sm]="{'width': '250px'}" fxLayout="row" fxLayoutGap="5">
-                        <mat-icon class="colorIcon">link</mat-icon>
-                        <input matInput type="text" formControlName="url"
-                            placeholder="Ejm: https://ncn.pe/files/NC.NCN01.00.HNZ.mseed">
+                    <div class="inputUrl" [ngStyle.lt-sm]="{'width': '250px'}" fxLayout="row"
+                        fxLayoutAlign="start center" fxLayoutGap="5">
+                        <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5" fxFlex="95">
+                            <mat-icon class="colorIcon">link</mat-icon>
+                            <input matInput type="text" formControlName="url"
+                                placeholder="Ejm: https://ncn.pe/files/NC.NCN01.00.HNZ.mseed">
+                        </div>
+
+                        <!-- <div fxFlex="5" [@aparecer]="loadingSpinner" *ngIf="loadingSpinner" fxLayout="column"
+                            fxLayoutAlign="center center" (click)="deleteFile()">
+                            <mat-icon style="color: rgb(252, 139, 139);">cancel</mat-icon>
+                        </div> -->
                     </div>
 
                     <p fxHide.lt-md>O</p>
@@ -46,11 +54,11 @@
                                     <mat-icon inline="true">expand_more</mat-icon>
                                 </button>
                                 <mat-menu #menuFile>
-                                    <button type="button" mat-menu-item>
+                                    <button disabled="true" type="button" mat-menu-item>
                                         <mat-icon>add_to_drive</mat-icon>
                                         Google Drive
                                     </button>
-                                    <button type="button" mat-menu-item>
+                                    <button disabled="true" type="button" mat-menu-item>
                                         <mat-icon>add_to_drive</mat-icon>
                                         DropBox
                                     </button>
@@ -60,7 +68,7 @@
 
                         <div [hidden]="btnCancel">
                             <div class="uploadbtnComplete" fxLayout="row" fxLayoutAlign="center center">
-                                <h3 style="margin: 0; padding-left: 10px;"> {{arch?.name}} </h3>
+                                <h3 style="margin: 0; padding-left: 10px;"> {{archFilter}} </h3>
                                 <button mat-icon-button type="button" (click)="deleteFile()">
                                     <mat-icon inline="true">cancel</mat-icon>
                                 </button>
@@ -77,10 +85,10 @@
                         LEER DATOS
                     </button>
 
-                    <div *ngIf="loadingSpinner" fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
+                    <!-- <div *ngIf="loadingSpinner" fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                         <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                             [diameter]="30"></mat-progress-spinner>
-                    </div>
+                    </div> -->
 
                 </form>
 
