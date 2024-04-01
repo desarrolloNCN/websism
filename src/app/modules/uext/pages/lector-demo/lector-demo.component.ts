@@ -2216,6 +2216,17 @@ export class LectorDemoComponent implements OnInit {
     let type = '';
     let maxVal = '';
 
+    let base = extrData.base || ''
+
+    let typeFilter = extrData.FilterForm.get('type').value || ''
+    let fmin = extrData.FilterForm.get('freqmin').value || ''
+    let fmax = extrData.FilterForm.get('freqmax').value || ''
+    let corn = extrData.FilterForm.get('order').value   || ''
+    let zero = extrData.FilterForm.get('zero').value    || ''
+
+    let t_min = parseFloat(extrData.TrimForm.get('t_min').value) || '' 
+    let t_max = parseFloat(extrData.TrimForm.get('t_max').value) || ''
+
     let title = 'QuakeSense | NCN Nuevo Control'
     let gentxt = 'Este archivo de texto fue generado por QuakeSense.'
     let mark = 'Descubre cómo nuestras soluciones avanzadas pueden proporcionar información crucial para el procesamiento sísmico y la seguridad estructural.'
@@ -2270,16 +2281,28 @@ export class LectorDemoComponent implements OnInit {
       dataText += `    LOCACION       : ${loc}` + '\n'
       dataText += `    CANAL          : ${cha}` + '\n'
       dataText += `    NRO. DATOS     : ${npts}` + '\n'
-      dataText += `    FRECUENCIA     : ${samples} Hz` + '\n'
+      dataText += `    FRECUENCIA     : ${samples} Hz` + '\n\n'
       dataText += '2. UNIDADES' + '\n'
       dataText += '    TIEMPO         : Segundos [s]' + '\n'
       dataText += `    ACELERACION    : [${und1}]` + '\n'
       dataText += `    VELOCIDAD      : [${und2}]` + '\n'
-      dataText += `    DESPLAZAMIENTO : [${und3}]` + '\n'
+      dataText += `    DESPLAZAMIENTO : [${und3}]` + '\n\n'
+      dataText += '4. HERRAMIENTAS USADAS' + '\n'
+      dataText += `    4.1 CORRECCION DE LINEA BASE `     + '\n'
+      dataText += `        BASE        : ${base}` + '\n'
+      dataText += `    4.2 FILTRO      `   + '\n'
+      dataText += `        TIPO        : ${typeFilter}` + '\n'
+      dataText += `        FREQ. MIN.  : ${fmin}` + '\n'
+      dataText += `        FREQ. MAX.  : ${fmax}` + '\n'
+      dataText += `        CORNERS     : ${corn}` + '\n'
+      dataText += `        BILINEAR    : ${zero}` + '\n'
+      dataText += `    4.3 RECORTE [segundos] `     + '\n'
+      dataText += `        MIN        : ${t_min}` + '\n'
+      dataText += `        MAX        : ${t_max}` + '\n\n'
       dataText += '3. VALORES MAXIMOS' + '\n'
       dataText += `    PGA            : ${maxV1} [${und1}]` + '\n'
       dataText += `    PGV            : ${maxV2} [${und2}]` + '\n'
-      dataText += `    PGD            : ${maxV3} [${und3}]` + '\n'
+      dataText += `    PGD            : ${maxV3} [${und3}]` + '\n\n'
       dataText += '4. DATOS DE LA ACELERACION Y COMPONENTES' + '\n\n'
       for (let i = 0; i < dataX.length; i++) {
         dataText += dataX[i].toFixed(3).padStart(12) + '     ' + dataY[i].toFixed(8).padStart(12) + '     ' + data2Y[i].toFixed(8).padStart(12) + '     ' + data3Y[i].toFixed(8).padStart(12) + '\n';
@@ -2324,7 +2347,19 @@ export class LectorDemoComponent implements OnInit {
       dataText += '\n'
       dataText += '3. VALORES MAXIMOS' + '\n'
       dataText += `    ${maxVal}      : [${unidad}]` + '\n\n'
-      dataText += '4. DATOS DE LA ACELERACION' + '\n'
+      dataText += '4. HERRAMIENTAS USADAS' + '\n'
+      dataText += `    4.1 CORRECCION DE LINEA BASE `     + '\n'
+      dataText += `        BASE        : ${base}` + '\n'
+      dataText += `    4.2 FILTRO      `   + '\n'
+      dataText += `        TIPO        : ${typeFilter}` + '\n'
+      dataText += `        FREQ. MIN.  : ${fmin}` + '\n'
+      dataText += `        FREQ. MAX.  : ${fmax}` + '\n'
+      dataText += `        CORNERS     : ${corn}` + '\n'
+      dataText += `        BILINEAR    : ${zero}` + '\n'
+      dataText += `    4.3 RECORTE [segundos] `     + '\n'
+      dataText += `        MIN        : ${t_min}` + '\n'
+      dataText += `        MAX        : ${t_max}` + '\n\n'
+      dataText += '5. DATOS DE LA ACELERACION' + '\n'
       dataText += '    T' + '     ' + `${cha}` + '\n'
 
       for (let i = 0; i < dataX.length; i++) {
@@ -2343,6 +2378,10 @@ export class LectorDemoComponent implements OnInit {
 
   toogleActionsImg() {
     this.zoomActivate != this.zoomActivate
+  }
+
+  redirectAcel(){
+    window.open('https://ncn.pe/acelerografo-reftek-sma2')
   }
 
 } 

@@ -1,7 +1,7 @@
 <div *ngIf="hideStaPanel" fxLayout="row" fxLayoutAlign="space-between center " [@enterAnimation2] class="winTitle">
     <div>
         <h2><b>Lector de Archivos Acelerográficos</b></h2>
-        <h4 fxHide.lt-sm>Podras manipular archivos de diferentes acelerografos y aplicar las diferentes
+        <h4 fxHide.lt-sm>Podras manipular archivos de diferentes <a (click)="redirectAcel()" matTooltip="Reftek SMA2">acelerografos</a> y aplicar las diferentes
             herramientas que ofrecemos
         </h4>
     </div>
@@ -13,7 +13,7 @@
             Sismos Historicos
         </button>
 
-        <button *ngIf="btnSisHide" mat-flat-button color="primary" (click)="savePorgressProyect()">
+        <button *ngIf="btnSisHide" mat-flat-button color="primary" disabled="true" matTooltip="Proximamente..." matTooltipPosition="left" (click)="savePorgressProyect()">
             <mat-icon>save</mat-icon>
             Guardar
         </button>
@@ -428,16 +428,16 @@
                                 </button>
 
                                 <mat-menu #downData="matMenu">
-                                    <button mat-menu-item (click)="donwloadData(tab, 'all')">
+                                    <button mat-menu-item (click)="donwloadData(tab, 'all', i)">
                                         Todas
                                     </button>
-                                    <button mat-menu-item (click)="donwloadData(tab, 'acel')">
+                                    <button mat-menu-item (click)="donwloadData(tab, 'acel', i)">
                                         Aceleracion
                                     </button>
-                                    <button mat-menu-item (click)="donwloadData(tab, 'vel')">
+                                    <button mat-menu-item (click)="donwloadData(tab, 'vel', i)">
                                         Velocidad
                                     </button>
-                                    <button mat-menu-item (click)="donwloadData(tab, 'des')">
+                                    <button mat-menu-item (click)="donwloadData(tab, 'des', i)">
                                         Desplazamiento
                                     </button>
                                 </mat-menu>

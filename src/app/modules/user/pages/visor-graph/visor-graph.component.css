@@ -16,6 +16,11 @@ h4 {
     color: #747474
 }
 
+a{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
 .winTitle {
     padding-top: 10px;
     padding-bottom: 10px;

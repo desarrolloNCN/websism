@@ -26,7 +26,7 @@ export class UserProjectsComponent implements OnInit {
     private authService: AuthService,
     private matDialog: MatDialog,
     private router: Router,
-    private snackBar : MatSnackBar
+    private snackBar: MatSnackBar
   ) { }
 
   ngOnInit(): void {
@@ -35,37 +35,51 @@ export class UserProjectsComponent implements OnInit {
 
     this.authService.getToken().subscribe({
       next: value => {
-        this.username = value.email
+        this.username = value.username
         this.email = value.email
       },
       error: err => {
-        this.username = 'ga'
-        this.email = 'test@example.com'
-
+        this.loadingSpinner = false
+        alert('Error')
         // TODO: Borrar en Produccion
 
-        this.userService.getProjectuser(this.username, this.email).subscribe({
-          next: value => {
-            this.proyectos = value
-          },
-          error: err => {
+        // this.username = 'ga'
+        // this.email = 'test@example.com'
 
-          },
-          complete: () =>{
-            this.loadingSpinner = false
-          }
-        })
+
+        // this.userService.getProjectuser(this.username, this.email).subscribe({
+        //   next: value => {
+        //     this.proyectos = value
+        //   },
+        //   error: err => {
+
+        //   },
+        //   complete: () =>{
+        //     this.loadingSpinner = false
+        //   }
+        // })
       },
       complete: () => {
 
-        this.userService.getProjectuser(this.username, this.email).subscribe({
-          next: value => {
-            this.proyectos = value
-          },
+        this.authService.nUser(this.username, this.email).subscribe({
           error: err => {
+            // TODO: Agregar en desarrollo
+            this.loadingSpinner = false
+          },
+          complete: () => {
+            this.userService.getProjectuser(this.username, this.email).subscribe({
+              next: value => {
+                this.proyectos = value
+              },
+              error: err => {
 
+              },
+              complete: () => this.loadingSpinner = false
+            })
           }
         })
+
+
       }
     })
     // this.getProyectos()
@@ -107,7 +121,7 @@ export class UserProjectsComponent implements OnInit {
   abrirLector(item: any) {
     console.log(item);
 
-    let addFiles : any[] = []
+    let addFiles: any[] = []
 
     item.files.forEach((e: any) => {
       let url = e.file || e.string_data
@@ -115,7 +129,7 @@ export class UserProjectsComponent implements OnInit {
       let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
       addFiles.push({
-        "uuid" : item.uuid,
+        "uuid": item.uuid,
         "originalName": nombreArchivo,
         "extension": extension.toLocaleUpperCase() || 'NO EXT',
         "unit": e.unit,
@@ -128,7 +142,7 @@ export class UserProjectsComponent implements OnInit {
 
   }
 
-  editProyec(item : any){
+  editProyec(item: any) {
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
     matDialogConfig.data = item
@@ -139,7 +153,7 @@ export class UserProjectsComponent implements OnInit {
     this.userService.sendData(data, route);
   }
 
-  delProj(item:any){
+  delProj(item: any) {
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 5 * 1000;
@@ -151,30 +165,30 @@ export class UserProjectsComponent implements OnInit {
 
       this.matDialog.open(DeleteConfirmationComponent).afterClosed().subscribe({
         next: value => {
-          if(value == true){
+          if (value == true) {
             this.userService.delProject(item.uuid).subscribe({
               error: err => {
                 console.log(err);
               },
               complete: () => {
                 this.proyectos.splice(indice, 1);
-                this.snackBar.open('✅ Proyecto Borrado' , 'cerrar', snackBar)
+                this.snackBar.open('✅ Proyecto Borrado', 'cerrar', snackBar)
               }
             })
           }
         },
         error: err => {
-          this.snackBar.open('⚠️ Ocurrio un Problema' , 'cerrar', snackBar)
+          this.snackBar.open('⚠️ Ocurrio un Problema', 'cerrar', snackBar)
         },
         complete: () => {
-         
+
         }
       })
 
-     
+
     }
 
-   
+
   }
 
 

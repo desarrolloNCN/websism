@@ -123,7 +123,7 @@ export class VisorGraphComponent implements OnInit {
   private userInfo = ''
 
   // TODO: cambiar esto en Produccion a -1
-  userId = 1
+  userId = -1
 
   plotedimages: any = []
 
@@ -203,7 +203,7 @@ export class VisorGraphComponent implements OnInit {
 
         if (value.username == null || value.email == null) {
           // TODO: cambiar esto en Produccion a -1
-          this.userId == 1
+          this.userId == -1
         } else {
           this.auth.nUser(value.username, value.email).subscribe({
             next: nvalue => {
@@ -2616,13 +2616,15 @@ export class VisorGraphComponent implements OnInit {
     })
   }
 
-  donwloadData(tabInfo: any, m: string) {
+  donwloadData(tabInfo: any, m: string, index: number) {
 
     const snackBar = new MatSnackBarConfig();
     snackBar.panelClass = ['snackBar-validator'];
 
-    var dataString, dataFile = this.proyectData[0].url
-    var unit_from: string = this.proyectData[0].unit
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
+
+    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var unit_from: string = this.proyectData[indexFilePanel].unit
 
     // TODO: descomentar luego de evaluacion
     // var dataString: string = localStorage.getItem('urlSearched')!
@@ -2758,12 +2760,12 @@ export class VisorGraphComponent implements OnInit {
       dataText += `    LOCACION       : ${loc}` + '\n'
       dataText += `    CANAL          : ${cha}` + '\n'
       dataText += `    NRO. DATOS     : ${npts}` + '\n'
-      dataText += `    FRECUENCIA     : ${samples} Hz` + '\n'
+      dataText += `    FRECUENCIA     : ${samples} Hz` + '\n\n'
       dataText += '2. UNIDADES' + '\n'
       dataText += '    TIEMPO         : Segundos [s]' + '\n'
       dataText += `    ACELERACION    : [${und1}]` + '\n'
       dataText += `    VELOCIDAD      : [${und2}]` + '\n'
-      dataText += `    DESPLAZAMIENTO : [${und3}]` + '\n'
+      dataText += `    DESPLAZAMIENTO : [${und3}]` + '\n\n'
       dataText += '4. HERRAMIENTAS USADAS' + '\n'
       dataText += `    4.1 CORRECCION DE LINEA BASE `     + '\n'
       dataText += `        BASE        : ${base}` + '\n'
@@ -2779,7 +2781,7 @@ export class VisorGraphComponent implements OnInit {
       dataText += '3. VALORES MAXIMOS' + '\n'
       dataText += `    PGA            : ${maxV1} [${und1}]` + '\n'
       dataText += `    PGV            : ${maxV2} [${und2}]` + '\n'
-      dataText += `    PGD            : ${maxV3} [${und3}]` + '\n'
+      dataText += `    PGD            : ${maxV3} [${und3}]` + '\n\n'
       dataText += '4. DATOS DE LA ACELERACION Y COMPONENTES' + '\n\n'
       for (let i = 0; i < dataX.length; i++) {
         dataText += dataX[i].toFixed(3).padStart(12) + '     ' + dataY[i].toFixed(8).padStart(12) + '     ' + data2Y[i].toFixed(8).padStart(12) + '     ' + data3Y[i].toFixed(8).padStart(12) + '\n';
@@ -2866,6 +2868,10 @@ export class VisorGraphComponent implements OnInit {
       }
     })
     
+  }
+
+  redirectAcel(){
+    window.open('https://ncn.pe/acelerografo-reftek-sma2')
   }
 
 }
