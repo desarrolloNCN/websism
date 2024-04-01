@@ -5,15 +5,71 @@
         <h4>Aca encontrarás tus projectos</h4>
     </div>
 
-    <button class="newProjectBtn" mat-raised-button type="button" (click)="crearProyecto()">
+    <button class="newProjectBtn" mat-raised-button type="button" matTooltip="Crear Proyecto" matTooltipPosition="right"
+        (click)="crearProyecto()">
         <mat-icon class="colorIcon">add</mat-icon>
     </button>
 
-    <div class="projectContainer" fxLayout="column" fxLayoutAlign="start start" fxLayoutGap="10">
+    <div *ngIf="loadingSpinner" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center"
+        style="padding-top: 20%;">
+        <mat-progress-spinner mode="indeterminate" style="margin:0 auto;" [diameter]="50"></mat-progress-spinner>
+        <h3> <b>Cargando Datos ....</b> </h3>
+    </div>
 
-        <div *ngFor="let proj of proyectos; let i = index">
-            <div class="newProject" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
-                <!-- <mat-icon class="colorIcon">add</mat-icon> -->
+    <div class="projectContainer" fxLayout="row wrap" fxLayoutAlign="center start" fxLayoutGap="10">
+
+        <div *ngFor="let proj of proyectos; let i = index" style="padding-bottom: 30px;">
+
+            <mat-card style="width: 400px;">
+
+                <mat-card-title-group>
+                    <img mat-card-sm-image src="/assets/ncnLogoColor.png">
+                    <mat-card-title>{{proj.name}}</mat-card-title>
+                    <mat-card-subtitle>{{proj.fecha_creacion | date: 'short'}}</mat-card-subtitle>
+                </mat-card-title-group>
+
+                <mat-card-content>
+                    <h4><b>Descripcion:</b></h4>
+                    <h5> {{proj.descrip || 'No hay Descripcion'}} </h5>
+                    <br>
+                    <div>
+                        <mat-accordion>
+                            <mat-expansion-panel>
+
+                                <mat-expansion-panel-header>
+                                    Ver mas
+                                </mat-expansion-panel-header>
+
+                                <h4><b>Archivos:</b></h4>
+                                <div *ngFor="let item of proj.files">
+                                    <div fxLayout="row" fxLayoutAlign="space-between" fxLayoutGap="10">
+                                        <h5 style="overflow: hidden;"><b>{{item.filename}}</b> </h5>
+                                        <a [href]="item.file">Descargar</a>
+                                    </div>
+                                </div>
+                            </mat-expansion-panel>
+
+
+                        </mat-accordion>
+                    </div>
+                </mat-card-content>
+
+                <mat-card-actions align="end" fxLayoutGap="10">
+                    <button mat-flat-button color="warn" (click)="delProj(proj)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                    <button mat-flat-button color="accent" (click)="editProyec(proj)">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-flat-button color="primary" (click)="abrirLector(proj)">
+                        <mat-icon>open_in_new</mat-icon>
+                        Abrir
+                    </button>
+                </mat-card-actions>
+
+            </mat-card>
+
+            <!-- <div class="newProject" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
                 <div fxLayout="row" fxLayoutGap="10">
                     <img class="thumbnail" src="/assets/ncnLogoColor.png">
                     <div fxLayout="column">
@@ -34,14 +90,9 @@
                     </button>
                 </div>
 
-            </div>
-        </div>
+            </div> -->
 
-        <!-- <div *ngIf="loadingSpinner" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center"
-            style="padding-top: 20%;">
-            <mat-progress-spinner mode="indeterminate" style="margin:0 auto;" [diameter]="50"></mat-progress-spinner>
-            <h3> <b>Cargando Datos ....</b> </h3>
-        </div> -->
+        </div>
 
     </div>
 

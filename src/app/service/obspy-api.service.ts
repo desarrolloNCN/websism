@@ -534,14 +534,13 @@ export class ObspyAPIService {
     const formData = new FormData();
     const url = 'plot-tool-auto/'
 
-    base_line = '',
-      filter = '',
-      freqmin = '',
-      freqmax = '',
-      corner = '',
-      zero = '',
-      t_min = '',
-      t_max = ''
+    base_line = ''
+    filter = ''
+    freqmin = ''
+    freqmax = ''
+    corner = ''
+    zero = ''
+
 
     if (typeof data === 'string') {
       formData.append('data', data);
@@ -553,8 +552,8 @@ export class ObspyAPIService {
       formData.append('freq_max', freqmax)
       formData.append('corner', corner)
       formData.append('zero', zero)
-      formData.append('t_min', t_min)
-      formData.append('t_max', t_max)
+      formData.append('t_min', t_min || '')
+      formData.append('t_max', t_max || '')
       formData.append('unit_from', unit)
       formData.append('graph_color', color_graph || '')
     } else {
@@ -588,7 +587,7 @@ export class ObspyAPIService {
   getIpAddress() {
     const headers = new HttpHeaders().set('No-Interceptor', 'true');
     const url = 'https://api.ipify.org?format=json'
-    return this.http.get(url, {headers}).pipe(
+    return this.http.get(url, { headers }).pipe(
       catchError(error => {
         return of(error)
       })

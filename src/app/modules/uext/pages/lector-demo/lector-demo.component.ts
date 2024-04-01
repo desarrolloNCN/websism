@@ -14,6 +14,7 @@ import { Subscription } from 'rxjs';
 import { CustomEvent, ImageViewerComponent, ImageViewerConfig } from 'ngx-image-viewer';
 import { HttpClient } from '@angular/common/http';
 import { SismosHistoricosComponent } from '../../componentes/sismos-historicos/sismos-historicos.component';
+import { ReCaptchaV3Service } from 'ng-recaptcha';
 
 @Component({
   selector: 'app-lector-demo',
@@ -136,7 +137,8 @@ export class LectorDemoComponent implements OnInit {
     private cdRef: ChangeDetectorRef,
     private matDialog: MatDialog,
     private decimalPipe: DecimalPipe,
-    private http: HttpClient
+    //TODO: Habilitar para usar captcha
+    //private recaptchaV3Service: ReCaptchaV3Service,
   ) {
 
     this.FilterForm = new FormGroup({
@@ -158,11 +160,11 @@ export class LectorDemoComponent implements OnInit {
     localStorage.clear()
 
     this.obsApi.getIpAddress().subscribe({
-      next: value =>{
+      next: value => {
         this.userInfo = value.ip
       }
     })
-    
+
     this.controlForm = new FormGroup({
       url: new FormControl(''),
     })
@@ -177,7 +179,7 @@ export class LectorDemoComponent implements OnInit {
     if (archivos && archivos.length > 0) {
       this.arch = archivos[0];
       let ext: string = archivos[0].name.substring(archivos[0].name.lastIndexOf('.') + 1);
-      this.archFilter = this.txtElip( archivos[0].name, ext, 20)
+      this.archFilter = this.txtElip(archivos[0].name, ext, 20)
       this.btnShow = true;
       this.btnCancel = false;
       this.controlForm.get('url').disable()
@@ -244,6 +246,7 @@ export class LectorDemoComponent implements OnInit {
           throw new Error('')
         }
       } catch (err) {
+
         this.obsApi.uploadFile(valorNoVacio, this.userInfo).subscribe({
           next: value => {
 
@@ -263,12 +266,12 @@ export class LectorDemoComponent implements OnInit {
 
             let url = ''
 
-            if(localStorage.getItem('urlFileUpload')! == null || localStorage.getItem('urlFileUpload')! == 'null'){
+            if (localStorage.getItem('urlFileUpload')! == null || localStorage.getItem('urlFileUpload')! == 'null') {
               url = localStorage.getItem('urlSearched')!
-            }else if(localStorage.getItem('urlSearched')! == null || localStorage.getItem('urlSearched')! == 'null'){
+            } else if (localStorage.getItem('urlSearched')! == null || localStorage.getItem('urlSearched')! == 'null') {
               url = localStorage.getItem('urlFileUpload')!
             }
-            
+
             if (ext == 'txt') {
               this.leerTxt(url)
             } else if (this.formatFile == 'MSEED' || ext == 'mseed') {
@@ -305,6 +308,25 @@ export class LectorDemoComponent implements OnInit {
             }
           }
         })
+
+        //TODO: AGREGAR CAPTCHA
+
+        // this.recaptchaV3Service.execute('archivo_subido').subscribe({
+        //   next: value => {
+        //     console.log(value);
+            
+        //   },
+        //   error: err => {
+        //     console.log(err);
+            
+        //   },
+        //   complete: () => {
+
+           
+
+        //   }
+        // })
+        
       }
 
     } else {
@@ -1933,8 +1955,14 @@ export class LectorDemoComponent implements OnInit {
   }
 
   togglePanel() {
-    if (this.hideStaPanel2 == false) {
-      this.hideStaPanel = true
+    if (this.hideStaPanel2 == true && this.hideStaPanel == true) {
+      this.hideStaPanel = false
+      this.hideStaPanel2 = false
+    }
+    else if (this.hideStaPanel == false && this.hideStaPanel2 == true) {
+      this.hideStaPanel2 = false
+    }
+    else if (this.hideStaPanel2 == false) {
       this.hideStaPanel2 = true
     }
     else {
@@ -2195,7 +2223,7 @@ export class LectorDemoComponent implements OnInit {
     let web = 'Website: https://qs.ncn.pe'
 
     const samples = extrData.sampling_rate
-      const npts = extrData.npts
+    const npts = extrData.npts
 
     if (m == 'acel' || m == 'vel' || m == 'des') {
       dataX = value[0].tiempo_a;
@@ -2229,7 +2257,7 @@ export class LectorDemoComponent implements OnInit {
       const maxV1 = value[0].peak_a.toFixed(6);
       const maxV2 = value[0].peak_v.toFixed(6);
       const maxV3 = value[0].peak_d.toFixed(6);
-      
+
       let dataText = '';
       dataText += title + '\n'
       dataText += gentxt + '\n'
@@ -2237,17 +2265,17 @@ export class LectorDemoComponent implements OnInit {
       dataText += contact + '\n'
       dataText += web + '\n \n'
       dataText += '1. INFORMACION' + '\n'
-      dataText += `    NETWORK        : ${net}`        + '\n'
-      dataText += `    ESTACION       : ${sta}`        + '\n'
-      dataText += `    LOCACION       : ${loc}`        + '\n'
-      dataText += `    CANAL          : ${cha}`        + '\n'
-      dataText += `    NRO. DATOS     : ${npts}`        + '\n'
-      dataText += `    FRECUENCIA     : ${samples} Hz`  + '\n'
+      dataText += `    NETWORK        : ${net}` + '\n'
+      dataText += `    ESTACION       : ${sta}` + '\n'
+      dataText += `    LOCACION       : ${loc}` + '\n'
+      dataText += `    CANAL          : ${cha}` + '\n'
+      dataText += `    NRO. DATOS     : ${npts}` + '\n'
+      dataText += `    FRECUENCIA     : ${samples} Hz` + '\n'
       dataText += '2. UNIDADES' + '\n'
       dataText += '    TIEMPO         : Segundos [s]' + '\n'
-      dataText += `    ACELERACION    : [${und1}]`    + '\n'
-      dataText += `    VELOCIDAD      : [${und2}]`    + '\n'
-      dataText += `    DESPLAZAMIENTO : [${und3}]`    + '\n'
+      dataText += `    ACELERACION    : [${und1}]` + '\n'
+      dataText += `    VELOCIDAD      : [${und2}]` + '\n'
+      dataText += `    DESPLAZAMIENTO : [${und3}]` + '\n'
       dataText += '3. VALORES MAXIMOS' + '\n'
       dataText += `    PGA            : ${maxV1} [${und1}]` + '\n'
       dataText += `    PGV            : ${maxV2} [${und2}]` + '\n'
@@ -2276,23 +2304,23 @@ export class LectorDemoComponent implements OnInit {
 
     if (dataX.length > 0 && dataY.length > 0) {
       let dataText = '';
-      dataText += title   + '\n'
-      dataText += gentxt  + '\n'
-      dataText += mark    + '\n'
+      dataText += title + '\n'
+      dataText += gentxt + '\n'
+      dataText += mark + '\n'
       dataText += contact + '\n'
-      dataText += web     + '\n'
+      dataText += web + '\n'
       dataText += '\n'
       dataText += '1. INFORMACION DE LA ESTACION' + '\n'
-      dataText += `    NETWORK        : ${net}`        + '\n'
-      dataText += `    ESTACION       : ${sta}`        + '\n'
-      dataText += `    LOCACION       : ${loc}`        + '\n'
-      dataText += `    CANAL          : ${cha}`        + '\n'
-      dataText += `    NRO. DATOS     : ${npts}`        + '\n'
-      dataText += `    FRECUENCIA     : ${samples} Hz`  + '\n'
+      dataText += `    NETWORK        : ${net}` + '\n'
+      dataText += `    ESTACION       : ${sta}` + '\n'
+      dataText += `    LOCACION       : ${loc}` + '\n'
+      dataText += `    CANAL          : ${cha}` + '\n'
+      dataText += `    NRO. DATOS     : ${npts}` + '\n'
+      dataText += `    FRECUENCIA     : ${samples} Hz` + '\n'
       dataText += '\n'
       dataText += '2. UNIDADES' + '\n'
       dataText += '    TIEMPO         : Segundos [s]' + '\n'
-      dataText += `    ${mag}         : [${unidad}]`  + '\n'
+      dataText += `    ${mag}         : [${unidad}]` + '\n'
       dataText += '\n'
       dataText += '3. VALORES MAXIMOS' + '\n'
       dataText += `    ${maxVal}      : [${unidad}]` + '\n\n'

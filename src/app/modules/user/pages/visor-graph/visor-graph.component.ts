@@ -5,7 +5,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { MatTab, MatTabChangeEvent } from '@angular/material/tabs';
-import { NavigationStart, Router } from '@angular/router';
+import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { EChartsOption } from 'echarts';
 import { Subscription } from 'rxjs';
 import { ArchivoMseedComponent } from 'src/app/modules/uext/componentes/archivo-mseed/archivo-mseed.component';
@@ -105,6 +105,8 @@ export class VisorGraphComponent implements OnInit {
   btnShow = false
   btnCancel = true
   btnDisable = false
+  btnSisHide = false
+
   isButtonActive = false
   panelOpenState = false
 
@@ -149,6 +151,7 @@ export class VisorGraphComponent implements OnInit {
   graphClientOption = false
 
   proyectData: any[] = [];
+  proyectDataIn: any[] = [];
 
   constructor(
     private obsApi: ObspyAPIService,
@@ -160,6 +163,8 @@ export class VisorGraphComponent implements OnInit {
     private matDialog: MatDialog,
     private router: Router,
     private decimalPipe: DecimalPipe,
+
+    private route: ActivatedRoute
   ) {
 
     this.FilterForm = new FormGroup({
@@ -226,12 +231,18 @@ export class VisorGraphComponent implements OnInit {
 
     this.obsUser.data.subscribe({
       next: valueD => {
+
         if (valueD == null) {
           this.proyectData = []
+          this.btnSisHide = false
         } else {
-          this.loadingPanelInfo = true
-          this.proyectData = valueD
 
+          this.loadingPanelInfo = true
+
+          this.btnSisHide = true
+
+          this.proyectData = valueD
+          
           this.proyectData.forEach((e: any, index: number) => {
 
             this.obsApi.getData(e.url).subscribe({
@@ -249,6 +260,7 @@ export class VisorGraphComponent implements OnInit {
 
                 this.toggleTabs = true
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                this.proyectData[index].stations =  this.groupedData
 
               },
               complete: () => {
@@ -257,14 +269,14 @@ export class VisorGraphComponent implements OnInit {
             })
 
           });
-          // TODO: Agregar controlador para mostrar "dndzone"
+
+         
 
         }
 
 
       },
       error: err => {
-        console.log(err);
         this.proyectData = []
       },
     });
@@ -313,10 +325,15 @@ export class VisorGraphComponent implements OnInit {
 
     if (archivos && archivos.length > 0) {
       this.arch = archivos[0];
+
       let ext: string = archivos[0].name.substring(archivos[0].name.lastIndexOf('.') + 1);
       this.archFilter = this.txtElip(archivos[0].name, ext, 20)
+
+      
+
       this.btnShow = true;
       this.btnCancel = false;
+
       this.controlForm.get('url').disable()
     } else {
       this.btnShow = false;
@@ -398,6 +415,7 @@ export class VisorGraphComponent implements OnInit {
 
     this.loadingSpinner = true
     this.loadingSpinnerStaInfo = true
+    this.loadingPanelInfo = true
 
     this.snackBar.open('⌛ Cargando Datos ...', '', snackBar)
 
@@ -441,10 +459,10 @@ export class VisorGraphComponent implements OnInit {
               "unit": ''
             })
 
-            localStorage.setItem('urlFileUpload', value.file)
-            localStorage.setItem('urlSearched', value.string_data)
+            //localStorage.setItem('urlFileUpload', value.file)
+            //localStorage.setItem('urlSearched', value.string_data)
 
-            this.formatFile = value.f
+            // this.formatFile = value.f
 
           },
           error: err => {
@@ -467,7 +485,7 @@ export class VisorGraphComponent implements OnInit {
 
             if (ext == 'txt') {
               this.leerTxt(url)
-            } else if (this.formatFile == 'MSEED' || ext == 'mseed') {
+            } else if (this.proyectData[0].format == 'MSEED' || ext == 'mseed') {
               this.leerMseed(url)
             } else {
               this.obsApi.getData(url).subscribe({
@@ -475,20 +493,24 @@ export class VisorGraphComponent implements OnInit {
 
                   if (value.data[0].und_calib == 'M/S**2') {
                     this.proyectData[0].unit = 'm'
-                    localStorage.setItem('ogUnit', 'm')
-                  } else if (value.data[0].und_calib == 'CM/S**2' || ext == 'evt' || this.formatFile == 'REFTEK130') {
+                    //localStorage.setItem('ogUnit', 'm')
+                  } else if (value.data[0].und_calib == 'CM/S**2' || ext == 'evt' || this.proyectData[0].format == 'REFTEK130' ) {
                     this.proyectData[0].unit = 'gal'
-                    localStorage.setItem('ogUnit', 'gal')
+                    //localStorage.setItem('ogUnit', 'gal')
                   } else if (value.data[0].und_calib == 'G') {
                     this.proyectData[0].unit = 'g'
-                    localStorage.setItem('ogUnit', 'g')
+                    //localStorage.setItem('ogUnit', 'g')
                   } else {
                     this.proyectData[0].unit = ''
-                    localStorage.setItem('ogUnit', '')
+                    //localStorage.setItem('ogUnit', '')
                   }
                   this.toggleTabs = true
+
                   this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                  this.leer(value.data[0])
+                  this.proyectData[0].stations = this.groupedData
+
+
+                  this.leer(value.data[0], 0)
                 },
                 error: err => {
                   this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
@@ -498,8 +520,9 @@ export class VisorGraphComponent implements OnInit {
                 },
                 complete: () => {
                   this.loadingSpinner = false
-                  this.loadingSpinnerStaInfo =
-                    this.btnDisable = false
+                  this.loadingSpinnerStaInfo = false
+                  this.loadingPanelInfo = false
+                  this.btnDisable = false
                 }
               })
             }
@@ -530,285 +553,285 @@ export class VisorGraphComponent implements OnInit {
     }
   }
 
-  leerArchivoTest() {
+  // leerArchivoTest() {
 
-    this.clearData()
+  //   this.clearData()
 
-    this.btnDisable = true
+  //   this.btnDisable = true
 
-    const snackBar = new MatSnackBarConfig();
-    snackBar.duration = 5 * 1000;
-    snackBar.panelClass = ['snackBar-validator'];
+  //   const snackBar = new MatSnackBarConfig();
+  //   snackBar.duration = 5 * 1000;
+  //   snackBar.panelClass = ['snackBar-validator'];
 
-    let textoValue = this.controlForm.get('url').value;
-    let archivoValue = this.arch;
+  //   let textoValue = this.controlForm.get('url').value;
+  //   let archivoValue = this.arch;
 
 
-    let valorNoVacio: string | File | undefined;
+  //   let valorNoVacio: string | File | undefined;
 
-    this.loadingSpinner = true
-    this.loadingSpinnerStaInfo = true
+  //   this.loadingSpinner = true
+  //   this.loadingSpinnerStaInfo = true
 
-    if (archivoValue instanceof File || typeof textoValue === 'string' && textoValue.trim() !== '') {
+  //   if (archivoValue instanceof File || typeof textoValue === 'string' && textoValue.trim() !== '') {
 
-      valorNoVacio = archivoValue || textoValue
+  //     valorNoVacio = archivoValue || textoValue
 
-      if (this.urlFile == '' && this.stringdata == '') {
+  //     if (this.urlFile == '' && this.stringdata == '') {
 
-        try {
+  //       try {
 
-          let valorNoVacio_recived: any = archivoValue.name
-          let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
-          let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+  //         let valorNoVacio_recived: any = archivoValue.name
+  //         let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+  //         let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
 
-          if (extension == 'XMR') {
-            this.stopXmr = this.obsApi.covertionXMR(archivoValue).subscribe({
-              next: value => {
-                this.leerTxt(value.url)
-              },
-              error: err => {
-                this.loadingSpinner = false
-                this.loadingSpinnerStaInfo = false
-              },
-              complete: () => {
-                this.loadingSpinner = false
-                this.loadingSpinnerStaInfo = false
-              }
-            })
-          } else {
-            this.stopXmr.unsubscribe()
-            throw new Error('')
-          }
+  //         if (extension == 'XMR') {
+  //           this.stopXmr = this.obsApi.covertionXMR(archivoValue).subscribe({
+  //             next: value => {
+  //               this.leerTxt(value.url)
+  //             },
+  //             error: err => {
+  //               this.loadingSpinner = false
+  //               this.loadingSpinnerStaInfo = false
+  //             },
+  //             complete: () => {
+  //               this.loadingSpinner = false
+  //               this.loadingSpinnerStaInfo = false
+  //             }
+  //           })
+  //         } else {
+  //           this.stopXmr.unsubscribe()
+  //           throw new Error('')
+  //         }
 
-        } catch (error) {
+  //       } catch (error) {
 
-          this.obsUser.uploadFileUser(valorNoVacio, this.userId.toString()).subscribe({
-            next: value => {
-
-              this.idFile = value.id
-              this.urlFile = value.file
-              this.stringdata = value.string_data
-
-              localStorage.setItem('urlFileUpload', value.file)
-              localStorage.setItem('urlSearched', value.string_data)
-
-            },
-            error: err => {
-              this.loadingSpinner = false
-              this.loadingSpinnerStaInfo = false
-              this.btnDisable = false
-              this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
-            },
-            complete: () => {
-              let valorNoVacio_recived: any = this.urlFile || this.stringdata
-              let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
-              let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
-
-              if (this.urlFile == null) {
-
-                if (extension == 'txt') {
-
-                  this.leerTxt(valorNoVacio_recived)
-
-                } else if (extension == 'mseed') {
-
-                  this.leerMseed(valorNoVacio_recived)
+  //         this.obsUser.uploadFileUser(valorNoVacio, this.userId.toString()).subscribe({
+  //           next: value => {
+
+  //             this.idFile = value.id
+  //             this.urlFile = value.file
+  //             this.stringdata = value.string_data
+
+  //             localStorage.setItem('urlFileUpload', value.file)
+  //             localStorage.setItem('urlSearched', value.string_data)
+
+  //           },
+  //           error: err => {
+  //             this.loadingSpinner = false
+  //             this.loadingSpinnerStaInfo = false
+  //             this.btnDisable = false
+  //             this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
+  //           },
+  //           complete: () => {
+  //             let valorNoVacio_recived: any = this.urlFile || this.stringdata
+  //             let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+  //             let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+
+  //             if (this.urlFile == null) {
+
+  //               if (extension == 'txt') {
+
+  //                 this.leerTxt(valorNoVacio_recived)
+
+  //               } else if (extension == 'mseed') {
+
+  //                 this.leerMseed(valorNoVacio_recived)
 
-                } else {
+  //               } else {
 
-                  this.obsApi.getData(this.stringdata).subscribe({
-                    next: value => {
+  //                 this.obsApi.getData(this.stringdata).subscribe({
+  //                   next: value => {
 
-                      if (value.data[0].und_calib == 'M/S**2') {
-                        localStorage.setItem('ogUnit', 'm')
-                      } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
-                        localStorage.setItem('ogUnit', 'gal')
-                      } else if (value.data[0].und_calib == 'G') {
-                        localStorage.setItem('ogUnit', 'g')
-                      } else {
-                        localStorage.setItem('ogUnit', '')
-                      }
+  //                     if (value.data[0].und_calib == 'M/S**2') {
+  //                       localStorage.setItem('ogUnit', 'm')
+  //                     } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
+  //                       localStorage.setItem('ogUnit', 'gal')
+  //                     } else if (value.data[0].und_calib == 'G') {
+  //                       localStorage.setItem('ogUnit', 'g')
+  //                     } else {
+  //                       localStorage.setItem('ogUnit', '')
+  //                     }
 
-                      this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-
-                      this.leer(value.data[0])
-                    },
-                    error: err => {
-                      this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                      this.loadingSpinner = false
-                      this.loadingSpinnerStaInfo = false
-                      this.btnDisable = false
-                    },
-                    complete: () => {
-
-                      this.loadingSpinner = false
-                      this.loadingSpinnerStaInfo = false
-                      this.btnDisable = false
-                    }
-                  })
-
-                }
-
-              } else if (this.stringdata == null) {
-
-                if (extension == 'txt') {
-
-                  this.leerTxt(valorNoVacio_recived)
-
-                } else if (extension == 'mseed') {
-
-                  this.leerMseed(valorNoVacio_recived)
-
-                } else {
-
-                  this.obsApi.getData(this.urlFile).subscribe({
-                    next: value => {
-                      if (value.data[0].und_calib == 'M/S**2') {
-                        localStorage.setItem('ogUnit', 'm')
-                      } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
-                        localStorage.setItem('ogUnit', 'gal')
-                      } else if (value.data[0].und_calib == 'G') {
-                        localStorage.setItem('ogUnit', 'g')
-                      } else {
-                        localStorage.setItem('ogUnit', '')
-                      }
-                      this.toggleTabs = true
-                      this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                      this.leer(value.data[0])
-                    },
-                    error: err => {
-                      this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                      this.loadingSpinner = false
-                      this.loadingSpinnerStaInfo = false
-                      this.btnDisable = false
-                    },
-                    complete: () => {
-                      this.loadingSpinner = false
-                      this.loadingSpinnerStaInfo =
-                        this.btnDisable = false
-                    }
-                  })
-
-                }
-
-              } else {
-                this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
-                this.loadingSpinner = false
-                this.loadingSpinnerStaInfo = false
-                this.btnDisable = false
-              }
-            }
-          })
-        }
-
-      } else {
-
-        let valorNoVacio_recived: any = this.urlFile || this.stringdata
-        let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
-        let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
-
-        if (this.urlFile == null || '') {
-
-          if (extension == 'txt') {
-
-            this.leerTxt(valorNoVacio_recived)
-
-          } else if (extension == 'mseed') {
-
-            this.leerMseed(valorNoVacio_recived)
-
-          } else {
-
-            this.obsApi.getData(this.stringdata).subscribe({
-              next: value => {
-
-                if (value.data[0].und_calib == 'M/S**2') {
-                  localStorage.setItem('ogUnit', 'm')
-                } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
-                  localStorage.setItem('ogUnit', 'gal')
-                } else if (value.data[0].und_calib == 'G') {
-                  localStorage.setItem('ogUnit', 'g')
-                } else {
-                  localStorage.setItem('ogUnit', '')
-                }
-
-                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-              },
-              error: err => {
-                this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                this.loadingSpinner = false
-                this.loadingSpinnerStaInfo = false
-                this.btnDisable = false
-              },
-              complete: () => {
-                this.loadingSpinner = false
-                this.loadingSpinnerStaInfo = false
-                this.btnDisable = false
-              }
-            })
-
-          }
-
-        } else if (this.stringdata == null || '') {
-
-          if (extension == 'txt') {
-
-            this.leerTxt(valorNoVacio_recived)
-
-          } else if (extension == 'mseed') {
-
-            this.leerMseed(valorNoVacio_recived)
-
-          } else {
-
-            this.obsApi.getData(this.urlFile).subscribe({
-              next: value => {
-
-                if (value.data[0].und_calib == 'M/S**2') {
-                  localStorage.setItem('ogUnit', 'm')
-                } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
-                  localStorage.setItem('ogUnit', 'gal')
-                } else if (value.data[0].und_calib == 'G') {
-                  localStorage.setItem('ogUnit', 'g')
-                } else {
-                  localStorage.setItem('ogUnit', '')
-                }
-
-                this.toggleTabs = true
-                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                this.leer(value.data[0])
-              },
-              error: err => {
-                this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-                this.loadingSpinner = false
-                this.loadingSpinnerStaInfo = false
-                this.btnDisable = false
-              },
-              complete: () => {
-                this.loadingSpinner = false
-                this.loadingSpinnerStaInfo = false
-                this.btnDisable = false
-              }
-            })
-
-          }
-
-        } else {
-          this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
-          this.loadingSpinner = false
-          this.loadingSpinnerStaInfo = false
-          this.btnDisable = false
-        }
-      }
-
-    } else {
-      this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
-      this.loadingSpinner = false
-      this.loadingSpinnerStaInfo = false
-      this.btnDisable = false
-    }
-  }
+  //                     this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+
+  //                     this.leer(value.data[0])
+  //                   },
+  //                   error: err => {
+  //                     this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+  //                     this.loadingSpinner = false
+  //                     this.loadingSpinnerStaInfo = false
+  //                     this.btnDisable = false
+  //                   },
+  //                   complete: () => {
+
+  //                     this.loadingSpinner = false
+  //                     this.loadingSpinnerStaInfo = false
+  //                     this.btnDisable = false
+  //                   }
+  //                 })
+
+  //               }
+
+  //             } else if (this.stringdata == null) {
+
+  //               if (extension == 'txt') {
+
+  //                 this.leerTxt(valorNoVacio_recived)
+
+  //               } else if (extension == 'mseed') {
+
+  //                 this.leerMseed(valorNoVacio_recived)
+
+  //               } else {
+
+  //                 this.obsApi.getData(this.urlFile).subscribe({
+  //                   next: value => {
+  //                     if (value.data[0].und_calib == 'M/S**2') {
+  //                       localStorage.setItem('ogUnit', 'm')
+  //                     } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
+  //                       localStorage.setItem('ogUnit', 'gal')
+  //                     } else if (value.data[0].und_calib == 'G') {
+  //                       localStorage.setItem('ogUnit', 'g')
+  //                     } else {
+  //                       localStorage.setItem('ogUnit', '')
+  //                     }
+  //                     this.toggleTabs = true
+  //                     this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+  //                     this.leer(value.data[0])
+  //                   },
+  //                   error: err => {
+  //                     this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+  //                     this.loadingSpinner = false
+  //                     this.loadingSpinnerStaInfo = false
+  //                     this.btnDisable = false
+  //                   },
+  //                   complete: () => {
+  //                     this.loadingSpinner = false
+  //                     this.loadingSpinnerStaInfo =
+  //                       this.btnDisable = false
+  //                   }
+  //                 })
+
+  //               }
+
+  //             } else {
+  //               this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+  //               this.loadingSpinner = false
+  //               this.loadingSpinnerStaInfo = false
+  //               this.btnDisable = false
+  //             }
+  //           }
+  //         })
+  //       }
+
+  //     } else {
+
+  //       let valorNoVacio_recived: any = this.urlFile || this.stringdata
+  //       let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
+  //       let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+
+  //       if (this.urlFile == null || '') {
+
+  //         if (extension == 'txt') {
+
+  //           this.leerTxt(valorNoVacio_recived)
+
+  //         } else if (extension == 'mseed') {
+
+  //           this.leerMseed(valorNoVacio_recived)
+
+  //         } else {
+
+  //           this.obsApi.getData(this.stringdata).subscribe({
+  //             next: value => {
+
+  //               if (value.data[0].und_calib == 'M/S**2') {
+  //                 localStorage.setItem('ogUnit', 'm')
+  //               } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
+  //                 localStorage.setItem('ogUnit', 'gal')
+  //               } else if (value.data[0].und_calib == 'G') {
+  //                 localStorage.setItem('ogUnit', 'g')
+  //               } else {
+  //                 localStorage.setItem('ogUnit', '')
+  //               }
+
+  //               this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+  //             },
+  //             error: err => {
+  //               this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+  //               this.loadingSpinner = false
+  //               this.loadingSpinnerStaInfo = false
+  //               this.btnDisable = false
+  //             },
+  //             complete: () => {
+  //               this.loadingSpinner = false
+  //               this.loadingSpinnerStaInfo = false
+  //               this.btnDisable = false
+  //             }
+  //           })
+
+  //         }
+
+  //       } else if (this.stringdata == null || '') {
+
+  //         if (extension == 'txt') {
+
+  //           this.leerTxt(valorNoVacio_recived)
+
+  //         } else if (extension == 'mseed') {
+
+  //           this.leerMseed(valorNoVacio_recived)
+
+  //         } else {
+
+  //           this.obsApi.getData(this.urlFile).subscribe({
+  //             next: value => {
+
+  //               if (value.data[0].und_calib == 'M/S**2') {
+  //                 localStorage.setItem('ogUnit', 'm')
+  //               } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
+  //                 localStorage.setItem('ogUnit', 'gal')
+  //               } else if (value.data[0].und_calib == 'G') {
+  //                 localStorage.setItem('ogUnit', 'g')
+  //               } else {
+  //                 localStorage.setItem('ogUnit', '')
+  //               }
+
+  //               this.toggleTabs = true
+  //               this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+  //               this.leer(value.data[0])
+  //             },
+  //             error: err => {
+  //               this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
+  //               this.loadingSpinner = false
+  //               this.loadingSpinnerStaInfo = false
+  //               this.btnDisable = false
+  //             },
+  //             complete: () => {
+  //               this.loadingSpinner = false
+  //               this.loadingSpinnerStaInfo = false
+  //               this.btnDisable = false
+  //             }
+  //           })
+
+  //         }
+
+  //       } else {
+  //         this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
+  //         this.loadingSpinner = false
+  //         this.loadingSpinnerStaInfo = false
+  //         this.btnDisable = false
+  //       }
+  //     }
+
+  //   } else {
+  //     this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
+  //     this.loadingSpinner = false
+  //     this.loadingSpinnerStaInfo = false
+  //     this.btnDisable = false
+  //   }
+  // }
 
 
 
@@ -908,13 +931,16 @@ export class VisorGraphComponent implements OnInit {
 
           } else {
 
-            this.urlFile = valueUrl.url
-            this.original_unit = valueUrl.unit
+            this.proyectData[0].url = valueUrl.url
+            this.proyectData[0].unit = valueUrl.unit
 
-            localStorage.setItem('urlFileUpload', valueUrl.url)
-            localStorage.setItem('ogUnit', valueUrl.unit)
+            // this.urlFile = valueUrl.url
+            // this.original_unit = valueUrl.unit
 
-            this.stopMseed = this.obsApi.getData(valueUrl.url).subscribe({
+            // localStorage.setItem('urlFileUpload', valueUrl.url)
+            // localStorage.setItem('ogUnit', valueUrl.unit)
+
+            this.stopMseed = this.obsApi.getData(this.proyectData[0].url).subscribe({
               next: value => {
                 this.toggleTabs = true
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
@@ -950,7 +976,7 @@ export class VisorGraphComponent implements OnInit {
 
   }
 
-  leer(e: any) {
+  leer(e: any, indexFile?: number) {
 
 
     for (const elem of this.tabs) {
@@ -967,8 +993,8 @@ export class VisorGraphComponent implements OnInit {
 
     this.stationInfo = e
 
-    var dataString, dataFile = this.proyectData[0].url
-    var og_unit: string = this.proyectData[0].unit
+    var dataString, dataFile = this.proyectData[indexFile || 0].url
+    var og_unit: string = this.proyectData[indexFile || 0].unit
     // var dataString: string = localStorage.getItem('urlSearched')!
     // var dataFile: string = localStorage.getItem('urlFileUpload')!
     //var og_unit: string = localStorage.getItem('ogUnit')!
@@ -986,9 +1012,9 @@ export class VisorGraphComponent implements OnInit {
           this.obsApi.plotGraph(dataToUse, e.station, e.channel, og_unit, this.colorGraph).subscribe({
             next: val => {
               if (!val.url) {
-                this.createTab(e, val, '', this.colorGraph)
+                this.createTab(e, val, '', this.colorGraph, indexFile)
               } else {
-                this.createTab(e, val, val.url, this.colorGraph)
+                this.createTab(e, val, val.url, this.colorGraph, indexFile)
               }
             },
             error: err => {
@@ -1007,7 +1033,7 @@ export class VisorGraphComponent implements OnInit {
           this.graphClientOption = false
 
           this.obsApi.getTraceData(dataToUse, e.station, e.channel, og_unit).subscribe({
-            next: value => { this.createTab(e, value, '', this.colorGraph) },
+            next: value => { this.createTab(e, value, '', this.colorGraph, indexFile) },
             error: err => {
               this.loadingBarGraph = false
             },
@@ -1025,9 +1051,9 @@ export class VisorGraphComponent implements OnInit {
         this.obsApi.plotGraph(dataToUse, e.station, e.channel, og_unit).subscribe({
           next: val => {
             if (!val.url) {
-              this.createTab(e, val, '', this.colorGraph)
+              this.createTab(e, val, '', this.colorGraph, indexFile)
             } else {
-              this.createTab(e, val, val.url, this.colorGraph)
+              this.createTab(e, val, val.url, this.colorGraph, indexFile)
             }
           },
           error: err => {
@@ -1050,7 +1076,7 @@ export class VisorGraphComponent implements OnInit {
 
   // ! Creacion de Tabs
 
-  createTab(e: any, value: any, img: string, graphC?: string): void {
+  createTab(e: any, value: any, img: string, graphC?: string, indexFilePanel?: number): void {
 
     this.ToggleGraph = false;
 
@@ -1085,6 +1111,7 @@ export class VisorGraphComponent implements OnInit {
       FilterForm,
       TrimForm,
       graph,
+      indexFilePanel : indexFilePanel,
       img
     });
 
@@ -1110,8 +1137,10 @@ export class VisorGraphComponent implements OnInit {
     let base = this.baseLineOptions[menuIndex]
     let unit = this.tabs[index].unit || ''
 
-    var dataString, dataFile = this.proyectData[0].url
-    var unit_from: string = this.proyectData[0].unit
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
+
+    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var unit_from: string = this.proyectData[indexFilePanel].unit
 
     // TODO: descomentar luego de evaluacion
     // let dataString: string = localStorage.getItem('urlSearched')!
@@ -1204,7 +1233,6 @@ export class VisorGraphComponent implements OnInit {
             error: err => {
               this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
               this.loadingSpinnerGraph = false
-              console.error('REQUEST API ERROR: ' + err.message)
             },
             complete: () => {
               this.actApli.push(`Linea Base: ${base} a ${sta}.${cha}`)
@@ -1245,8 +1273,10 @@ export class VisorGraphComponent implements OnInit {
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
-    var dataString, dataFile = this.proyectData[0].url
-    var unit_from: string = this.proyectData[0].unit
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
+
+    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var unit_from: string = this.proyectData[indexFilePanel].unit
 
     // TODO: descomentar luego de evaluacion
     // var dataString: string = localStorage.getItem('urlSearched')!
@@ -1344,7 +1374,6 @@ export class VisorGraphComponent implements OnInit {
             error: err => {
               this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
               this.loadingSpinnerGraph = false
-              console.error('REQUEST API ERROR: ' + err.message)
             },
             complete: () => {
               this.actApli.push(`Filtro: ${type} a ${sta}.${cha}`)
@@ -1389,8 +1418,10 @@ export class VisorGraphComponent implements OnInit {
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
-    var dataString, dataFile = this.proyectData[0].url
-    var unit_from: string = this.proyectData[0].unit
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
+
+    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var unit_from: string = this.proyectData[indexFilePanel].unit
 
     // TODO: descomentar luego de evaluacion
     // var dataString: string = localStorage.getItem('urlSearched')!
@@ -1483,7 +1514,6 @@ export class VisorGraphComponent implements OnInit {
             error: err => {
               this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
               this.loadingSpinnerGraph = false
-              console.error('REQUEST API ERROR: ' + err.message)
             },
             complete: () => {
               this.actApli.push(`Trim: ${t_max - t_min}seg a ${sta}.${cha}`)
@@ -1548,8 +1578,10 @@ export class VisorGraphComponent implements OnInit {
     let unit_to = this.unitConvertOptions[menuIndex];
     unit_to = unitMap[unit_to] || '';
 
-    var dataString, dataFile = this.proyectData[0].url
-    var unit_from: string = this.proyectData[0].unit
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
+
+    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var unit_from: string = this.proyectData[indexFilePanel].unit
 
     // TODO: descomentar luego de evaluacion
 
@@ -1643,7 +1675,6 @@ export class VisorGraphComponent implements OnInit {
             error: err => {
               this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
               this.loadingSpinnerGraph = false
-              console.error('REQUEST API ERROR: ' + err.message)
             },
             complete: () => {
               this.actApli.push(`Linea Base: ${base} a ${sta}.${cha}`)
@@ -1685,8 +1716,10 @@ export class VisorGraphComponent implements OnInit {
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
-    var dataString, dataFile = this.proyectData[0].url
-    var unit_from: string = this.proyectData[0].unit
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
+
+    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var unit_from: string = this.proyectData[indexFilePanel].unit
 
     // TODO: descomentar luego de evaluacion
     // var dataString: string = localStorage.getItem('urlSearched')!
@@ -1706,6 +1739,29 @@ export class VisorGraphComponent implements OnInit {
 
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
+
+    const t_min = parseFloat(this.tabs[index].TrimForm.get('t_min').value);
+    const t_max = parseFloat(this.tabs[index].TrimForm.get('t_max').value);
+
+    let utc_min: any
+    let utc_max: any
+
+    let min = ''
+    let max = ''
+
+    if (isNaN(t_min) && isNaN(t_max)) {
+      min = ''
+      max = ''
+    } else {
+      utc_min = new Date(this.tabs[index].sttime);
+      utc_max = new Date(this.tabs[index].sttime);
+
+      utc_min.setUTCSeconds(utc_min.getUTCSeconds() + t_min);
+      utc_max.setUTCSeconds(utc_max.getUTCSeconds() + t_max);
+
+      min = utc_min.toISOString()
+      max = utc_max.toISOString()
+    }
 
     this.isLoading = true
 
@@ -1756,7 +1812,6 @@ export class VisorGraphComponent implements OnInit {
             error: err => {
               this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
               this.loadingSpinnerGraph = false
-              console.error('REQUEST API ERROR: ' + err.message)
             },
             complete: () => {
               this.actApli.push(`AutoAjuste a ${sta}.${cha}`)
@@ -1772,7 +1827,7 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         this.graphClientOption = true
-        this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from, this.colorGraph).subscribe({
+        this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from, this.colorGraph,'','','','','','',min,max).subscribe({
           next: value => {
             const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
             if (indx !== -1) {
@@ -1803,8 +1858,10 @@ export class VisorGraphComponent implements OnInit {
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
 
-    var dataString, dataFile = this.proyectData[0].url
-    var unit_from: string = this.proyectData[0].unit
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
+
+    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var unit_from: string = this.proyectData[indexFilePanel].unit
 
     // TODO: descomentar luego de evaluacion
     // var dataString: string = localStorage.getItem('urlSearched')!
@@ -1839,8 +1896,10 @@ export class VisorGraphComponent implements OnInit {
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
 
-    var dataString, dataFile = this.proyectData[0].url
-    var unit_from: string = this.proyectData[0].unit
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
+
+    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var unit_from: string = this.proyectData[indexFilePanel].unit
 
     // TODO: descomentar luego de evaluacion
     // var dataString: string = localStorage.getItem('urlSearched')!
@@ -2333,7 +2392,7 @@ export class VisorGraphComponent implements OnInit {
     return groupedD;
   }
 
-  selectGroup(groupKey: string): void {
+  selectGroup(groupKey: string | any): void {
     this.selectedGroup = groupKey;
   }
 
@@ -2348,6 +2407,7 @@ export class VisorGraphComponent implements OnInit {
     this.urlFile = ''
     this.stringdata = ''
 
+    this.proyectData = []
     this.tabs = []
     this.actApli = []
 
@@ -2365,6 +2425,7 @@ export class VisorGraphComponent implements OnInit {
     this.urlFile = ''
     this.stringdata = ''
 
+    this.proyectData = []
     this.tabs = []
     this.actApli = []
     this.stationInfo = []
@@ -2468,10 +2529,12 @@ export class VisorGraphComponent implements OnInit {
     this.matDialog.open(RegisterDialogComponent, matDialogConfig)
   }
 
-  resetGraph(tabInfo: any) {
+  resetGraph(tabInfo: any, index: number) {
 
-    var dataString, dataFile = this.proyectData[0].url
-    var unit_from: string = this.proyectData[0].unit
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
+
+    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var unit_from: string = this.proyectData[indexFilePanel].unit
 
     // TODO: descomentar luego de evaluacion
     // var dataString: string = localStorage.getItem('urlSearched')!
@@ -2608,7 +2671,7 @@ export class VisorGraphComponent implements OnInit {
 
     this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to).subscribe({
       next: value => {
-        this.proceseDataDownload(value, net, sta, loc, cha, m, tabInfo.dataEst)
+        this.proceseDataDownload(value, net, sta, loc, cha, m, tabInfo)
       },
       error: err => {
         this.snackBar.dismiss()
@@ -2623,19 +2686,31 @@ export class VisorGraphComponent implements OnInit {
   proceseDataDownload(value: any, net: string, sta: string, loc: string, cha: string, m: string, extrData: any) {
     let dataX = [];
     let dataY = [];
+
     let mag = '';
     let unidad = '';
     let type = '';
     let maxVal = '';
 
+    let base = extrData.base || ''
+
+    let typeFilter = extrData.FilterForm.get('type').value || ''
+    let fmin = extrData.FilterForm.get('freqmin').value || ''
+    let fmax = extrData.FilterForm.get('freqmax').value || ''
+    let corn = extrData.FilterForm.get('order').value   || ''
+    let zero = extrData.FilterForm.get('zero').value    || ''
+
+    let t_min = parseFloat(extrData.TrimForm.get('t_min').value) || '' 
+    let t_max = parseFloat(extrData.TrimForm.get('t_max').value) || ''
+
     let title = 'QuakeSense | NCN Nuevo Control'
     let gentxt = 'Este archivo de texto fue generado por QuakeSense.'
-    let mark = 'Descubre cómo nuestras soluciones avanzadas pueden proporcionar información crucial para el procesamiento sísmico y la seguridad estructural.'
+    let mark = 'Descubre cómo nuestras soluciones avanzadas pueden proporcionar información \n crucial para el procesamiento sísmico y la seguridad estructural.'
     let contact = 'Contacto: informes@ncn.pe'
     let web = 'Website: https://qs.ncn.pe'
 
-    const samples = extrData.sampling_rate
-    const npts = extrData.npts
+    const samples = extrData.dataEst.sampling_rate
+    const npts = extrData.dataEst.npts   
 
     if (m == 'acel' || m == 'vel' || m == 'des') {
       dataX = value[0].tiempo_a;
@@ -2645,6 +2720,7 @@ export class VisorGraphComponent implements OnInit {
         mag = 'ACELERACION';
         unidad = value[0].trace_a_unit;
         maxVal = 'PGA: ' + value[0].peak_a.toFixed(6);
+
       } else if (m == 'vel') {
         dataY = value[0].traces_v;
         type = 'VEL';
@@ -2688,6 +2764,18 @@ export class VisorGraphComponent implements OnInit {
       dataText += `    ACELERACION    : [${und1}]` + '\n'
       dataText += `    VELOCIDAD      : [${und2}]` + '\n'
       dataText += `    DESPLAZAMIENTO : [${und3}]` + '\n'
+      dataText += '4. HERRAMIENTAS USADAS' + '\n'
+      dataText += `    4.1 CORRECCION DE LINEA BASE `     + '\n'
+      dataText += `        BASE        : ${base}` + '\n'
+      dataText += `    4.2 FILTRO      `   + '\n'
+      dataText += `        TIPO        : ${typeFilter}` + '\n'
+      dataText += `        FREQ. MIN.  : ${fmin}` + '\n'
+      dataText += `        FREQ. MAX.  : ${fmax}` + '\n'
+      dataText += `        CORNERS     : ${corn}` + '\n'
+      dataText += `        BILINEAR    : ${zero}` + '\n'
+      dataText += `    4.3 RECORTE [segundos] `     + '\n'
+      dataText += `        MIN        : ${t_min}` + '\n'
+      dataText += `        MAX        : ${t_max}` + '\n\n'
       dataText += '3. VALORES MAXIMOS' + '\n'
       dataText += `    PGA            : ${maxV1} [${und1}]` + '\n'
       dataText += `    PGV            : ${maxV2} [${und2}]` + '\n'
@@ -2736,7 +2824,19 @@ export class VisorGraphComponent implements OnInit {
       dataText += '\n'
       dataText += '3. VALORES MAXIMOS' + '\n'
       dataText += `    ${maxVal}      : [${unidad}]` + '\n\n'
-      dataText += '4. DATOS DE LA ACELERACION' + '\n'
+      dataText += '4. HERRAMIENTAS USADAS' + '\n'
+      dataText += `    4.1 CORRECCION DE LINEA BASE `     + '\n'
+      dataText += `        BASE        : ${base}` + '\n'
+      dataText += `    4.2 FILTRO      `   + '\n'
+      dataText += `        TIPO        : ${typeFilter}` + '\n'
+      dataText += `        FREQ. MIN.  : ${fmin}` + '\n'
+      dataText += `        FREQ. MAX.  : ${fmax}` + '\n'
+      dataText += `        CORNERS     : ${corn}` + '\n'
+      dataText += `        BILINEAR    : ${zero}` + '\n'
+      dataText += `    4.3 RECORTE [segundos] `     + '\n'
+      dataText += `        MIN        : ${t_min}` + '\n'
+      dataText += `        MAX        : ${t_max}` + '\n\n'
+      dataText += '5. DATOS DE LA ACELERACION' + '\n'
       dataText += '    T' + '     ' + `${cha}` + '\n'
 
       for (let i = 0; i < dataX.length; i++) {
@@ -2751,6 +2851,21 @@ export class VisorGraphComponent implements OnInit {
       downloadLink.click();
       document.body.removeChild(downloadLink);
     }
+  }
+
+  savePorgressProyect(){
+    let uuid = this.proyectData[0].uuid
+    let tabInfo = this.tabs
+    this.obsUser.putProjectTab(uuid, tabInfo).subscribe({
+      error: err => {
+        console.log(err);        
+      },
+      complete: () => {
+        console.log('Completo');
+        
+      }
+    })
+    
   }
 
 }

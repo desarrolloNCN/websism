@@ -23,6 +23,7 @@ import {
   NgxMatNativeDateModule,
   NgxMatTimepickerModule
 } from '@angular-material-components/datetime-picker';
+import { RECAPTCHA_SETTINGS, RECAPTCHA_V3_SITE_KEY, RecaptchaFormsModule, RecaptchaModule, RecaptchaSettings, RecaptchaV3Module } from 'ng-recaptcha';
 
 
 @NgModule({
@@ -50,8 +51,13 @@ import {
     NgxMatDatetimePickerModule,
     NgxMatTimepickerModule,
     NgxMatNativeDateModule,
+    RecaptchaV3Module,
+    RecaptchaModule,
+    RecaptchaFormsModule
   ],
   providers: [
+    //TODO: Habilitar para usar captcha
+    //{ provide: RECAPTCHA_V3_SITE_KEY, useValue: '6LdJMakpAAAAACparsg4nc32OF7RgNiBj_Ou8Ush' },
     DecimalPipe,
   ],
 })

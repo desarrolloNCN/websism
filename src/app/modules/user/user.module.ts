@@ -16,6 +16,7 @@ import { PlotlyViaCDNModule } from 'angular-plotly.js';
 import { ImageViewerModule } from 'ngx-image-viewer';
 import { NgxMatDatetimePickerModule, NgxMatTimepickerModule, NgxMatNativeDateModule } from '@angular-material-components/datetime-picker';
 import { NewProjectComponent } from './componentes/new-project/new-project.component';
+import { DeleteConfirmationComponent } from './componentes/delete-confirmation/delete-confirmation.component';
 
 // import * as PlotlyJS from 'plotly.js-dist-min';
 // import { PlotlyModule } from 'angular-plotly.js';
@@ -33,6 +34,7 @@ PlotlyViaCDNModule.setPlotlyBundle('basic');
     AmplitudFourierComponent,
     EspectroFourierComponent,
     NewProjectComponent,
+    DeleteConfirmationComponent,
   ],
   imports: [
     CommonModule,

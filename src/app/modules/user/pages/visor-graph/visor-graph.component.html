@@ -6,10 +6,19 @@
         </h4>
     </div>
 
-    <button class="button-12" (click)="sismosHistoricos()">
-        <mat-icon class="pulse" style=" color: #e9e9e9;">radar</mat-icon>
-        Sismos Historicos
-    </button>
+    <div fxLayout="row">
+
+        <button *ngIf="!btnSisHide" class="button-12" (click)="sismosHistoricos()">
+            <mat-icon class="pulse" style=" color: #e9e9e9;">radar</mat-icon>
+            Sismos Historicos
+        </button>
+
+        <button *ngIf="btnSisHide" mat-flat-button color="primary" (click)="savePorgressProyect()">
+            <mat-icon>save</mat-icon>
+            Guardar
+        </button>
+    </div>
+   
 
 </div>
 
@@ -112,17 +121,17 @@
 
                 <div class="scrlSta" fxLayout="column">
 
-                    <div *ngIf="loadingSpinnerStaInfo" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center"
+                    <!-- <div *ngIf="loadingSpinnerStaInfo" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center"
                         style="padding-top: 20%;">
                         <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                             [diameter]="50"></mat-progress-spinner>
                         <h3> <b>Cargando Datos ....</b> </h3>
-                    </div>
+                    </div> -->
 
                     <mat-accordion>
 
-                        <mat-expansion-panel *ngFor="let item of proyectData" (opened)="panelOpenState = true"
-                            (closed)="panelOpenState = false">
+                        <mat-expansion-panel *ngFor="let item of proyectData; let ind = index">
+
                             <mat-expansion-panel-header>
                                 <mat-panel-title>
                                     {{item.originalName}}
@@ -135,20 +144,21 @@
                                     [diameter]="50"></mat-progress-spinner>
                                 <h3> <b>Cargando Datos ....</b> </h3>
                             </div>
-
+                            
                             <ng-container style="width: 100%;"
-                                *ngFor="let sta of groupedData | keyvalue; let i = index">
+                                *ngFor="let sta of item.stations | keyvalue; let i = index">
 
                                 <div style="width: 100%;"
                                     [ngClass]="{'selected-group': selectedGroup === sta.key, 'color-impar': i % 2 === 0, 'color-par': i % 2 !== 0}"
                                     (click)="selectGroup(sta.key)" fxLayout="column" fxLayoutGap="3"
                                     fxLayoutAlign="space-around">
                                     <ng-container *ngFor="let item of getGroupValues(sta)">
-                                        <div fxLayout="row" fxLayoutAlign="space-around center" (click)="leer(item)"
-                                            style="cursor: pointer; padding: 3px;" *ngIf="filterDataT(item)">
+                                        <div fxLayout="row" fxLayoutAlign="space-around center"
+                                            (click)="leer(item, ind)" style="cursor: pointer; padding: 3px;"
+                                            *ngIf="filterDataT(item)">
                                             <mat-icon style="color: white;">router</mat-icon>
-                                            <p> {{item.network}} </p>
-                                            <p> {{item.station}} </p>
+                                            <p> {{item.network  || '-'}} </p>
+                                            <p> {{item.station  || '-'}} </p>
                                             <p> {{item.location || '-'}}</p>
                                             <p style="padding: 1px 4px 1px 4px; border-radius: 3px;"
                                                 [ngStyle]="setColorStationChannel(item.channel)">
@@ -158,6 +168,8 @@
                                 </div>
 
                             </ng-container>
+
+
 
                         </mat-expansion-panel>
 
@@ -432,7 +444,7 @@
 
                                 <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                                     <mat-divider class="separator" vertical="true"></mat-divider>
-                                    <button mat-icon-button type="button" (click)="resetGraph(tab)">
+                                    <button mat-icon-button type="button" (click)="resetGraph(tab, i)">
                                         <mat-icon class="colorIconBar" title="Reestablecer Datos">refresh</mat-icon>
                                     </button>
                                 </div>

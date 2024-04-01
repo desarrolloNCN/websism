@@ -1,3 +1,4 @@
+import { trigger, transition, animate, style } from '@angular/animations';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { delay } from 'rxjs';
@@ -5,6 +6,15 @@ import { AuthService } from 'src/app/service/auth.service';
 
 @Component({
   selector: 'app-nav-bar',
+  animations: [
+    trigger('bellAnimation', [
+      transition(':enter', [
+        animate('1s', style({ transform: 'rotate(-20deg)' })),
+        animate('1s', style({ transform: 'rotate(20deg)' })),
+        animate('1s', style({ transform: 'rotate(0deg)' }))
+      ]),
+    ]),
+  ],
   templateUrl: './nav-bar.component.html',
   styleUrls: ['./nav-bar.component.css']
 })
@@ -13,6 +23,8 @@ export class NavBarComponent implements OnInit {
   apiAuth: any = {}
   showUserNav = false
   hideCommonAuth = true
+
+  animateBell: boolean = true;
 
   constructor(
     private auth: AuthService
@@ -59,6 +71,18 @@ export class NavBarComponent implements OnInit {
       }
 
     })
+  }
+
+  ringBell() {
+    this.animateBell = !this.animateBell;
+  }
+
+  redirectAcel(){
+    window.open('https://ncn.pe/acelerografo-reftek-sma2')
+  }
+
+  redirectScri(){
+    window.open('https://ncn.pe/widget')
   }
 
 }

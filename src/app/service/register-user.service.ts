@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, catchError, of, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, catchError, of, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -146,13 +146,11 @@ export class RegisterUserService {
   }
 
   getProjectuser(user:string, email:string) {
-    const url = `pro/`
-    
+    const url = `get_pro/`    
     const sendData = {
       "username" : user,
       "email": email
     }
-
     return this.http.post<any>(url, sendData).pipe(
       catchError(error => {
         return throwError(() => error);
@@ -199,6 +197,19 @@ export class RegisterUserService {
       "extra": ext
     }
 
+    return this.http.put<any>(url, sendData).pipe(
+      catchError(error => {
+        return throwError(() => error);
+      })
+    );
+  }
+
+  putProjectTab(idPro: string, tab: any) {
+    const url = `tab_pro/?id=${idPro}`
+    
+    const sendData = {
+      "tab" : tab
+    }
     return this.http.put<any>(url, sendData).pipe(
       catchError(error => {
         return throwError(() => error);

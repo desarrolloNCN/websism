@@ -8,6 +8,7 @@ import { RegisterUserService } from 'src/app/service/register-user.service';
 import { AuthService } from 'src/app/service/auth.service';
 import { ArchivoMseedComponent } from 'src/app/modules/uext/componentes/archivo-mseed/archivo-mseed.component';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { UserProjectsComponent } from '../../pages/user-projects/user-projects.component';
 
 @Component({
   selector: 'app-new-project',
@@ -41,6 +42,12 @@ export class NewProjectComponent implements OnInit {
 
   aceeptedFiles = ['.seed', '.mseed', '.evt', '.txt']
 
+  titleDialog = 'Nuevo Proyecto'
+  subtitleDialog = 'Asigne un nombre a su proyecto, añada sus archivos con los que va a trabajar y'
+  subtitleStrong = 'Crear Proyecto'
+
+  buttonSubmitForm = 'Crear Proyecto'
+
   addedFiles: any = []
 
   regexURL = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/;
@@ -50,7 +57,7 @@ export class NewProjectComponent implements OnInit {
   private idUser = ''
 
   constructor(
-    private matDailogRef: MatDialogRef<VisorGraphComponent>,
+    private matDailogRef: MatDialogRef<UserProjectsComponent>,
     private snackBar: MatSnackBar,
     private matdialog: MatDialog,
     private regApi: RegisterUserService,
@@ -66,6 +73,8 @@ export class NewProjectComponent implements OnInit {
 
   ngOnInit(): void {
 
+    this.regApi.resetService()
+
     this.authService.getToken().subscribe({
       next: value => {
         this.username = value.username
@@ -73,16 +82,56 @@ export class NewProjectComponent implements OnInit {
 
       },
       error: err => {
+
+        // TODO: Borrar en Produccion
+
+        if (this.data.uuid) {
+
+          this.titleDialog    = 'Editar Proyecto'
+          this.subtitleDialog = 'Asigne un nuevo nombre a su proyecto, añada nuevos archivos con los que va a trabajar y'
+          this.subtitleStrong = 'Actualizar Proyecto'
+
+          this.buttonSubmitForm = 'Actualizar Proyecto'
+
+          let uuid = this.data.uuid
+
+          let proj_name = this.controlForm.controls['projectName'].setValue(this.data.name)
+          let proj_desp = this.controlForm.controls['descript'].setValue(this.data.descrip)
+
+          this.data.files.forEach((e: any) => {
+            let file_name = e.filename
+
+            let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
+            let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+
+            let formatoNombre = this.formatearNombreArchivo(file_name, extension, 7)
+
+            this.addedFiles.push({
+              "file": '',
+              "fileName": formatoNombre,
+              "originalName": file_name,
+              "status": e.status,
+              "extension": extension.toLocaleUpperCase() || 'NO EXT',
+              "url": e.file
+            })
+          });
+
+          //this.regApi.putProject(this.data.uuid, '', '')
+        }
+
         this.username = 'ga'
         this.email = 'test@example.com'
         this.idUser = `${1}`
       },
       complete: () => {
+
         this.authService.nUser(this.username, this.email).subscribe({
           next: value => {
             this.idUser = value
           },
           error: err => {
+
+            // TODO: Borrar en Produccion
             this.idUser = `${1}`
           }
         })
@@ -112,6 +161,8 @@ export class NewProjectComponent implements OnInit {
 
     if (archivos && archivos.length > 0) {
 
+      let idProj = this.data.id || this.data.uuid
+
       let nombreArchivo: string = archivos[0].name.substring(archivos[0].name.lastIndexOf('/') + 1);
       let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
@@ -129,7 +180,7 @@ export class NewProjectComponent implements OnInit {
 
       let formatoNombre = this.formatearNombreArchivo(archivos[0].name, extension, 7)
 
-      this.regApi.uploadProjectFileUser(this.arch, this.idUser, this.data.id, archivos[0].name, statusCalib).subscribe({
+      this.regApi.uploadProjectFileUser(this.arch, this.idUser, idProj, archivos[0].name, statusCalib).subscribe({
         next: value => {
           this.addedFiles.push({
             "file": archivos[0],
@@ -196,6 +247,8 @@ export class NewProjectComponent implements OnInit {
 
     if (urlData != '') {
 
+      let idProj = this.data.id || this.data.uuid
+
       let nombreArchivo: string = urlData.substring(urlData.lastIndexOf('/') + 1);
       let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
@@ -209,7 +262,7 @@ export class NewProjectComponent implements OnInit {
 
       let formatoNombre = this.formatearNombreArchivo(nombreArchivo, extension, 7)
 
-      this.regApi.uploadProjectFileUser(urlData, this.idUser, this.data.id, nombreArchivo, statusCalib).subscribe({
+      this.regApi.uploadProjectFileUser(urlData, this.idUser, idProj, nombreArchivo, statusCalib).subscribe({
         next: value => {
           this.addedFiles.push({
             "file": '',
@@ -312,7 +365,9 @@ export class NewProjectComponent implements OnInit {
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 5 * 1000;
-    snackBar.panelClass = ['snackBar-validator'];
+    snackBar.panelClass = ['snackBar-validator']
+
+    let idProj = this.data.id || this.data.uuid
 
     if (this.controlForm.invalid) {
       this.snackBar.open('⚠️ Verificar Campos', 'cerrar', snackBar)
@@ -327,10 +382,7 @@ export class NewProjectComponent implements OnInit {
           let projName = this.controlForm.get('projectName').value
           let projDesp = this.controlForm.get('descript').value
 
-          console.log(this.data);
-          
-
-          this.regApi.putProject(this.data.id, projName, projDesp).subscribe({
+          this.regApi.putProject(idProj, projName, projDesp).subscribe({
             error: err => {
               this.snackBar.open('⚠️ Problema con el Registro ', 'cerrar', snackBar)
               this.sendData(this.addedFiles, '/user/lectorAcel')
@@ -343,7 +395,7 @@ export class NewProjectComponent implements OnInit {
           })
 
         }
-      });
+      })
     }
 
   }
@@ -390,15 +442,20 @@ export class NewProjectComponent implements OnInit {
   }
 
   close() {
-    this.regApi.delProject(this.data.id).subscribe({
-      error: err => {
-        console.log(err);
+    if (this.data.uuid) {
+      this.matDailogRef.close()
+    } else {
+      this.regApi.delProject(this.data.id).subscribe({
+        error: err => {
+          console.log(err);
 
-      },
-      complete: () => {
-        this.matDailogRef.close()
-      }
-    })
+        },
+        complete: () => {
+          this.matDailogRef.close()
+        }
+      })
+    }
+
   }
 
 }

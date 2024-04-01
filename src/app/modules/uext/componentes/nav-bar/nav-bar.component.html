@@ -18,11 +18,15 @@
 
     <div *ngIf="hideCommonAuth" fxHide.lt-md class="actionBtn">
 
+        <button mat-icon-button class="bell" (click)="ringBell()">
+            <mat-icon class="bellIcon">notifications_active</mat-icon>
+        </button>
+
         <button mat-button style="color: white;" (click)="redirect()">
             Identificarse
         </button>
-        
-        <button mat-flat-button class="registerBtn" (click)="redirectRegister()"> 
+
+        <button mat-flat-button class="registerBtn" (click)="redirectRegister()">
             Registro
         </button>
 
@@ -30,7 +34,11 @@
 
     <div *ngIf="hideCommonAuth" fxShow="false" fxShow.lt-md>
 
-        <button fxHide.lt-sm mat-icon-button (click)="redirect()" >
+        <button mat-icon-button class="bell" (click)="ringBell()">
+            <mat-icon class="bellIcon">notifications_active</mat-icon>
+        </button>
+
+        <button fxHide.lt-sm mat-icon-button (click)="redirect()">
             <mat-icon class="coloIconTop">login</mat-icon>
         </button>
 
@@ -42,11 +50,11 @@
             <mat-icon class="coloIconTop">menu</mat-icon>
         </button>
         <mat-menu #menu="matMenu">
-            <button mat-menu-item  fxShow="false" fxShow.lt-sm (click)="redirect()">
+            <button mat-menu-item fxShow="false" fxShow.lt-sm (click)="redirect()">
                 <mat-icon>login</mat-icon>
                 <span>Login</span>
             </button>
-            <button mat-menu-item  fxShow="false" fxShow.lt-sm>
+            <button mat-menu-item fxShow="false" fxShow.lt-sm>
                 <mat-icon>person_add</mat-icon>
                 <span>Registro</span>
             </button>
@@ -72,12 +80,12 @@
 
     <div *ngIf="showUserNav" fxLayout="row" fxLayoutGap="10" fxLayoutAlign="center center">
         <!-- <img class="avatar"   > -->
-        <span class="username" > {{apiAuth.name || 'Waiting User..'}} </span>
+        <span class="username"> {{apiAuth.name || 'Waiting User..'}} </span>
         <button mat-icon-button [matMenuTriggerFor]="menuUser" aria-label="Example icon-button with a menu">
             <mat-icon class="coloIconTop">more_vert</mat-icon>
         </button>
         <mat-menu #menuUser="matMenu">
-            <button mat-menu-item  fxShow="false" fxShow.lt-sm (click)="redirect()">
+            <button mat-menu-item fxShow="false" fxShow.lt-sm (click)="redirect()">
                 <mat-icon>login</mat-icon>
                 <span>Login</span>
             </button>
@@ -95,5 +103,23 @@
             </button>
         </mat-menu>
     </div>
+
+
+</div>
+
+<div [hidden]="animateBell" class="lastsis">
+
+    <div fxLayout="column" fxLayoutAlign="center center">
+        <h5 style="margin: 0;">Último sismo detectado con</h5>
+        <a class="acelRedi" matTooltip="Reftek SMA2" matTooltipPosition="left" (click)="redirectAcel()">Acelerógrafo</a>
+    </div>
+
+    <div fxLayout="column" fxLayoutAlign="center center">
+        <iframe src="https://ncn.pe/ultimo.php" width="200" height="320"
+            style="overflow: hidden;margin: 0; padding: 0; border: 0px solid black;">
+        </iframe>
+    </div>
+
+    <a class="scriRedi" (click)="redirectScri()" matTooltip="(NCN WIDGET) Ultimo Sismo" matTooltipPosition="left">Copia este script a tu página Web</a>
 
 </div>

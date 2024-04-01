@@ -13,6 +13,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { HttpHeadersInterceptor } from './interceptor/interceptor';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { OrderByPipe } from './pipe/ordenar.pipe';
+import { RECAPTCHA_V3_SITE_KEY, RecaptchaFormsModule, RecaptchaModule } from 'ng-recaptcha';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { OrderByPipe } from './pipe/ordenar.pipe';
     NgxEchartsModule.forRoot({
       echarts: () => import('echarts')
     }),
-    
+    RecaptchaModule,
+    RecaptchaFormsModule
   ],
   exports: [
     OrderByPipe
@@ -40,7 +42,9 @@ import { OrderByPipe } from './pipe/ordenar.pipe';
     provide: HTTP_INTERCEPTORS,
     useClass: HttpHeadersInterceptor,
     multi: true
-  }],
+  },
+  { provide: RECAPTCHA_V3_SITE_KEY, useValue: '6LdJMakpAAAAAB6T56n1KXEk7X6m1K4Y4o13zwte' },
+],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

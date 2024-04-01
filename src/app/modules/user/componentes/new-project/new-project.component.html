@@ -1,13 +1,12 @@
 <mat-dialog-content>
 
     <div style="padding-bottom: 5px;">
-        <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>Nuevo Proyecto</b></h2>
+        <h2 [ngStyle.lt-lg]="{'font-size': '15px'}"><b>{{titleDialog}}</b></h2>
         <mat-divider></mat-divider>
     </div>
 
     <div>
-        <h3>Asigne un nombre a su proyecto, añada sus archivos con los que va a trabajar y <b
-                style="color: rgb(82, 25, 134);">Crear Proyecto</b></h3>
+        <h3>{{subtitleDialog}} <b style="color: rgb(82, 25, 134);"> {{subtitleStrong}} </b></h3>
     </div>
 
     <form [formGroup]="controlForm" fxLayout="column" (submit)="crearProject()">
@@ -19,7 +18,8 @@
             <div fxLayout="column" fxFlex="70">
                 <mat-form-field appearance="outline">
                     <mat-label>Nombre del Proyecto</mat-label>
-                    <input matInput type="text" formControlName="projectName" required="true">
+                    <input matInput #prjname type="text" formControlName="projectName" maxlength="30" required="true">
+                    <mat-hint align="end">{{prjname.value.length}} / 30</mat-hint>
                     <mat-error *ngIf="controlForm.get('projectName')?.hasError('required')"> Ingrese el nombre
                         del <strong>Proyecto</strong> </mat-error>
                 </mat-form-field>
@@ -107,7 +107,7 @@
         </div>
 
         <button mat-flat-button color="primary" type="submit">
-            Crear Proyecto
+            {{buttonSubmitForm}}
         </button>
 
     </form>
