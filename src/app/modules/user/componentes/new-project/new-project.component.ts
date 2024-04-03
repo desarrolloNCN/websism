@@ -34,6 +34,9 @@ export class NewProjectComponent implements OnInit {
   controlForm2: FormGroup | any
 
   arch: File[] | any = ''
+  imgproj: File[] | any = ''
+
+  defImg: string | ArrayBuffer | any = '/assets/ncnLogoColor.png'
 
   btnDisable = false
   showProgressBar = false
@@ -41,6 +44,7 @@ export class NewProjectComponent implements OnInit {
   showCalibration = false
 
   aceeptedFiles = ['.seed', '.mseed', '.evt', '.txt']
+  aceeptedImgFiles = ['.png', '.jpg', '.jpeg', '.gif']
 
   titleDialog = 'Nuevo Proyecto'
   subtitleDialog = 'Asigne un nombre a su proyecto, añada sus archivos con los que va a trabajar y'
@@ -67,7 +71,8 @@ export class NewProjectComponent implements OnInit {
     this.controlForm = new FormGroup({
       projectName: new FormControl('', Validators.required),
       descript: new FormControl(''),
-      checkOps: new FormControl(false)
+      checkOps: new FormControl(false),
+      imgProj: new FormControl()
     })
   }
 
@@ -87,7 +92,7 @@ export class NewProjectComponent implements OnInit {
 
         if (this.data.uuid) {
 
-          this.titleDialog    = 'Editar Proyecto'
+          this.titleDialog = 'Editar Proyecto'
           this.subtitleDialog = 'Asigne un nuevo nombre a su proyecto, añada nuevos archivos con los que va a trabajar y'
           this.subtitleStrong = 'Actualizar Proyecto'
 
@@ -97,6 +102,8 @@ export class NewProjectComponent implements OnInit {
 
           let proj_name = this.controlForm.controls['projectName'].setValue(this.data.name)
           let proj_desp = this.controlForm.controls['descript'].setValue(this.data.descrip)
+
+          this.defImg = this.data.img 
 
           this.data.files.forEach((e: any) => {
             let file_name = e.filename
@@ -119,11 +126,47 @@ export class NewProjectComponent implements OnInit {
           //this.regApi.putProject(this.data.uuid, '', '')
         }
 
-        this.username = 'ga'
-        this.email = 'test@example.com'
-        this.idUser = `${1}`
+        // this.username = 'ga'
+        // this.email = 'test@example.com'
+        // this.idUser = `${1}`
       },
       complete: () => {
+
+        if (this.data.uuid) {
+
+          this.titleDialog = 'Editar Proyecto'
+          this.subtitleDialog = 'Asigne un nuevo nombre a su proyecto, añada nuevos archivos con los que va a trabajar y'
+          this.subtitleStrong = 'Actualizar Proyecto'
+
+          this.buttonSubmitForm = 'Actualizar Proyecto'
+
+          let uuid = this.data.uuid
+
+          let proj_name = this.controlForm.controls['projectName'].setValue(this.data.name)
+          let proj_desp = this.controlForm.controls['descript'].setValue(this.data.descrip)
+          
+          this.defImg = this.data.img 
+
+          this.data.files.forEach((e: any) => {
+            let file_name = e.filename
+
+            let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
+            let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+
+            let formatoNombre = this.formatearNombreArchivo(file_name, extension, 7)
+
+            this.addedFiles.push({
+              "file": '',
+              "fileName": formatoNombre,
+              "originalName": file_name,
+              "status": e.status,
+              "extension": extension.toLocaleUpperCase() || 'NO EXT',
+              "url": e.file
+            })
+          });
+
+          //this.regApi.putProject(this.data.uuid, '', '')
+        }
 
         this.authService.nUser(this.username, this.email).subscribe({
           next: value => {
@@ -135,6 +178,7 @@ export class NewProjectComponent implements OnInit {
             this.idUser = `${1}`
           }
         })
+
       }
     })
 
@@ -215,6 +259,22 @@ export class NewProjectComponent implements OnInit {
       this.arch = null;
       this.showProgressBar = false
     }
+  }
+
+  onFileSelected2(event: any) {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.imgproj = file
+      this.readImage(file);
+    }
+  }
+
+  readImage(file: File) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.defImg = e.target?.result;
+    };
+    reader.readAsDataURL(file);
   }
 
   formatearNombreArchivo(nombre: string, extension: string, longitudVisible: number) {
@@ -382,7 +442,10 @@ export class NewProjectComponent implements OnInit {
           let projName = this.controlForm.get('projectName').value
           let projDesp = this.controlForm.get('descript').value
 
-          this.regApi.putProject(idProj, projName, projDesp).subscribe({
+          let img = this.imgproj || ''
+          console.log(img);
+          
+          this.regApi.putProject(idProj, projName, projDesp, img).subscribe({
             error: err => {
               this.snackBar.open('⚠️ Problema con el Registro ', 'cerrar', snackBar)
               this.sendData(this.addedFiles, '/user/lectorAcel')

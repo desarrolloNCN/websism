@@ -203,7 +203,7 @@ export class VisorGraphComponent implements OnInit {
 
         if (value.username == null || value.email == null) {
           // TODO: cambiar esto en Produccion a -1
-          this.userId == -1
+          this.userId == 1
         } else {
           this.auth.nUser(value.username, value.email).subscribe({
             next: nvalue => {
@@ -261,7 +261,8 @@ export class VisorGraphComponent implements OnInit {
                 this.toggleTabs = true
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
                 this.proyectData[index].stations =  this.groupedData
-
+                
+                this.leer(value.data[0], 0)
               },
               complete: () => {
                 this.loadingPanelInfo = false
@@ -2445,8 +2446,14 @@ export class VisorGraphComponent implements OnInit {
   }
 
   togglePanel() {
-    if (this.hideStaPanel2 == false) {
-      this.hideStaPanel = true
+    if (this.hideStaPanel2 == true && this.hideStaPanel == true) {
+      this.hideStaPanel = false
+      this.hideStaPanel2 = false
+    }
+    else if (this.hideStaPanel == false && this.hideStaPanel2 == true) {
+      this.hideStaPanel2 = false
+    }
+    else if (this.hideStaPanel2 == false) {
       this.hideStaPanel2 = true
     }
     else {

@@ -40,24 +40,26 @@ export class UserProjectsComponent implements OnInit {
       },
       error: err => {
         this.loadingSpinner = false
-        alert('Error')
         // TODO: Borrar en Produccion
 
-        // this.username = 'ga'
-        // this.email = 'test@example.com'
+        this.username = 'ga'
+        this.email = 'test@example.com'
 
 
-        // this.userService.getProjectuser(this.username, this.email).subscribe({
-        //   next: value => {
-        //     this.proyectos = value
-        //   },
-        //   error: err => {
+        this.userService.getProjectuser(this.username, this.email).subscribe({
+          next: value => {
+            console.log(value);
+            
+            this.proyectos = value
 
-        //   },
-        //   complete: () =>{
-        //     this.loadingSpinner = false
-        //   }
-        // })
+          },
+          error: err => {
+
+          },
+          complete: () =>{
+            this.loadingSpinner = false
+          }
+        })
       },
       complete: () => {
 
@@ -119,7 +121,8 @@ export class UserProjectsComponent implements OnInit {
   }
 
   abrirLector(item: any) {
-    console.log(item);
+
+    this.userService.resetService()
 
     let addFiles: any[] = []
 
@@ -133,6 +136,7 @@ export class UserProjectsComponent implements OnInit {
         "originalName": nombreArchivo,
         "extension": extension.toLocaleUpperCase() || 'NO EXT',
         "unit": e.unit,
+        "img": e.img,
         "url": url
       })
 

@@ -23,7 +23,7 @@
             <mat-card style="width: 400px;">
 
                 <mat-card-title-group>
-                    <img mat-card-sm-image src="/assets/ncnLogoColor.png">
+                    <img mat-card-sm-image [src]="proj.img || '/assets/ncnLogoColor.png'">
                     <mat-card-title>{{proj.name}}</mat-card-title>
                     <mat-card-subtitle>{{proj.fecha_creacion | date: 'short'}}</mat-card-subtitle>
                 </mat-card-title-group>

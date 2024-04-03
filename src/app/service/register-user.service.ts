@@ -88,7 +88,7 @@ export class RegisterUserService {
     );
   }
 
-  uploadProjectFileUser(data: File | string | undefined, iduser?: string, idproj?: string, filename?: string, status? : string): Observable<any> {
+  uploadProjectFileUser(data: File | string | undefined, iduser?: string, idproj?: string, filename?: string, status?: string): Observable<any> {
     const formData = new FormData();
     const url = `new_f_pro/`;
 
@@ -142,13 +142,14 @@ export class RegisterUserService {
   }
 
   resetService() {
-    this.dataSubject.next(null);
+    this.dataSubject = new BehaviorSubject<any>(null);
+    this.data = this.dataSubject.asObservable();
   }
 
-  getProjectuser(user:string, email:string) {
-    const url = `get_pro/`    
+  getProjectuser(user: string, email: string) {
+    const url = `get_pro/`
     const sendData = {
-      "username" : user,
+      "username": user,
       "email": email
     }
     return this.http.post<any>(url, sendData).pipe(
@@ -158,11 +159,11 @@ export class RegisterUserService {
     );
   }
 
-  getProjectIdUser(idproj: string, user:string, email:string) {
+  getProjectIdUser(idproj: string, user: string, email: string) {
     const url = `proid/?id=${idproj}`
-    
+
     const sendData = {
-      "username" : user,
+      "username": user,
       "email": email
     }
 
@@ -173,21 +174,28 @@ export class RegisterUserService {
     );
   }
 
-  putProject(idPro: string, name: String, desp: string) {
+  putProject(idPro: string, name: string, desp: string, img:  File | string | undefined) {
+    const formData = new FormData();
+
     const url = `new_pro/?id=${idPro}`
+
+    formData.append('name', name)
+    formData.append('desp', desp)
     
-    const sendData = {
-      "name": name,
-      "desp": desp
+    if(img instanceof File){
+      formData.append('img_proj', img)
+    }else{
+      formData.append('img_proj', '')
     }
-    return this.http.put<any>(url, sendData).pipe(
+
+    return this.http.put<any>(url, formData).pipe(
       catchError(error => {
         return throwError(() => error);
       })
     );
   }
 
-  putFileProject(idFile: string,  unit?: string, status?: string, ext?: any, file?: string ) {
+  putFileProject(idFile: string, unit?: string, status?: string, ext?: any, file?: string) {
     const url = `new_f_pro/?id=${idFile}`
 
     const sendData = {
@@ -206,9 +214,9 @@ export class RegisterUserService {
 
   putProjectTab(idPro: string, tab: any) {
     const url = `tab_pro/?id=${idPro}`
-    
+
     const sendData = {
-      "tab" : tab
+      "tab": tab
     }
     return this.http.put<any>(url, sendData).pipe(
       catchError(error => {
