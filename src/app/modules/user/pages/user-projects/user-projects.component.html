@@ -10,11 +10,17 @@
         <mat-icon class="colorIcon">add</mat-icon>
     </button>
 
-    <div *ngIf="loadingSpinner" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center"
-        style="padding-top: 20%;">
-        <mat-progress-spinner mode="indeterminate" style="margin:0 auto;" [diameter]="50"></mat-progress-spinner>
-        <h3> <b>Cargando Datos ....</b> </h3>
+    <div style="padding: 20px 0 0 0;">
+        <h4>Como usuario con <a style=" cursor: pointer; text-decoration: underline;">plan gratuito</a> solo tiene
+            permitido crear 5 proyectos con 5 archivos</h4>
     </div>
+
+    <div>
+        <div *ngIf="loadingSpinner">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        </div>
+    </div>
+
 
     <div class="projectContainer" fxLayout="row wrap" fxLayoutAlign="center start" fxLayoutGap="10">
 
@@ -23,7 +29,7 @@
             <mat-card style="width: 400px;">
 
                 <mat-card-title-group>
-                    <img mat-card-sm-image [src]="proj.img || '/assets/ncnLogoColor.png'">
+                    <img mat-card-sm-image [src]="proj.img == null ? '/assets/ncnLogoColor.png' : proj.img ">
                     <mat-card-title>{{proj.name}}</mat-card-title>
                     <mat-card-subtitle>{{proj.fecha_creacion | date: 'short'}}</mat-card-subtitle>
                 </mat-card-title-group>

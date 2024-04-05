@@ -52,7 +52,7 @@ export class NewProjectComponent implements OnInit {
 
   buttonSubmitForm = 'Crear Proyecto'
 
-  addedFiles: any = []
+  addedFiles: any[] = []
 
   regexURL = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/;
 
@@ -72,7 +72,7 @@ export class NewProjectComponent implements OnInit {
       projectName: new FormControl('', Validators.required),
       descript: new FormControl(''),
       checkOps: new FormControl(false),
-      imgProj: new FormControl()
+      imgProj: new FormControl('')
     })
   }
 
@@ -103,7 +103,7 @@ export class NewProjectComponent implements OnInit {
           let proj_name = this.controlForm.controls['projectName'].setValue(this.data.name)
           let proj_desp = this.controlForm.controls['descript'].setValue(this.data.descrip)
 
-          this.defImg = this.data.img 
+          this.defImg = this.data.img || '/assets/ncnLogoColor.png'
 
           this.data.files.forEach((e: any) => {
             let file_name = e.filename
@@ -114,6 +114,7 @@ export class NewProjectComponent implements OnInit {
             let formatoNombre = this.formatearNombreArchivo(file_name, extension, 7)
 
             this.addedFiles.push({
+              "id": e.id,
               "file": '',
               "fileName": formatoNombre,
               "originalName": file_name,
@@ -126,9 +127,9 @@ export class NewProjectComponent implements OnInit {
           //this.regApi.putProject(this.data.uuid, '', '')
         }
 
-        // this.username = 'ga'
-        // this.email = 'test@example.com'
-        // this.idUser = `${1}`
+        this.username = 'ga'
+        this.email = 'test@example.com'
+        this.idUser = `${1}`
       },
       complete: () => {
 
@@ -144,8 +145,8 @@ export class NewProjectComponent implements OnInit {
 
           let proj_name = this.controlForm.controls['projectName'].setValue(this.data.name)
           let proj_desp = this.controlForm.controls['descript'].setValue(this.data.descrip)
-          
-          this.defImg = this.data.img 
+
+          this.defImg = this.data.img
 
           this.data.files.forEach((e: any) => {
             let file_name = e.filename
@@ -226,16 +227,22 @@ export class NewProjectComponent implements OnInit {
 
       this.regApi.uploadProjectFileUser(this.arch, this.idUser, idProj, archivos[0].name, statusCalib).subscribe({
         next: value => {
-          this.addedFiles.push({
-            "file": archivos[0],
-            "fileName": formatoNombre,
-            "originalName": archivos[0].name,
-            "status": statusCalib,
-            "extension": extension.toLocaleUpperCase() || 'NO EXT',
-            "id": value.id,
-            "unit": '',
-            "url": value.file
-          })
+         
+          if (value.msg) {
+            this.snackBar.open(`⚠️ ${value.msg}`, 'cerrar', snackBar)
+          } else {
+            this.addedFiles.push({
+              "file": archivos[0],
+              "fileName": formatoNombre,
+              "originalName": archivos[0].name,
+              "status": statusCalib,
+              "extension": extension.toLocaleUpperCase() || 'NO EXT',
+              "id": value.id,
+              "unit": '',
+              "url": value.file
+            })
+          }
+
         },
         error: err => {
           this.showProgressBar = false
@@ -324,16 +331,21 @@ export class NewProjectComponent implements OnInit {
 
       this.regApi.uploadProjectFileUser(urlData, this.idUser, idProj, nombreArchivo, statusCalib).subscribe({
         next: value => {
-          this.addedFiles.push({
-            "file": '',
-            "fileName": formatoNombre,
-            "originalName": nombreArchivo,
-            "status": statusCalib,
-            "extension": extension.toLocaleUpperCase() || 'NO EXT',
-            "id": value.id,
-            "unit": '',
-            "url": value.string_data
-          })
+          if (value.msg) {
+            this.snackBar.open(`⚠️ ${value.msg}`, 'cerrar', snackBar)
+          } else {
+            this.addedFiles.push({
+              "file": '',
+              "fileName": formatoNombre,
+              "originalName": nombreArchivo,
+              "status": statusCalib,
+              "extension": extension.toLocaleUpperCase() || 'NO EXT',
+              "id": value.id,
+              "unit": '',
+              "url": value.string_data
+            })
+          }
+
         },
         error: err => {
           this.showProgressBar = false
@@ -398,7 +410,6 @@ export class NewProjectComponent implements OnInit {
     } else if (item.extension == 'MSEED') {
       this.matdialog.open(ArchivoMseedComponent, matDialogConfig).afterClosed().subscribe({
         next: value => {
-          console.log(value);
 
           if (value.url == '') {
             this.addedFiles[index].status = 'Error'
@@ -432,34 +443,56 @@ export class NewProjectComponent implements OnInit {
     if (this.controlForm.invalid) {
       this.snackBar.open('⚠️ Verificar Campos', 'cerrar', snackBar)
       return
-    } else {
-      this.addedFiles.forEach((e: any) => {
-        if (e.status == 'Error') {
-          this.snackBar.open('⚠️ Eliminar Archivos', 'cerrar', snackBar)
-          return
-        } else {
-
-          let projName = this.controlForm.get('projectName').value
-          let projDesp = this.controlForm.get('descript').value
-
-          let img = this.imgproj || ''
-          console.log(img);
-          
-          this.regApi.putProject(idProj, projName, projDesp, img).subscribe({
-            error: err => {
-              this.snackBar.open('⚠️ Problema con el Registro ', 'cerrar', snackBar)
-              this.sendData(this.addedFiles, '/user/lectorAcel')
-              this.matDailogRef.close()
-            },
-            complete: () => {
-              this.sendData(this.addedFiles, '/user/lectorAcel')
-              this.matDailogRef.close()
-            }
-          })
-
-        }
-      })
     }
+
+    if (this.addedFiles.length == 0) {
+      this.snackBar.open('⚠️ Debe Agregar Archivos', 'cerrar', snackBar)
+    }
+
+    if (!this.verificarFiles(this.addedFiles)) {
+      this.snackBar.open('⚠️ Verificar Archivos', 'cerrar', snackBar);
+      return;
+    }
+
+    this.redirectLector()
+
+  }
+
+  verificarFiles(arr: any[]): boolean {
+    for (let e of arr) {
+      if (e.status == 'Error' || e.status == 'No Calibrado') {
+        return false
+      }
+
+    }
+    return true
+  }
+
+
+
+  redirectLector() {
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 5 * 1000;
+    snackBar.panelClass = ['snackBar-validator']
+
+    let idProj = this.data.id || this.data.uuid
+
+    let projName = this.controlForm.get('projectName').value
+    let projDesp = this.controlForm.get('descript').value
+
+    let img = this.imgproj || this.defImg || ''
+
+    this.regApi.putProject(idProj, projName, projDesp, img).subscribe({
+      error: err => {
+        this.snackBar.open('⚠️ Problema con el Registro ', 'cerrar', snackBar)
+        this.matDailogRef.close()
+      },
+      complete: () => {
+        this.sendData(this.addedFiles, '/user/lectorAcel')
+        this.matDailogRef.close()
+      }
+    })
 
   }
 
@@ -472,7 +505,7 @@ export class NewProjectComponent implements OnInit {
     if (indice !== -1) {
       this.regApi.delFileProject(item.id).subscribe({
         error: err => {
-          this.addedFiles.splice(indice, 1);
+          // this.addedFiles.splice(indice, 1);
         },
         complete: () => {
           this.addedFiles.splice(indice, 1);
@@ -510,8 +543,7 @@ export class NewProjectComponent implements OnInit {
     } else {
       this.regApi.delProject(this.data.id).subscribe({
         error: err => {
-          console.log(err);
-
+          
         },
         complete: () => {
           this.matDailogRef.close()

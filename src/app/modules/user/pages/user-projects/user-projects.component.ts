@@ -48,15 +48,13 @@ export class UserProjectsComponent implements OnInit {
 
         this.userService.getProjectuser(this.username, this.email).subscribe({
           next: value => {
-            console.log(value);
-            
+           
             this.proyectos = value
-
           },
           error: err => {
 
           },
-          complete: () =>{
+          complete: () => {
             this.loadingSpinner = false
           }
         })
@@ -90,38 +88,33 @@ export class UserProjectsComponent implements OnInit {
 
   crearProyecto() {
 
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 5 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
 
     this.userService.newProject(this.username, this.email).subscribe({
       next: value => {
-        matDialogConfig.data = value
+        if (value.msg) {
+          this.snackBar.open(`⚠️ ${value.msg}`, 'cerrar', snackBar)
+        } else {
+          matDialogConfig.data = value
+          this.matDialog.open(NewProjectComponent, matDialogConfig)
+        }
       },
       error: err => {
 
       },
       complete: () => {
-        this.matDialog.open(NewProjectComponent, matDialogConfig)
+        // this.snackBar.open(`⚠️ ${matDialogConfig.data.msg}`, 'cerrar', snackBar)
       }
     })
-
-
-
-    // this.userService.postProjectUser(this.ud).subscribe({
-    //   next: value => {
-
-    //   },
-    //   error: err => {
-    //     this.loadingSpinner = false
-    //   },
-    //   complete: () => {
-    //     this.getProyectos()
-    //   }
-    // })
   }
 
   abrirLector(item: any) {
-
+       
     this.userService.resetService()
 
     let addFiles: any[] = []
@@ -150,7 +143,11 @@ export class UserProjectsComponent implements OnInit {
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
     matDialogConfig.data = item
-    this.matDialog.open(NewProjectComponent, matDialogConfig)
+    this.matDialog.open(NewProjectComponent, matDialogConfig).afterClosed().subscribe({
+      complete: () => {
+        this.ngOnInit()
+      }
+    })
   }
 
   sendData(data: any, route?: string) {
@@ -172,7 +169,7 @@ export class UserProjectsComponent implements OnInit {
           if (value == true) {
             this.userService.delProject(item.uuid).subscribe({
               error: err => {
-                console.log(err);
+               
               },
               complete: () => {
                 this.proyectos.splice(indice, 1);

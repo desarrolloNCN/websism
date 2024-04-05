@@ -2196,7 +2196,7 @@ export class LectorDemoComponent implements OnInit {
 
     this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, og_unit, unit_to).subscribe({
       next: value => {
-        this.proceseDataDownload(value, net, sta, loc, cha, m, tabInfo.dataEst)
+        this.proceseDataDownload(value, net, sta, loc, cha, m, tabInfo)
       },
       error: err => {
         this.snackBar.dismiss()
@@ -2209,6 +2209,8 @@ export class LectorDemoComponent implements OnInit {
   }
 
   proceseDataDownload(value: any, net: string, sta: string, loc: string, cha: string, m: string, extrData: any) {
+    console.log(extrData);
+    
     let dataX = [];
     let dataY = [];
     let mag = '';
@@ -2233,8 +2235,8 @@ export class LectorDemoComponent implements OnInit {
     let contact = 'Contacto: informes@ncn.pe'
     let web = 'Website: https://qs.ncn.pe'
 
-    const samples = extrData.sampling_rate
-    const npts = extrData.npts
+    const samples = extrData.dataEst.sampling_rate
+    const npts = extrData.dataEst.npts
 
     if (m == 'acel' || m == 'vel' || m == 'des') {
       dataX = value[0].tiempo_a;
