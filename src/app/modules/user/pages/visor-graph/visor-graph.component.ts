@@ -7,7 +7,7 @@ import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { MatTab, MatTabChangeEvent } from '@angular/material/tabs';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { EChartsOption } from 'echarts';
-import { Subscription } from 'rxjs';
+import { Subscription, catchError, concatMap, forkJoin, from, map, mergeMap, throwError } from 'rxjs';
 import { ArchivoMseedComponent } from 'src/app/modules/uext/componentes/archivo-mseed/archivo-mseed.component';
 import { ArchivoTXTComponent } from 'src/app/modules/uext/componentes/archivo-txt/archivo-txt.component';
 import { RegisterDialogComponent } from 'src/app/modules/uext/componentes/register-dialog/register-dialog.component';
@@ -203,7 +203,7 @@ export class VisorGraphComponent implements OnInit {
 
         if (value.username == null || value.email == null) {
           // TODO: cambiar esto en Produccion a -1
-          this.userId == 1
+          this.userId == -1
         } else {
           this.auth.nUser(value.username, value.email).subscribe({
             next: nvalue => {
@@ -220,6 +220,7 @@ export class VisorGraphComponent implements OnInit {
         }
       },
       error: err => {
+        //TODO: cambiar esto en Produccion a -1
         this.userId == -1
         this.graphClientOption = true
       },
@@ -242,36 +243,64 @@ export class VisorGraphComponent implements OnInit {
           this.btnSisHide = true
 
           this.proyectData = valueD
-          
-          this.proyectData.forEach((e: any, index: number) => {
 
-            this.obsApi.getData(e.url).subscribe({
-              next: value => {
+          from(this.proyectData).pipe(
+            concatMap((e: any, index: number) =>
+              this.obsApi.getData(e.url).pipe(
+                map((value: any) => {
+                  if (value.data[0].und_calib == 'M/S**2') {
+                    e.unit = 'm';
+                  } else if (value.data[0].und_calib == 'CM/S**2' || e.extension == 'EVT' || e.extension == 'MSEED') {
+                    e.unit = 'gal';
+                  } else if (value.data[0].und_calib == 'G') {
+                    e.unit = 'g';
+                  } else {
+                    e.unit = '';
+                  }
 
-                if (value.data[0].und_calib == 'M/S**2') {
-                  e.unit = 'm'
-                } else if (value.data[0].und_calib == 'CM/S**2' || e.extension == 'EVT' || e.extension == 'MSEED') {
-                  e.unit = 'gal'
-                } else if (value.data[0].und_calib == 'G') {
-                  e.unit = 'g'
-                } else {
-                  e.unit = ''
-                }
+                  this.toggleTabs = true;
+                  this.groupedData = this.groupByNetworkAndStation(value.data, value.inv);
+                  this.proyectData[index].stations = this.groupedData;
 
-                this.toggleTabs = true
-                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                this.proyectData[index].stations =  this.groupedData
-                
-                this.leer(value.data[0], 0)
-              },
-              complete: () => {
-                this.loadingPanelInfo = false
-              }
-            })
-
+                  this.leer(value.data[0], index);
+                })
+              )
+            )
+          ).subscribe({
+            complete: () => {
+              this.loadingPanelInfo = false;
+            }
           });
 
-         
+          // this.proyectData.forEach((e: any, index: number) => {
+
+          //   this.obsApi.getData(e.url).subscribe({
+          //     next: value => {
+
+          //       if (value.data[0].und_calib == 'M/S**2') {
+          //         e.unit = 'm'
+          //       } else if (value.data[0].und_calib == 'CM/S**2' || e.extension == 'EVT' || e.extension == 'MSEED') {
+          //         e.unit = 'gal'
+          //       } else if (value.data[0].und_calib == 'G') {
+          //         e.unit = 'g'
+          //       } else {
+          //         e.unit = ''
+          //       }
+
+          //       this.toggleTabs = true
+          //       this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+          //       this.proyectData[index].stations = this.groupedData
+
+          //       this.leer(value.data[0], 0)
+          //     },
+          //     complete: () => {
+          //       this.loadingPanelInfo = false
+          //     }
+          //   })
+
+          // });
+
+
 
         }
 
@@ -279,7 +308,7 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         this.proyectData = []
-      },
+      }
     });
 
     this.obsApi.getIpAddress().subscribe({
@@ -330,7 +359,7 @@ export class VisorGraphComponent implements OnInit {
       let ext: string = archivos[0].name.substring(archivos[0].name.lastIndexOf('.') + 1);
       this.archFilter = this.txtElip(archivos[0].name, ext, 20)
 
-      
+
 
       this.btnShow = true;
       this.btnCancel = false;
@@ -495,7 +524,7 @@ export class VisorGraphComponent implements OnInit {
                   if (value.data[0].und_calib == 'M/S**2') {
                     this.proyectData[0].unit = 'm'
                     //localStorage.setItem('ogUnit', 'm')
-                  } else if (value.data[0].und_calib == 'CM/S**2' || ext == 'evt' || this.proyectData[0].format == 'REFTEK130' ) {
+                  } else if (value.data[0].und_calib == 'CM/S**2' || ext == 'evt' || this.proyectData[0].format == 'REFTEK130') {
                     this.proyectData[0].unit = 'gal'
                     //localStorage.setItem('ogUnit', 'gal')
                   } else if (value.data[0].und_calib == 'G') {
@@ -1112,7 +1141,7 @@ export class VisorGraphComponent implements OnInit {
       FilterForm,
       TrimForm,
       graph,
-      indexFilePanel : indexFilePanel,
+      indexFilePanel: indexFilePanel,
       img
     });
 
@@ -1828,7 +1857,7 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         this.graphClientOption = true
-        this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from, this.colorGraph,'','','','','','',min,max).subscribe({
+        this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from, this.colorGraph, '', '', '', '', '', '', min, max).subscribe({
           next: value => {
             const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
             if (indx !== -1) {
@@ -2706,10 +2735,10 @@ export class VisorGraphComponent implements OnInit {
     let typeFilter = extrData.FilterForm.get('type').value || ''
     let fmin = extrData.FilterForm.get('freqmin').value || ''
     let fmax = extrData.FilterForm.get('freqmax').value || ''
-    let corn = extrData.FilterForm.get('order').value   || ''
-    let zero = extrData.FilterForm.get('zero').value    || ''
+    let corn = extrData.FilterForm.get('order').value || ''
+    let zero = extrData.FilterForm.get('zero').value || ''
 
-    let t_min = parseFloat(extrData.TrimForm.get('t_min').value) || '' 
+    let t_min = parseFloat(extrData.TrimForm.get('t_min').value) || ''
     let t_max = parseFloat(extrData.TrimForm.get('t_max').value) || ''
 
     let title = 'QuakeSense | NCN Nuevo Control'
@@ -2719,7 +2748,7 @@ export class VisorGraphComponent implements OnInit {
     let web = 'Website: https://qs.ncn.pe'
 
     const samples = extrData.dataEst.sampling_rate
-    const npts = extrData.dataEst.npts   
+    const npts = extrData.dataEst.npts
 
     if (m == 'acel' || m == 'vel' || m == 'des') {
       dataX = value[0].tiempo_a;
@@ -2774,15 +2803,15 @@ export class VisorGraphComponent implements OnInit {
       dataText += `    VELOCIDAD      : [${und2}]` + '\n'
       dataText += `    DESPLAZAMIENTO : [${und3}]` + '\n\n'
       dataText += '4. HERRAMIENTAS USADAS' + '\n'
-      dataText += `    4.1 CORRECCION DE LINEA BASE `     + '\n'
+      dataText += `    4.1 CORRECCION DE LINEA BASE ` + '\n'
       dataText += `        BASE        : ${base}` + '\n'
-      dataText += `    4.2 FILTRO      `   + '\n'
+      dataText += `    4.2 FILTRO      ` + '\n'
       dataText += `        TIPO        : ${typeFilter}` + '\n'
       dataText += `        FREQ. MIN.  : ${fmin}` + '\n'
       dataText += `        FREQ. MAX.  : ${fmax}` + '\n'
       dataText += `        CORNERS     : ${corn}` + '\n'
       dataText += `        BILINEAR    : ${zero}` + '\n'
-      dataText += `    4.3 RECORTE [segundos] `     + '\n'
+      dataText += `    4.3 RECORTE [segundos] ` + '\n'
       dataText += `        MIN        : ${t_min}` + '\n'
       dataText += `        MAX        : ${t_max}` + '\n\n'
       dataText += '3. VALORES MAXIMOS' + '\n'
@@ -2834,15 +2863,15 @@ export class VisorGraphComponent implements OnInit {
       dataText += '3. VALORES MAXIMOS' + '\n'
       dataText += `    ${maxVal}      : [${unidad}]` + '\n\n'
       dataText += '4. HERRAMIENTAS USADAS' + '\n'
-      dataText += `    4.1 CORRECCION DE LINEA BASE `     + '\n'
+      dataText += `    4.1 CORRECCION DE LINEA BASE ` + '\n'
       dataText += `        BASE        : ${base}` + '\n'
-      dataText += `    4.2 FILTRO      `   + '\n'
+      dataText += `    4.2 FILTRO      ` + '\n'
       dataText += `        TIPO        : ${typeFilter}` + '\n'
       dataText += `        FREQ. MIN.  : ${fmin}` + '\n'
       dataText += `        FREQ. MAX.  : ${fmax}` + '\n'
       dataText += `        CORNERS     : ${corn}` + '\n'
       dataText += `        BILINEAR    : ${zero}` + '\n'
-      dataText += `    4.3 RECORTE [segundos] `     + '\n'
+      dataText += `    4.3 RECORTE [segundos] ` + '\n'
       dataText += `        MIN        : ${t_min}` + '\n'
       dataText += `        MAX        : ${t_max}` + '\n\n'
       dataText += '5. DATOS DE LA ACELERACION' + '\n'
@@ -2862,22 +2891,22 @@ export class VisorGraphComponent implements OnInit {
     }
   }
 
-  savePorgressProyect(){
+  savePorgressProyect() {
     let uuid = this.proyectData[0].uuid
     let tabInfo = this.tabs
     this.obsUser.putProjectTab(uuid, tabInfo).subscribe({
       error: err => {
-        console.log(err);        
+        console.log(err);
       },
       complete: () => {
         console.log('Completo');
-        
+
       }
     })
-    
+
   }
 
-  redirectAcel(){
+  redirectAcel() {
     window.open('https://ncn.pe/acelerografo-reftek-sma2')
   }
 

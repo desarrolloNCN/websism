@@ -87,7 +87,8 @@ export class NewProjectComponent implements OnInit {
 
       },
       error: err => {
-
+        console.log(this.data);
+        
         // TODO: Borrar en Produccion
 
         if (this.data.uuid) {
@@ -446,7 +447,8 @@ export class NewProjectComponent implements OnInit {
     }
 
     if (this.addedFiles.length == 0) {
-      this.snackBar.open('⚠️ Debe Agregar Archivos', 'cerrar', snackBar)
+      this.snackBar.open('⚠️ Debe Agregar Archivos', 'cerrar', snackBar) 
+      return
     }
 
     if (!this.verificarFiles(this.addedFiles)) {
@@ -481,8 +483,8 @@ export class NewProjectComponent implements OnInit {
     let projName = this.controlForm.get('projectName').value
     let projDesp = this.controlForm.get('descript').value
 
-    let img = this.imgproj || this.defImg || ''
-
+    let img = this.imgproj || this.defImg
+    
     this.regApi.putProject(idProj, projName, projDesp, img).subscribe({
       error: err => {
         this.snackBar.open('⚠️ Problema con el Registro ', 'cerrar', snackBar)

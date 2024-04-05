@@ -48,7 +48,8 @@ export class UserProjectsComponent implements OnInit {
 
         this.userService.getProjectuser(this.username, this.email).subscribe({
           next: value => {
-           
+            console.log(value);
+            
             this.proyectos = value
           },
           error: err => {
