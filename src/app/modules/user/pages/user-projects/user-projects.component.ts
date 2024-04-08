@@ -48,8 +48,6 @@ export class UserProjectsComponent implements OnInit {
 
         this.userService.getProjectuser(this.username, this.email).subscribe({
           next: value => {
-            console.log(value);
-            
             this.proyectos = value
           },
           error: err => {
@@ -115,13 +113,14 @@ export class UserProjectsComponent implements OnInit {
   }
 
   abrirLector(item: any) {
-       
+
     this.userService.resetService()
 
     let addFiles: any[] = []
 
     item.files.forEach((e: any) => {
       let url = e.file || e.string_data
+      let urlconvert = e.url_gen
       let nombreArchivo: string = url.substring(url.lastIndexOf('/') + 1);
       let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
@@ -131,7 +130,7 @@ export class UserProjectsComponent implements OnInit {
         "extension": extension.toLocaleUpperCase() || 'NO EXT',
         "unit": e.unit,
         "img": e.img,
-        "url": url
+        "urlconvert": urlconvert
       })
 
     });
@@ -141,6 +140,7 @@ export class UserProjectsComponent implements OnInit {
   }
 
   editProyec(item: any) {
+    console.log('EDIt', item);
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
     matDialogConfig.data = item
@@ -170,7 +170,7 @@ export class UserProjectsComponent implements OnInit {
           if (value == true) {
             this.userService.delProject(item.uuid).subscribe({
               error: err => {
-               
+
               },
               complete: () => {
                 this.proyectos.splice(indice, 1);

@@ -1090,6 +1090,7 @@ export class LectorDemoComponent implements OnInit {
       },
       complete: () => {
         this.loadingBarGraph = false
+        this.toogleFilter = false
       }
     })
 
@@ -1191,6 +1192,7 @@ export class LectorDemoComponent implements OnInit {
       },
       complete: () => {
         this.loadingBarGraph = false
+        this.toogleTrim = false
       }
     })
 
@@ -1384,10 +1386,33 @@ export class LectorDemoComponent implements OnInit {
     let sta = this.tabs[index].dataEst.station
     let cha = this.tabs[index].dataEst.channel
 
+    const t_min = parseFloat(this.tabs[index].TrimForm.get('t_min').value);
+    const t_max = parseFloat(this.tabs[index].TrimForm.get('t_max').value);
+
+    let utc_min: any
+    let utc_max: any
+
+    let min = ''
+    let max = ''
+
+    if (isNaN(t_min) && isNaN(t_max)) {
+      min = ''
+      max = ''
+    } else {
+      utc_min = new Date(this.tabs[index].sttime);
+      utc_max = new Date(this.tabs[index].sttime);
+
+      utc_min.setUTCSeconds(utc_min.getUTCSeconds() + t_min);
+      utc_max.setUTCSeconds(utc_max.getUTCSeconds() + t_max);
+
+      min = utc_min.toISOString()
+      max = utc_max.toISOString()
+    }
+
     this.isLoading = true
     this.loadingBarGraph = true
 
-    this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from).subscribe({
+    this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from, '', '', '', '', '', '', '', min, max).subscribe({
       next: value => {
         const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
         if (indx !== -1) {

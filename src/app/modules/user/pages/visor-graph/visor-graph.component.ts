@@ -203,7 +203,7 @@ export class VisorGraphComponent implements OnInit {
 
         if (value.username == null || value.email == null) {
           // TODO: cambiar esto en Produccion a -1
-          this.userId == -1
+          this.userId == 1
         } else {
           this.auth.nUser(value.username, value.email).subscribe({
             next: nvalue => {
@@ -243,19 +243,18 @@ export class VisorGraphComponent implements OnInit {
           this.btnSisHide = true
 
           this.proyectData = valueD
-
+          // console.log('Visor',this.proyectData);
+          
           from(this.proyectData).pipe(
             concatMap((e: any, index: number) =>
-              this.obsApi.getData(e.url).pipe(
+              this.obsApi.getData(e.urlconvert).pipe(
                 map((value: any) => {
                   if (value.data[0].und_calib == 'M/S**2') {
                     e.unit = 'm';
-                  } else if (value.data[0].und_calib == 'CM/S**2' || e.extension == 'EVT' || e.extension == 'MSEED') {
+                  } else if (value.data[0].und_calib == 'CM/S**2' || e.extension == 'EVT' || e.extension == 'KINEMETRICS_EVT') {
                     e.unit = 'gal';
                   } else if (value.data[0].und_calib == 'G') {
                     e.unit = 'g';
-                  } else {
-                    e.unit = '';
                   }
 
                   this.toggleTabs = true;
@@ -484,7 +483,7 @@ export class VisorGraphComponent implements OnInit {
 
             this.proyectData.push({
               "originalName": na,
-              "url": value.file || value.string_data,
+              "urlconvert": value.file || value.string_data,
               "format": value.f,
               "unit": ''
             })
@@ -504,14 +503,7 @@ export class VisorGraphComponent implements OnInit {
           },
           complete: () => {
 
-            let url = this.proyectData[0].url
-
-            // TODO: se comento verificacion LocalStorage
-            // if(localStorage.getItem('urlFileUpload')! == null || localStorage.getItem('urlFileUpload')! == 'null'){
-            //   url = localStorage.getItem('urlSearched')!
-            // }else if(localStorage.getItem('urlSearched')! == null || localStorage.getItem('urlSearched')! == 'null'){
-            //   url = localStorage.getItem('urlFileUpload')!
-            // }
+            let url = this.proyectData[0].urlconvert
 
             if (ext == 'txt') {
               this.leerTxt(url)
@@ -893,23 +885,31 @@ export class VisorGraphComponent implements OnInit {
 
           } else {
 
-            this.urlFile = value.url
-            this.original_unit = value.unit
+            this.proyectData[0].urlconvert = value.url
+            this.proyectData[0].unit = value.unit
+            // this.urlFile = value.url
+            // this.original_unit = value.unit
 
-            localStorage.setItem('urlFileUpload', value.url)
-            localStorage.setItem('ogUnit', value.unit)
+            // localStorage.setItem('urlFileUpload', value.url)
+            // localStorage.setItem('ogUnit', value.unit)
 
             this.stopTxt = this.obsApi.getData(value.url).subscribe({
               next: value => {
                 this.toggleTabs = true
+
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                this.leer(value.data[0])
+                this.proyectData[0].stations = this.groupedData
+
+                this.leer(value.data[0], 0)
+                //this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                //this.leer(value.data[0])
               },
               error: err => {
                 this.snackBar.open('⚠️ Error CTS-DT', 'cerrar', snackBar)
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
                 this.btnDisable = false
+                this.loadingPanelInfo = false
               },
               complete: () => {
                 this.loadingSpinner = false
@@ -929,6 +929,7 @@ export class VisorGraphComponent implements OnInit {
         },
         complete: () => {
           this.loadingSpinner = false
+          this.loadingPanelInfo = false
         }
       }
 
@@ -961,7 +962,7 @@ export class VisorGraphComponent implements OnInit {
 
           } else {
 
-            this.proyectData[0].url = valueUrl.url
+            this.proyectData[0].urlconvert = valueUrl.url
             this.proyectData[0].unit = valueUrl.unit
 
             // this.urlFile = valueUrl.url
@@ -970,11 +971,18 @@ export class VisorGraphComponent implements OnInit {
             // localStorage.setItem('urlFileUpload', valueUrl.url)
             // localStorage.setItem('ogUnit', valueUrl.unit)
 
-            this.stopMseed = this.obsApi.getData(this.proyectData[0].url).subscribe({
+            this.stopMseed = this.obsApi.getData(this.proyectData[0].urlconvert).subscribe({
               next: value => {
                 this.toggleTabs = true
+
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                this.leer(value.data[0])
+                this.proyectData[0].stations = this.groupedData
+
+
+                this.leer(value.data[0], 0)
+
+                // this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                // this.leer(value.data[0])
               },
               error: err => {
                 this.snackBar.open('⚠️ Error al leer el XML', 'cerrar', snackBar)
@@ -996,9 +1004,11 @@ export class VisorGraphComponent implements OnInit {
           this.loadingSpinner = false
           this.loadingSpinnerStaInfo = false
           this.btnDisable = false
+          this.loadingPanelInfo = false
         },
         complete: () => {
           this.loadingSpinner = false
+          this.loadingPanelInfo = false
         }
       }
 
@@ -1023,7 +1033,7 @@ export class VisorGraphComponent implements OnInit {
 
     this.stationInfo = e
 
-    var dataString, dataFile = this.proyectData[indexFile || 0].url
+    var dataString, dataFile = this.proyectData[indexFile || 0].urlconvert
     var og_unit: string = this.proyectData[indexFile || 0].unit
     // var dataString: string = localStorage.getItem('urlSearched')!
     // var dataFile: string = localStorage.getItem('urlFileUpload')!
@@ -1169,13 +1179,8 @@ export class VisorGraphComponent implements OnInit {
 
     let indexFilePanel = this.tabs[index].indexFilePanel || 0
 
-    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var dataString, dataFile = this.proyectData[indexFilePanel].urlconvert
     var unit_from: string = this.proyectData[indexFilePanel].unit
-
-    // TODO: descomentar luego de evaluacion
-    // let dataString: string = localStorage.getItem('urlSearched')!
-    // let dataFile: string = localStorage.getItem('urlFileUpload')!
-    // let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -1305,13 +1310,8 @@ export class VisorGraphComponent implements OnInit {
 
     let indexFilePanel = this.tabs[index].indexFilePanel || 0
 
-    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var dataString, dataFile = this.proyectData[indexFilePanel].urlconvert
     var unit_from: string = this.proyectData[indexFilePanel].unit
-
-    // TODO: descomentar luego de evaluacion
-    // var dataString: string = localStorage.getItem('urlSearched')!
-    // var dataFile: string = localStorage.getItem('urlFileUpload')!
-    // let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -1450,13 +1450,8 @@ export class VisorGraphComponent implements OnInit {
 
     let indexFilePanel = this.tabs[index].indexFilePanel || 0
 
-    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var dataString, dataFile = this.proyectData[indexFilePanel].urlconvert
     var unit_from: string = this.proyectData[indexFilePanel].unit
-
-    // TODO: descomentar luego de evaluacion
-    // var dataString: string = localStorage.getItem('urlSearched')!
-    // var dataFile: string = localStorage.getItem('urlFileUpload')!
-    // let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -1610,15 +1605,8 @@ export class VisorGraphComponent implements OnInit {
 
     let indexFilePanel = this.tabs[index].indexFilePanel || 0
 
-    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var dataString, dataFile = this.proyectData[indexFilePanel].urlconvert
     var unit_from: string = this.proyectData[indexFilePanel].unit
-
-    // TODO: descomentar luego de evaluacion
-
-    // let unit_from = localStorage.getItem('ogUnit')!
-
-    // var dataString: string = localStorage.getItem('urlSearched')!
-    // var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -1682,7 +1670,7 @@ export class VisorGraphComponent implements OnInit {
           })
         } else {
           this.graphClientOption = false
-          this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to).subscribe({
+          this.obsApi.unitConvertion(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to, this.colorGraph).subscribe({
             next: value => {
 
               this.ToggleGraph = false
@@ -1748,13 +1736,8 @@ export class VisorGraphComponent implements OnInit {
 
     let indexFilePanel = this.tabs[index].indexFilePanel || 0
 
-    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var dataString, dataFile = this.proyectData[indexFilePanel].urlconvert
     var unit_from: string = this.proyectData[indexFilePanel].unit
-
-    // TODO: descomentar luego de evaluacion
-    // var dataString: string = localStorage.getItem('urlSearched')!
-    // var dataFile: string = localStorage.getItem('urlFileUpload')!
-    // let unit_from = localStorage.getItem('ogUnit')!
 
     this.tabs[index].base = 'linear'
     this.tabs[index].unit = 'gal'
@@ -1804,7 +1787,7 @@ export class VisorGraphComponent implements OnInit {
 
         if (value.modo_grafico == null || value.modo_grafico == 'no') {
           this.graphClientOption = true
-          this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from, this.colorGraph).subscribe({
+          this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from, this.colorGraph, '', '', '', '', '', '', min, max).subscribe({
             next: value => {
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
               if (indx !== -1) {
@@ -1820,7 +1803,7 @@ export class VisorGraphComponent implements OnInit {
           })
         } else {
           this.graphClientOption = false
-          this.obsApi.autoAdjust(dataToUse, sta, cha, unit_from).subscribe({
+          this.obsApi.autoAdjust(dataToUse, sta, cha, unit_from, '', '', '', '', '', '', min, max, this.colorGraph).subscribe({
             next: value => {
 
               this.ToggleGraph = false
@@ -1890,12 +1873,8 @@ export class VisorGraphComponent implements OnInit {
 
     let indexFilePanel = this.tabs[index].indexFilePanel || 0
 
-    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var dataString, dataFile = this.proyectData[indexFilePanel].urlconvert
     var unit_from: string = this.proyectData[indexFilePanel].unit
-
-    // TODO: descomentar luego de evaluacion
-    // var dataString: string = localStorage.getItem('urlSearched')!
-    // var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -1928,12 +1907,8 @@ export class VisorGraphComponent implements OnInit {
 
     let indexFilePanel = this.tabs[index].indexFilePanel || 0
 
-    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var dataString, dataFile = this.proyectData[indexFilePanel].urlconvert
     var unit_from: string = this.proyectData[indexFilePanel].unit
-
-    // TODO: descomentar luego de evaluacion
-    // var dataString: string = localStorage.getItem('urlSearched')!
-    // var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -2569,13 +2544,8 @@ export class VisorGraphComponent implements OnInit {
 
     let indexFilePanel = this.tabs[index].indexFilePanel || 0
 
-    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var dataString, dataFile = this.proyectData[indexFilePanel].urlconvert
     var unit_from: string = this.proyectData[indexFilePanel].unit
-
-    // TODO: descomentar luego de evaluacion
-    // var dataString: string = localStorage.getItem('urlSearched')!
-    // var dataFile: string = localStorage.getItem('urlFileUpload')!
-    // let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -2659,13 +2629,8 @@ export class VisorGraphComponent implements OnInit {
 
     let indexFilePanel = this.tabs[index].indexFilePanel || 0
 
-    var dataString, dataFile = this.proyectData[indexFilePanel].url
+    var dataString, dataFile = this.proyectData[indexFilePanel].urlconvert
     var unit_from: string = this.proyectData[indexFilePanel].unit
-
-    // TODO: descomentar luego de evaluacion
-    // var dataString: string = localStorage.getItem('urlSearched')!
-    // var dataFile: string = localStorage.getItem('urlFileUpload')!
-    // var og_unit: string = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 

@@ -144,16 +144,7 @@ export class ArchivoTXTComponent implements OnInit {
 
     if (encabezados.length < datosPrimeraLinea.length) {
       for (let i = encabezados.length; i < datosPrimeraLinea.length; i++) {
-        // TODO: Verificar si es necesario
-        // if (i == 0) {
-        //   encabezados.push('Z')
-        // } else if (i == 1) {
-        //   encabezados.push('N')
-        // } else if (i == 2) {
-        //   encabezados.push('E')
-        // } else {
         encabezados.push(`C${i + 1}`);
-        // }
       }
     }
 
@@ -187,20 +178,6 @@ export class ArchivoTXTComponent implements OnInit {
     this.encabezadosGen(valoresAgrupados, encabezados)
 
   }
-
-
-  // TODO:Pendiente indicar Canales
-
-  // this.columnDetector.forEach((item: any, index: number) => {
-  //   if (index === 0) {
-  //     this.channels.push('Z');
-  //   } else if (index === 1) {
-  //     this.channels.push('N');
-  //   } else if (index === 2) {
-  //     this.channels.push('E');
-  //   } else {
-  //     this.channels.push('C' + (index + 3))}; 
-
 
   encabezadosGen(valores: any, headers: any) {
 

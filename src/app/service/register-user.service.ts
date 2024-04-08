@@ -199,7 +199,7 @@ export class RegisterUserService {
     const url = `new_f_pro/?id=${idFile}`
 
     const sendData = {
-      "string_data": file,
+      "url_gen": file,
       "unit": unit,
       "status": status,
       "extra": ext
