@@ -123,7 +123,7 @@ export class VisorGraphComponent implements OnInit {
   private userInfo = ''
 
   // TODO: cambiar esto en Produccion a -1
-  userId = -1
+  userId = 1
 
   plotedimages: any = []
 
@@ -221,7 +221,7 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         //TODO: cambiar esto en Produccion a -1
-        this.userId == -1
+        this.userId == 1
         this.graphClientOption = true
       },
     })

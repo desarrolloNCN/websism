@@ -90,46 +90,46 @@ export class NewProjectComponent implements OnInit {
 
         // TODO: Borrar en Produccion
 
-        // if (this.data.uuid) {
+        if (this.data.uuid) {
 
-        //   this.titleDialog = 'Editar Proyecto'
-        //   this.subtitleDialog = 'Asigne un nuevo nombre a su proyecto, añada nuevos archivos con los que va a trabajar y'
-        //   this.subtitleStrong = 'Actualizar Proyecto'
+          this.titleDialog = 'Editar Proyecto'
+          this.subtitleDialog = 'Asigne un nuevo nombre a su proyecto, añada nuevos archivos con los que va a trabajar y'
+          this.subtitleStrong = 'Actualizar Proyecto'
 
-        //   this.buttonSubmitForm = 'Actualizar Proyecto'
+          this.buttonSubmitForm = 'Actualizar Proyecto'
 
-        //   let uuid = this.data.uuid
+          let uuid = this.data.uuid
 
-        //   let proj_name = this.controlForm.controls['projectName'].setValue(this.data.name)
-        //   let proj_desp = this.controlForm.controls['descript'].setValue(this.data.descrip)
+          let proj_name = this.controlForm.controls['projectName'].setValue(this.data.name)
+          let proj_desp = this.controlForm.controls['descript'].setValue(this.data.descrip)
 
-        //   this.defImg = this.data.img || '/assets/ncnLogoColor.png'
+          this.defImg = this.data.img || '/assets/ncnLogoColor.png'
 
-        //   this.data.files.forEach((e: any) => {
-        //     let file_name = e.filename
+          this.data.files.forEach((e: any) => {
+            let file_name = e.filename
 
-        //     let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
-        //     let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+            let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
+            let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
-        //     let formatoNombre = this.formatearNombreArchivo(file_name, extension, 7)
+            let formatoNombre = this.formatearNombreArchivo(file_name, extension, 7)
 
-        //     this.addedFiles.push({
-        //       "id": e.id,
-        //       "file": '',
-        //       "fileName": formatoNombre,
-        //       "originalName": file_name,
-        //       "status": e.status,
-        //       "extension": extension.toLocaleUpperCase() || 'NO EXT',
-        //       "string_data": e.string_data,
-        //       "urlconvert": e.url_gen,
-        //       "unit": e.unit
-        //     })
-        //   });
-        // }
+            this.addedFiles.push({
+              "id": e.id,
+              "file": '',
+              "fileName": formatoNombre,
+              "originalName": file_name,
+              "status": e.status,
+              "extension": extension.toLocaleUpperCase() || 'NO EXT',
+              "string_data": e.string_data,
+              "urlconvert": e.url_gen,
+              "unit": e.unit
+            })
+          });
+        }
 
-        // this.username = 'ga'
-        // this.email = 'test@example.com'
-        // this.idUser = `${1}`
+        this.username = 'ga'
+        this.email = 'test@example.com'
+        this.idUser = `${1}`
       },
       complete: () => {
 
@@ -176,7 +176,7 @@ export class NewProjectComponent implements OnInit {
           },
           error: err => {
             // TODO: Borrar en Produccion
-            //this.idUser = `${1}`
+            this.idUser = `${1}`
           }
         })
 

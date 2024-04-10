@@ -76,7 +76,7 @@
 
                 <div class="columGen">
 
-                    <div *ngFor="let itm of columnDetector; let i = index">
+                    <div [hidden]="true" *ngFor="let itm of columnDetector; let i = index">
                         <mat-form-field appearance="outline" class="mtff">
                             <mat-label>Columna {{i+1}}</mat-label>
                             <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
@@ -108,9 +108,15 @@
                             </mat-select>
                         </mat-form-field>
                     </div>
+
+                    <div *ngFor="let itm of columHead;let i = index">
+                        <mat-form-field appearance="outline" class="mtff">
+                            <mat-label>Factor {{i+1}}</mat-label>
+                            <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
+                            <input matInput formControlName='ccc_{{i}}' type="number">
+                        </mat-form-field>
+                    </div>
                 </div>
-
-
 
             </div>
             <br>

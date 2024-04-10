@@ -19,7 +19,7 @@ export class ArchivoTXTComponent implements OnInit {
   maxRows = 0
 
   controlForm: FormGroup | any
-  controlForm_2: FormGroup | any
+
 
   columnDetector: any = []
   columHead: any = []
@@ -49,10 +49,6 @@ export class ArchivoTXTComponent implements OnInit {
       location: new FormControl('',),
       starttime: new FormControl(''),
       ckInfo: new FormControl(false),
-    })
-
-    this.controlForm_2 = new FormGroup({
-
     })
   }
 
@@ -207,6 +203,10 @@ export class ArchivoTXTComponent implements OnInit {
       this.controlForm.addControl('cc_' + index, new FormControl('', Validators.required));
     });
 
+    headers.forEach((headers: any, index: string) => {
+      this.controlForm.addControl('ccc_' + index, new FormControl('', Validators.required));
+    });
+
   }
 
   crearSteam() {
@@ -216,6 +216,8 @@ export class ArchivoTXTComponent implements OnInit {
     snackBar.panelClass = ['snackBar-validator'];
 
     if (this.controlForm.valid) {
+      console.log(this.controlForm.value);
+      
 
       this.obsApi.convertToStream(this.controlForm.value).subscribe({
         next: value => {

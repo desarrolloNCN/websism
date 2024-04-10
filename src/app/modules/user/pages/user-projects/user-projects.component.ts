@@ -40,6 +40,7 @@ export class UserProjectsComponent implements OnInit {
       },
       error: err => {
         this.loadingSpinner = false
+        
         // TODO: Borrar en Produccion
 
         this.username = 'ga'
