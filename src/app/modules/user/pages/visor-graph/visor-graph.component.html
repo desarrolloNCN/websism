@@ -130,7 +130,7 @@
 
                     <mat-accordion>
 
-                        <mat-expansion-panel *ngFor="let item of proyectData; let ind = index">
+                        <mat-expansion-panel *ngFor="let item of proyectData; let ind = index" expanded="0">
 
                             <mat-expansion-panel-header>
                                 <mat-panel-title>
@@ -139,7 +139,7 @@
                             </mat-expansion-panel-header>
 
                             <div *ngIf="loadingPanelInfo" fxLayout="column" fxLayoutGap="10"
-                                fxLayoutAlign="center center" style="padding-top: 20%;">
+                                fxLayoutAlign="center center" style="padding-top: 10%;">
                                 <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                                     [diameter]="50"></mat-progress-spinner>
                                 <h3> <b>Cargando Datos ....</b> </h3>

@@ -121,9 +121,13 @@ export class VisorGraphComponent implements OnInit {
   stringdata = ''
   formatFile = ''
   private userInfo = ''
+  private group: any
+  private groupNro: any
+  name = ''
+  usere = ''
 
-  // TODO: cambiar esto en Produccion a -1
-  userId = 1
+  // TODO: cambiar esto en Produccion a -1, 3 en dev
+  userId = -1
 
   plotedimages: any = []
 
@@ -202,10 +206,18 @@ export class VisorGraphComponent implements OnInit {
       next: value => {
 
         if (value.username == null || value.email == null) {
-          // TODO: cambiar esto en Produccion a -1
-          this.userId == 1
+          // TODO: cambiar esto en Produccion a -1, 3 en dev
+          this.userId == -1
         } else {
-          this.auth.nUser(value.username, value.email).subscribe({
+          this.group = value.groups
+          this.name = value.name
+
+          if (this.group['10']) {
+            this.groupNro = 10
+          } else {
+            this.groupNro = 2
+          }
+          this.auth.nUser(value.username, value.email, this.groupNro).subscribe({
             next: nvalue => {
               this.userId = nvalue
             }
@@ -220,8 +232,8 @@ export class VisorGraphComponent implements OnInit {
         }
       },
       error: err => {
-        //TODO: cambiar esto en Produccion a -1
-        this.userId == 1
+        //TODO: cambiar esto en Produccion a -1, 3 en dev
+        this.userId == -1
         this.graphClientOption = true
       },
     })
@@ -244,7 +256,7 @@ export class VisorGraphComponent implements OnInit {
 
           this.proyectData = valueD
           // console.log('Visor',this.proyectData);
-          
+
           from(this.proyectData).pipe(
             concatMap((e: any, index: number) =>
               this.obsApi.getData(e.urlconvert).pipe(
@@ -575,289 +587,6 @@ export class VisorGraphComponent implements OnInit {
     }
   }
 
-  // leerArchivoTest() {
-
-  //   this.clearData()
-
-  //   this.btnDisable = true
-
-  //   const snackBar = new MatSnackBarConfig();
-  //   snackBar.duration = 5 * 1000;
-  //   snackBar.panelClass = ['snackBar-validator'];
-
-  //   let textoValue = this.controlForm.get('url').value;
-  //   let archivoValue = this.arch;
-
-
-  //   let valorNoVacio: string | File | undefined;
-
-  //   this.loadingSpinner = true
-  //   this.loadingSpinnerStaInfo = true
-
-  //   if (archivoValue instanceof File || typeof textoValue === 'string' && textoValue.trim() !== '') {
-
-  //     valorNoVacio = archivoValue || textoValue
-
-  //     if (this.urlFile == '' && this.stringdata == '') {
-
-  //       try {
-
-  //         let valorNoVacio_recived: any = archivoValue.name
-  //         let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
-  //         let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
-
-
-  //         if (extension == 'XMR') {
-  //           this.stopXmr = this.obsApi.covertionXMR(archivoValue).subscribe({
-  //             next: value => {
-  //               this.leerTxt(value.url)
-  //             },
-  //             error: err => {
-  //               this.loadingSpinner = false
-  //               this.loadingSpinnerStaInfo = false
-  //             },
-  //             complete: () => {
-  //               this.loadingSpinner = false
-  //               this.loadingSpinnerStaInfo = false
-  //             }
-  //           })
-  //         } else {
-  //           this.stopXmr.unsubscribe()
-  //           throw new Error('')
-  //         }
-
-  //       } catch (error) {
-
-  //         this.obsUser.uploadFileUser(valorNoVacio, this.userId.toString()).subscribe({
-  //           next: value => {
-
-  //             this.idFile = value.id
-  //             this.urlFile = value.file
-  //             this.stringdata = value.string_data
-
-  //             localStorage.setItem('urlFileUpload', value.file)
-  //             localStorage.setItem('urlSearched', value.string_data)
-
-  //           },
-  //           error: err => {
-  //             this.loadingSpinner = false
-  //             this.loadingSpinnerStaInfo = false
-  //             this.btnDisable = false
-  //             this.snackBar.open('⚠️ Fuera de Linea', 'cerrar', snackBar)
-  //           },
-  //           complete: () => {
-  //             let valorNoVacio_recived: any = this.urlFile || this.stringdata
-  //             let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
-  //             let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
-
-  //             if (this.urlFile == null) {
-
-  //               if (extension == 'txt') {
-
-  //                 this.leerTxt(valorNoVacio_recived)
-
-  //               } else if (extension == 'mseed') {
-
-  //                 this.leerMseed(valorNoVacio_recived)
-
-  //               } else {
-
-  //                 this.obsApi.getData(this.stringdata).subscribe({
-  //                   next: value => {
-
-  //                     if (value.data[0].und_calib == 'M/S**2') {
-  //                       localStorage.setItem('ogUnit', 'm')
-  //                     } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
-  //                       localStorage.setItem('ogUnit', 'gal')
-  //                     } else if (value.data[0].und_calib == 'G') {
-  //                       localStorage.setItem('ogUnit', 'g')
-  //                     } else {
-  //                       localStorage.setItem('ogUnit', '')
-  //                     }
-
-  //                     this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-
-  //                     this.leer(value.data[0])
-  //                   },
-  //                   error: err => {
-  //                     this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-  //                     this.loadingSpinner = false
-  //                     this.loadingSpinnerStaInfo = false
-  //                     this.btnDisable = false
-  //                   },
-  //                   complete: () => {
-
-  //                     this.loadingSpinner = false
-  //                     this.loadingSpinnerStaInfo = false
-  //                     this.btnDisable = false
-  //                   }
-  //                 })
-
-  //               }
-
-  //             } else if (this.stringdata == null) {
-
-  //               if (extension == 'txt') {
-
-  //                 this.leerTxt(valorNoVacio_recived)
-
-  //               } else if (extension == 'mseed') {
-
-  //                 this.leerMseed(valorNoVacio_recived)
-
-  //               } else {
-
-  //                 this.obsApi.getData(this.urlFile).subscribe({
-  //                   next: value => {
-  //                     if (value.data[0].und_calib == 'M/S**2') {
-  //                       localStorage.setItem('ogUnit', 'm')
-  //                     } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
-  //                       localStorage.setItem('ogUnit', 'gal')
-  //                     } else if (value.data[0].und_calib == 'G') {
-  //                       localStorage.setItem('ogUnit', 'g')
-  //                     } else {
-  //                       localStorage.setItem('ogUnit', '')
-  //                     }
-  //                     this.toggleTabs = true
-  //                     this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-  //                     this.leer(value.data[0])
-  //                   },
-  //                   error: err => {
-  //                     this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-  //                     this.loadingSpinner = false
-  //                     this.loadingSpinnerStaInfo = false
-  //                     this.btnDisable = false
-  //                   },
-  //                   complete: () => {
-  //                     this.loadingSpinner = false
-  //                     this.loadingSpinnerStaInfo =
-  //                       this.btnDisable = false
-  //                   }
-  //                 })
-
-  //               }
-
-  //             } else {
-  //               this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
-  //               this.loadingSpinner = false
-  //               this.loadingSpinnerStaInfo = false
-  //               this.btnDisable = false
-  //             }
-  //           }
-  //         })
-  //       }
-
-  //     } else {
-
-  //       let valorNoVacio_recived: any = this.urlFile || this.stringdata
-  //       let nombreArchivo: string = valorNoVacio_recived.substring(valorNoVacio_recived.lastIndexOf('/') + 1);
-  //       let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
-
-  //       if (this.urlFile == null || '') {
-
-  //         if (extension == 'txt') {
-
-  //           this.leerTxt(valorNoVacio_recived)
-
-  //         } else if (extension == 'mseed') {
-
-  //           this.leerMseed(valorNoVacio_recived)
-
-  //         } else {
-
-  //           this.obsApi.getData(this.stringdata).subscribe({
-  //             next: value => {
-
-  //               if (value.data[0].und_calib == 'M/S**2') {
-  //                 localStorage.setItem('ogUnit', 'm')
-  //               } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
-  //                 localStorage.setItem('ogUnit', 'gal')
-  //               } else if (value.data[0].und_calib == 'G') {
-  //                 localStorage.setItem('ogUnit', 'g')
-  //               } else {
-  //                 localStorage.setItem('ogUnit', '')
-  //               }
-
-  //               this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-  //             },
-  //             error: err => {
-  //               this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-  //               this.loadingSpinner = false
-  //               this.loadingSpinnerStaInfo = false
-  //               this.btnDisable = false
-  //             },
-  //             complete: () => {
-  //               this.loadingSpinner = false
-  //               this.loadingSpinnerStaInfo = false
-  //               this.btnDisable = false
-  //             }
-  //           })
-
-  //         }
-
-  //       } else if (this.stringdata == null || '') {
-
-  //         if (extension == 'txt') {
-
-  //           this.leerTxt(valorNoVacio_recived)
-
-  //         } else if (extension == 'mseed') {
-
-  //           this.leerMseed(valorNoVacio_recived)
-
-  //         } else {
-
-  //           this.obsApi.getData(this.urlFile).subscribe({
-  //             next: value => {
-
-  //               if (value.data[0].und_calib == 'M/S**2') {
-  //                 localStorage.setItem('ogUnit', 'm')
-  //               } else if (value.data[0].und_calib == 'CM/S**2' || extension == 'evt' || value.data[0].format == 'REFTEK130') {
-  //                 localStorage.setItem('ogUnit', 'gal')
-  //               } else if (value.data[0].und_calib == 'G') {
-  //                 localStorage.setItem('ogUnit', 'g')
-  //               } else {
-  //                 localStorage.setItem('ogUnit', '')
-  //               }
-
-  //               this.toggleTabs = true
-  //               this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-  //               this.leer(value.data[0])
-  //             },
-  //             error: err => {
-  //               this.snackBar.open('Formato no Soportado', 'cerrar', snackBar)
-  //               this.loadingSpinner = false
-  //               this.loadingSpinnerStaInfo = false
-  //               this.btnDisable = false
-  //             },
-  //             complete: () => {
-  //               this.loadingSpinner = false
-  //               this.loadingSpinnerStaInfo = false
-  //               this.btnDisable = false
-  //             }
-  //           })
-
-  //         }
-
-  //       } else {
-  //         this.snackBar.open('No se puede leer Datos', 'cerrar', snackBar)
-  //         this.loadingSpinner = false
-  //         this.loadingSpinnerStaInfo = false
-  //         this.btnDisable = false
-  //       }
-  //     }
-
-  //   } else {
-  //     this.snackBar.open('No se encontro ARCHIVO o URL', 'cerrar', snackBar)
-  //     this.loadingSpinner = false
-  //     this.loadingSpinnerStaInfo = false
-  //     this.btnDisable = false
-  //   }
-  // }
-
-
-
-
   async leerTxt(url: string) {
 
     const snackBar = new MatSnackBarConfig();
@@ -869,6 +598,7 @@ export class VisorGraphComponent implements OnInit {
     matDialogConfig.data = url
 
     this.loadingSpinnerStaInfo = true
+    this.loadingPanelInfo = true
 
     this.matDialog.open(ArchivoTXTComponent, matDialogConfig).afterClosed()
       .subscribe({
@@ -877,7 +607,8 @@ export class VisorGraphComponent implements OnInit {
           // this.toggleTabs = true
 
           if (value.url == '') {
-
+            this.loadingPanelInfo = false
+            this.proyectData = []
             this.loadingSpinner = false
             this.loadingSpinnerStaInfo = false
             this.btnDisable = false
@@ -887,11 +618,7 @@ export class VisorGraphComponent implements OnInit {
 
             this.proyectData[0].urlconvert = value.url
             this.proyectData[0].unit = value.unit
-            // this.urlFile = value.url
-            // this.original_unit = value.unit
 
-            // localStorage.setItem('urlFileUpload', value.url)
-            // localStorage.setItem('ogUnit', value.unit)
 
             this.stopTxt = this.obsApi.getData(value.url).subscribe({
               next: value => {
@@ -901,17 +628,17 @@ export class VisorGraphComponent implements OnInit {
                 this.proyectData[0].stations = this.groupedData
 
                 this.leer(value.data[0], 0)
-                //this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                //this.leer(value.data[0])
+
               },
               error: err => {
-                this.snackBar.open('⚠️ Error CTS-DT', 'cerrar', snackBar)
+                this.snackBar.open('⚠️ Error al Leer Datos', 'cerrar', snackBar)
+                this.loadingPanelInfo = false
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
                 this.btnDisable = false
-                this.loadingPanelInfo = false
               },
               complete: () => {
+                this.loadingPanelInfo = false
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
                 this.btnDisable = false
@@ -922,14 +649,14 @@ export class VisorGraphComponent implements OnInit {
           }
         },
         error: err => {
-          this.snackBar.open('⚠️ Error ', 'cerrar', snackBar)
+          this.snackBar.open('⚠️ Error al mostrar Datos ', 'cerrar', snackBar)
           this.loadingSpinner = false
           this.loadingSpinnerStaInfo = false
           this.btnDisable = false
+          this.loadingPanelInfo = false
         },
         complete: () => {
           this.loadingSpinner = false
-          this.loadingPanelInfo = false
         }
       }
 
@@ -954,13 +681,16 @@ export class VisorGraphComponent implements OnInit {
         next: valueUrl => {
           // this.toggleTabs = true
           if (valueUrl.url == '') {
-
+            this.loadingPanelInfo = false
+            this.proyectData = []
             this.loadingSpinner = false
             this.loadingSpinnerStaInfo = false
             this.btnDisable = false
             return
 
           } else {
+
+            this.loadingPanelInfo = true
 
             this.proyectData[0].urlconvert = valueUrl.url
             this.proyectData[0].unit = valueUrl.unit
@@ -989,8 +719,10 @@ export class VisorGraphComponent implements OnInit {
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
                 this.btnDisable = false
+                this.loadingPanelInfo = false
               },
               complete: () => {
+                this.loadingPanelInfo = false
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
                 this.btnDisable = false
@@ -1004,6 +736,7 @@ export class VisorGraphComponent implements OnInit {
           this.loadingSpinner = false
           this.loadingSpinnerStaInfo = false
           this.btnDisable = false
+          this.loadingPanelInfo = false
           this.loadingPanelInfo = false
         },
         complete: () => {
@@ -2405,7 +2138,6 @@ export class VisorGraphComponent implements OnInit {
     return Object.values(group.value);
   }
 
-  // TODO: Eliminar si no se vuelve usar
   clearData() {
     localStorage.clear()
 
@@ -2550,29 +2282,103 @@ export class VisorGraphComponent implements OnInit {
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
     this.isLoading = true
+    this.loadingBarGraph = true
 
-    this.obsApi.getTraceData(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel, unit_from)
-      .subscribe({
-        next: value => {
+    this.auth.getToken().subscribe({
+      next: value => {
+        this.colorGraph = value.color_grafico
 
-          const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`)
-          if (indx !== -1) {
+        if (value.modo_grafico == null || value.modo_grafico == 'no') {
 
-            const graph = this.graphGenerator(this.stationInfo, value, '(RAWDATA)', this.colorGraph)
+          this.graphClientOption = true
 
-            this.tabs[indx].graph = graph
-            this.tabs[indx].base = ''
-            this.tabs[indx].unit = ''
-            this.cdRef.detectChanges()
-          }
-        },
-        error: err => { this.isLoading = false },
-        complete: () => {
-          this.loadingSpinnerGraph = false
-          this.ToggleGraph = true
-          this.isLoading = false
+          this.obsApi.plotGraph(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel, unit_from, this.colorGraph).subscribe({
+            next: val => {
+              const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`)
+              if (indx !== -1) {
+
+                this.tabs[indx].img = value.url
+                this.tabs[indx].base = ''
+                this.tabs[indx].unit = ''
+
+                this.cdRef.detectChanges()
+              }
+            },
+            error: err => {
+              this.loadingBarGraph = false
+            },
+            complete: () => {
+              this.loadingSpinnerGraph = false
+              this.loadingBarGraph = false
+              this.ToggleGraph = true
+            }
+
+          })
+
+        } else {
+
+          this.graphClientOption = false
+
+          this.obsApi.getTraceData(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel, unit_from)
+            .subscribe({
+              next: value => {
+
+                const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`)
+                if (indx !== -1) {
+
+                  const graph = this.graphGenerator(this.stationInfo, value, '(RAWDATA)', this.colorGraph)
+
+                  this.tabs[indx].graph = graph
+                  this.tabs[indx].base = ''
+                  this.tabs[indx].unit = ''
+                  this.cdRef.detectChanges()
+                }
+              },
+              error: err => { this.isLoading = false, this.loadingBarGraph = false },
+              complete: () => {
+                this.loadingSpinnerGraph = false
+                this.ToggleGraph = true
+                this.isLoading = false
+                this.loadingBarGraph = false
+              }
+            })
+
         }
-      })
+      },
+      error: err => {
+        this.graphClientOption = true
+
+        this.obsApi.plotGraph(dataToUse, tabInfo.dataEst.station, tabInfo.dataEst.channel, unit_from, this.colorGraph).subscribe({
+          next: val => {
+            const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`)
+            if (indx !== -1) {
+
+              this.tabs[indx].img = val.url
+              this.tabs[indx].base = ''
+              this.tabs[indx].unit = ''
+
+              this.cdRef.detectChanges()
+            }
+          },
+          error: err => {
+            this.loadingBarGraph = false
+          },
+          complete: () => {
+            this.loadingBarGraph = false
+            this.loadingSpinnerGraph = false
+            this.loadingBarGraph = false
+            this.ToggleGraph = true
+          }
+
+        })
+
+        // this.graphClientOption = true
+        // this.loadingBarGraph = false
+      },
+
+    })
+
+
 
   }
 

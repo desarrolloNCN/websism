@@ -20,6 +20,12 @@ export class UserProjectsComponent implements OnInit {
 
   private username = ''
   private email = ''
+  private group: any
+  private groupNro :any
+  name = ''
+  usere = ''
+
+  showmsg = true
 
   constructor(
     private userService: RegisterUserService,
@@ -35,33 +41,45 @@ export class UserProjectsComponent implements OnInit {
 
     this.authService.getToken().subscribe({
       next: value => {
-        this.username = value.username
-        this.email = value.email
+        this.username = value.username 
+        this.email, this.usere = value.email
+        this.group = value.groups
+        this.name = value.name
+
+        if (this.group['10']) {
+          this.showmsg = false
+          this.groupNro = 10
+        } else {
+          this.showmsg = true
+          this.groupNro = 2
+        }
+
       },
       error: err => {
         this.loadingSpinner = false
-        
+
         // TODO: Borrar en Produccion
 
-        this.username = 'ga'
-        this.email = 'test@example.com'
+        // this.username = 'ga'
+        // this.email = 'test@example.com'
 
 
-        this.userService.getProjectuser(this.username, this.email).subscribe({
-          next: value => {
-            this.proyectos = value
-          },
-          error: err => {
+        // this.userService.getProjectuser(this.username, this.email).subscribe({
+        //   next: value => {
+        //     this.proyectos = value
+        //   },
+        //   error: err => {
 
-          },
-          complete: () => {
-            this.loadingSpinner = false
-          }
-        })
+        //   },
+        //   complete: () => {
+        //     this.loadingSpinner = false
+        //   }
+        // })
+
       },
       complete: () => {
 
-        this.authService.nUser(this.username, this.email).subscribe({
+        this.authService.nUser(this.username, this.email, this.groupNro).subscribe({
           error: err => {
             // TODO: Agregar en desarrollo
             this.loadingSpinner = false
@@ -119,21 +137,28 @@ export class UserProjectsComponent implements OnInit {
 
     let addFiles: any[] = []
 
+    let shouldContinueIteration = true;
+
     item.files.forEach((e: any) => {
-      let url = e.file || e.string_data
-      let urlconvert = e.url_gen
-      let nombreArchivo: string = url.substring(url.lastIndexOf('/') + 1);
-      let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+      if (shouldContinueIteration) {
+        if (e.status === "No Calibrado") {
+          shouldContinueIteration = false;
+        } else {
+          let url = e.file || e.string_data;
+          let urlconvert = e.url_gen;
+          let nombreArchivo: string = url.substring(url.lastIndexOf('/') + 1);
+          let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
-      addFiles.push({
-        "uuid": item.uuid,
-        "originalName": nombreArchivo,
-        "extension": extension.toLocaleUpperCase() || 'NO EXT',
-        "unit": e.unit,
-        "img": e.img,
-        "urlconvert": urlconvert
-      })
-
+          addFiles.push({
+            "uuid": item.uuid,
+            "originalName": nombreArchivo,
+            "extension": extension.toLocaleUpperCase() || 'NO EXT',
+            "unit": e.unit,
+            "img": e.img,
+            "urlconvert": urlconvert
+          });
+        }
+      }
     });
 
     this.sendData(addFiles, 'user/lectorAcel')

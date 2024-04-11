@@ -27,7 +27,7 @@ export class ArchivoMseedComponent implements OnInit {
   urlXml = ''
   stringdata = ''
 
-  userId = -1
+  userId = 3
 
   hideStaPanel = true
 
@@ -46,6 +46,11 @@ export class ArchivoMseedComponent implements OnInit {
   calibTraces: any = []
   calibCoinc: any = []
 
+  private group: any
+  private groupNro: any
+  name = ''
+  usere = ''
+  
   constructor(
     private matDialogRef: MatDialogRef<LectorDemoComponent>,
     private http: HttpClient,
@@ -77,7 +82,16 @@ export class ArchivoMseedComponent implements OnInit {
         if (value.username == null || value.email == null) {
           this.userId == -1
         } else {
-          this.authApi.nUser(value.username, value.email).subscribe({
+          this.group = value.groups
+          this.name = value.name
+
+          if (this.group['10']) {
+            this.groupNro = 10
+          } else {
+            this.groupNro = 2
+          }
+
+          this.authApi.nUser(value.username, value.email, this.groupNro).subscribe({
             next: nvalue => {
               this.userId = nvalue
             }
@@ -85,9 +99,9 @@ export class ArchivoMseedComponent implements OnInit {
         }
       },
       error: err => {
-        // TODO: CAMBIAR EN MODO PROD a -1
-        this.userId = 1
-        
+        // TODO: CAMBIAR EN MODO PROD a -1 en DEV 3
+        this.userId = -1
+
         this.obsApi.getData(this.url).subscribe({
           next: value => {
             this.tempdata = value.data
@@ -301,11 +315,11 @@ export class ArchivoMseedComponent implements OnInit {
               value.xmlData.forEach((element: any, index: number) => {
                 this.controlForm2.controls[`c_${index}`].setValue(element.calib)
               });
-              
+
               this.controlForm2.controls['unitst'].setValue(value.unit)
 
             },
-            error: err => {   
+            error: err => {
               this.snackBar.open(`⚠️ ${err.error.error}`, 'cerrar', snackBar)
               this.controlForm.enable()
               this.controlForm2.enable()
@@ -464,7 +478,7 @@ export class ArchivoMseedComponent implements OnInit {
       this.tempdata.forEach((element: any, index: number) => {
         if (this.controlForm2.get('c_' + index).value == '') {
           this.controlForm2.get('c_' + index).setValue(1)
-        } 
+        }
       });
     } else {
       this.controlForm.enable()
@@ -488,6 +502,12 @@ export class ArchivoMseedComponent implements OnInit {
       "unit": ''
     }
     this.matDialogRef.close(sendData)
+  }
+
+  onKeyDown(event: KeyboardEvent) {
+    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      event.preventDefault();
+    }
   }
 
 }

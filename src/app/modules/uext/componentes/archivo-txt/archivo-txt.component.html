@@ -111,9 +111,9 @@
 
                     <div *ngFor="let itm of columHead;let i = index">
                         <mat-form-field appearance="outline" class="mtff">
-                            <mat-label>Factor {{i+1}}</mat-label>
+                            <mat-label>Factor Calibracion {{i+1}}</mat-label>
                             <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
-                            <input matInput formControlName='ccc_{{i}}' type="number">
+                            <input matInput formControlName='ccc_{{i}}' type="number" (keydown)="onKeyDown($event)">
                         </mat-form-field>
                     </div>
                 </div>

@@ -204,7 +204,7 @@ export class ArchivoTXTComponent implements OnInit {
     });
 
     headers.forEach((headers: any, index: string) => {
-      this.controlForm.addControl('ccc_' + index, new FormControl('', Validators.required));
+      this.controlForm.addControl('ccc_' + index, new FormControl(1, Validators.required));
     });
 
   }
@@ -292,6 +292,12 @@ export class ArchivoTXTComponent implements OnInit {
       "unit": ''
     }
     this.matDialogRef.close(respData)
+  }
+
+  onKeyDown(event: KeyboardEvent) {
+    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      event.preventDefault();
+    }
   }
 
 }

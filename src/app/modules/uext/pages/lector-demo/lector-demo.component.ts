@@ -1937,7 +1937,6 @@ export class LectorDemoComponent implements OnInit {
     return Object.values(group.value);
   }
 
-  // TODO: Eliminar si no se vuelve usar
   clearData() {
     localStorage.clear()
 

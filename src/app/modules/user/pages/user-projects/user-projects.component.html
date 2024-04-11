@@ -1,7 +1,7 @@
 <div>
 
     <div class="winTitle">
-        <h2><b>Mis Proyectos</b></h2>
+        <h2><b>Mis Proyectos</b> {{' '+ name || ''}} <h3>{{usere || ''}}</h3> </h2> 
         <h4>Aca encontrarás tus projectos</h4>
     </div>
 
@@ -11,8 +11,8 @@
     </button>
 
     <div style="padding: 20px 0 0 0;">
-        <h4>Como usuario con <a style=" cursor: pointer; text-decoration: underline;">plan gratuito</a> solo tiene
-            permitido crear 5 proyectos con 5 archivos. Mas detalles <a style=" cursor: pointer; text-decoration: underline;" href="mailto:informes@ncn.pe" >informes@ncn.pe</a> </h4>
+        <h4 *ngIf="showmsg">Si es usuario con <a style=" cursor: pointer; text-decoration: underline;">plan gratuito</a> solo tiene
+            permitido crear 5 proyectos con 5 archivos.Para mas detalles <a style=" cursor: pointer; text-decoration: underline;" href="mailto:informes@ncn.pe" >informes@ncn.pe</a> </h4>
     </div>
 
     <div>
@@ -30,7 +30,7 @@
 
                 <mat-card-title-group>
                     <img mat-card-sm-image [src]="proj.img == null ? '/assets/ncnLogoColor.png' : proj.img ">
-                    <mat-card-title>{{proj.name}}</mat-card-title>
+                    <mat-card-title>{{proj.name || 'Sin Tutulo'}}</mat-card-title>
                     <mat-card-subtitle>{{proj.fecha_creacion | date: 'short'}}</mat-card-subtitle>
                 </mat-card-title-group>
 

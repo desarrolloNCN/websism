@@ -59,6 +59,10 @@ export class NewProjectComponent implements OnInit {
   private username = ''
   private email = ''
   private idUser = ''
+  private group: any
+  private groupNro: any
+  name = ''
+  usere = ''
 
   constructor(
     private matDailogRef: MatDialogRef<UserProjectsComponent>,
@@ -85,51 +89,59 @@ export class NewProjectComponent implements OnInit {
         this.username = value.username
         this.email = value.email
 
+        this.group = value.groups
+        this.name = value.name
+
+        if (this.group['10']) {
+          this.groupNro = 10
+        } else {
+          this.groupNro = 2
+        }
       },
       error: err => {
 
         // TODO: Borrar en Produccion
 
-        if (this.data.uuid) {
+        // if (this.data.uuid) {
 
-          this.titleDialog = 'Editar Proyecto'
-          this.subtitleDialog = 'Asigne un nuevo nombre a su proyecto, añada nuevos archivos con los que va a trabajar y'
-          this.subtitleStrong = 'Actualizar Proyecto'
+        //   this.titleDialog = 'Editar Proyecto'
+        //   this.subtitleDialog = 'Asigne un nuevo nombre a su proyecto, añada nuevos archivos con los que va a trabajar y'
+        //   this.subtitleStrong = 'Actualizar Proyecto'
 
-          this.buttonSubmitForm = 'Actualizar Proyecto'
+        //   this.buttonSubmitForm = 'Actualizar Proyecto'
 
-          let uuid = this.data.uuid
+        //   let uuid = this.data.uuid
 
-          let proj_name = this.controlForm.controls['projectName'].setValue(this.data.name)
-          let proj_desp = this.controlForm.controls['descript'].setValue(this.data.descrip)
+        //   let proj_name = this.controlForm.controls['projectName'].setValue(this.data.name)
+        //   let proj_desp = this.controlForm.controls['descript'].setValue(this.data.descrip)
 
-          this.defImg = this.data.img || '/assets/ncnLogoColor.png'
+        //   this.defImg = this.data.img || '/assets/ncnLogoColor.png'
 
-          this.data.files.forEach((e: any) => {
-            let file_name = e.filename
+        //   this.data.files.forEach((e: any) => {
+        //     let file_name = e.filename
 
-            let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
-            let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+        //     let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
+        //     let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
-            let formatoNombre = this.formatearNombreArchivo(file_name, extension, 7)
+        //     let formatoNombre = this.formatearNombreArchivo(file_name, extension, 12)
 
-            this.addedFiles.push({
-              "id": e.id,
-              "file": '',
-              "fileName": formatoNombre,
-              "originalName": file_name,
-              "status": e.status,
-              "extension": extension.toLocaleUpperCase() || 'NO EXT',
-              "string_data": e.string_data,
-              "urlconvert": e.url_gen,
-              "unit": e.unit
-            })
-          });
-        }
+        //     this.addedFiles.push({
+        //       "id": e.id,
+        //       "file": '',
+        //       "fileName": formatoNombre,
+        //       "originalName": file_name,
+        //       "status": e.status,
+        //       "extension": extension.toLocaleUpperCase() || 'NO EXT',
+        //       "string_data": e.string_data,
+        //       "urlconvert": e.url_gen,
+        //       "unit": e.unit
+        //     })
+        //   });
+        // }
 
-        this.username = 'ga'
-        this.email = 'test@example.com'
-        this.idUser = `${1}`
+        // this.username = 'ga'
+        // this.email = 'test@example.com'
+        // this.idUser = `${3}`
       },
       complete: () => {
 
@@ -154,7 +166,7 @@ export class NewProjectComponent implements OnInit {
             let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
             let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
-            let formatoNombre = this.formatearNombreArchivo(file_name, extension, 7)
+            let formatoNombre = this.formatearNombreArchivo(file_name, extension, 12)
 
             this.addedFiles.push({
               "id": e.id,
@@ -170,13 +182,13 @@ export class NewProjectComponent implements OnInit {
           });
         }
 
-        this.authService.nUser(this.username, this.email).subscribe({
+        this.authService.nUser(this.username, this.email, this.groupNro).subscribe({
           next: value => {
             this.idUser = value
           },
           error: err => {
             // TODO: Borrar en Produccion
-            this.idUser = `${1}`
+            this.idUser = `${3}`
           }
         })
 
@@ -223,7 +235,7 @@ export class NewProjectComponent implements OnInit {
         statusCalib = 'No Calibrado'
       }
 
-      let formatoNombre = this.formatearNombreArchivo(archivos[0].name, extension, 7)
+      let formatoNombre = this.formatearNombreArchivo(archivos[0].name, extension, 12)
 
       this.regApi.uploadProjectFileUser(this.arch, this.idUser, idProj, archivos[0].name, statusCalib).subscribe({
         next: value => {
@@ -233,9 +245,9 @@ export class NewProjectComponent implements OnInit {
           } else {
             let urlconvert = ''
 
-            if (value.f == 'MSEED') {
+            if (value.f == 'MSEED' || extension == 'TXT') {
               statusCalib = 'No Calibrado'
-              urlconvert = ''
+              urlconvert = value.file
             } else if (value.f == 'KINEMETRICS_EVT' || extension == 'EVT') {
               urlconvert = value.file
             }
@@ -248,7 +260,7 @@ export class NewProjectComponent implements OnInit {
               "extension": value.f || extension.toLocaleUpperCase() || 'NO EXT',
               "id": value.id,
               "url": value.file,
-              "urlconvert": urlconvert
+              "urlconvert": value.file
             })
           }
 
@@ -299,7 +311,9 @@ export class NewProjectComponent implements OnInit {
 
     if (longitudSinExtension > longitudVisible) {
       const parteVisible = nombre.substring(0, longitudVisible);
-      return parteVisible + '...' + extension;
+      // ! Cambiar si es necesario
+      //return parteVisible + '...' + extension;
+      return parteVisible + '...';
     } else {
       return nombre;
     }
@@ -336,7 +350,7 @@ export class NewProjectComponent implements OnInit {
         statusCalib = 'No Calibrado'
       }
 
-      let formatoNombre = this.formatearNombreArchivo(nombreArchivo, extension, 7)
+      let formatoNombre = this.formatearNombreArchivo(nombreArchivo, extension, 12)
 
       this.regApi.uploadProjectFileUser(urlData, this.idUser, idProj, nombreArchivo, statusCalib).subscribe({
         next: value => {
@@ -345,9 +359,9 @@ export class NewProjectComponent implements OnInit {
           } else {
             let urlconvert = ''
 
-            if (value.f == 'MSEED') {
+            if (value.f == 'MSEED' || extension == 'TXT') {
               statusCalib = 'No Calibrado'
-              urlconvert = ''
+              urlconvert = value.string_data
             } else if (value.f == 'KINEMETRICS_EVT' || extension == 'EVT') {
               urlconvert = value.string_data
             }
@@ -374,24 +388,17 @@ export class NewProjectComponent implements OnInit {
         }
       })
 
-      // this.addedFiles.push({
-      //   "file": '',
-      //   "fileName": formatoNombre,
-      //   "originalName": nombreArchivo,
-      //   "status": statusCalib,
-      //   "extension": extension.toLocaleUpperCase() || 'NO EXT',
-      //   "url": urlData
-      // })
-
       this.controlForm2.get('url').setValue('')
 
     } else {
-      this.snackBar.open('Ingrese URL valida')
+      this.snackBar.open('Ingrese una URL', 'cerrar', snackBar)
+      this.showProgressBar = false
     }
 
   }
 
   calibrarFile(item: any, index: number) {
+    console.log('calibrar', item);
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 5 * 1000;
@@ -404,7 +411,7 @@ export class NewProjectComponent implements OnInit {
 
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
-    matDialogConfig.data = item.url
+    matDialogConfig.data = item.urlconvert
 
     if (item.extension == 'TXT') {
       this.matdialog.open(ArchivoTXTComponent, matDialogConfig).afterClosed().subscribe({

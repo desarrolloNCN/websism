@@ -29,16 +29,16 @@
             <div fxLayout="column" fxFlex="70">
                 <mat-form-field appearance="outline">
                     <mat-label>Nombre del Proyecto</mat-label>
-                    <input matInput #prjname type="text" formControlName="projectName" maxlength="30" required="true">
-                    <mat-hint align="end">{{prjname.value.length}} / 30</mat-hint>
+                    <input matInput #prjname type="text" formControlName="projectName" maxlength="100" required="true">
+                    <mat-hint align="end">{{prjname.value.length}} / 100</mat-hint>
                     <mat-error *ngIf="controlForm.get('projectName')?.hasError('required')"> Ingrese el nombre
                         del <strong>Proyecto</strong> </mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
                     <mat-label>Descripcion</mat-label>
-                    <textarea #descript matInput maxlength="256" type="text" formControlName="descript"></textarea>
-                    <mat-hint align="end">{{descript.value.length}} / 256</mat-hint>
+                    <textarea #descript matInput maxlength="250" type="text" formControlName="descript"></textarea>
+                    <mat-hint align="end">{{descript.value.length}} / 250</mat-hint>
                 </mat-form-field>
             </div>
 
@@ -82,13 +82,13 @@
             <div fxLayout="row" fxLayoutAlign="space-around center"
                 style="background-color: rgb(245, 245, 245); border-radius: 5px; padding: 5px;">
                 <p class="filename"> <b>NOMBRE</b> </p>
-                <p class="filename"> <b>EXTENSION</b> </p>
+                <p class="filename"> <b>FORMATO</b> </p>
                 <p class="filename"> <b>ESTADO</b> </p>
                 <p class="filename"> <b>ACCION</b> </p>
             </div>
 
             <div *ngFor="let item of addedFiles; let i = index" fxLayout="row" fxLayoutAlign="space-around center">
-                <p class="filename"> {{item.fileName}} </p>
+                <p class="filename" matTooltip="{{item.originalName}}" matTooltipPosition="above"> {{item.fileName}} </p>
                 <p class="filename"> {{item.extension}} </p>
                 <p class="filename" [ngStyle]="setColorStationChannel(item.status)"> {{item.status}}
                     <!-- <mat-progress-bar itemref="showCalibration" mode="indeterminate">

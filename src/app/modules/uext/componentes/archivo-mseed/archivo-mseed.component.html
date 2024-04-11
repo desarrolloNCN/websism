@@ -182,7 +182,7 @@
                                     <mat-label>{{itm.station + '.' + itm.location + '.' + itm.channel ||
                                         ''}}</mat-label>
                                     <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
-                                    <input matInput type="number" formControlName='c_{{i}}'>
+                                    <input matInput type="number" formControlName='c_{{i}}' (keydown)="onKeyDown($event)">
                                 </mat-form-field>
 
                                 <!-- <mat-form-field appearance="outline" class="mtfs">

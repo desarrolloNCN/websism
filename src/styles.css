@@ -52,20 +52,20 @@ body {
 }
 
 @keyframes pulse {
-	0% {
-		opacity: 1;
-		transform: scale(0.2);
-	}
+    0% {
+        opacity: 1;
+        transform: scale(0.2);
+    }
 
-	80% {
-		opacity: 0;
-		transform: scale(1.2);
-	}
+    80% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
 
-	100% {
-		opacity: 0;
-		transform: scale(2.2);
-	}
+    100% {
+        opacity: 0;
+        transform: scale(2.2);
+    }
 }
 
 .pulse {
@@ -82,11 +82,17 @@ body {
     border-radius: 5px;
     border: none;
     background: #6e6d70c9;
-    
+
     color: #DFDEDF;
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
     cursor: pointer;
-  }
-  
+}
+
+/* Apunta a todos los inputs con tipo number */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}

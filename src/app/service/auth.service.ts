@@ -33,13 +33,14 @@ export class AuthService {
     )
   }
 
-  nUser(username: string, email: string): Observable<any> {
+  nUser(username: string, email: string, group?: number): Observable<any> {
 
     const url = 'user/'
 
     const sendData = {
       "username": username,
-      "email": email
+      "email": email,
+      "g": group
     }
 
     return this.http.post<any>(url, sendData).pipe(
