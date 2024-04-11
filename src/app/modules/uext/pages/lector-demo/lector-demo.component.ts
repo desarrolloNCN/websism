@@ -2233,8 +2233,7 @@ export class LectorDemoComponent implements OnInit {
   }
 
   proceseDataDownload(value: any, net: string, sta: string, loc: string, cha: string, m: string, extrData: any) {
-    console.log(extrData);
-    
+
     let dataX = [];
     let dataY = [];
     let mag = '';

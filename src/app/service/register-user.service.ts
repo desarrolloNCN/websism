@@ -174,7 +174,7 @@ export class RegisterUserService {
     );
   }
 
-  putProject(idPro: string, name: string, desp: string, img:  File | string | undefined) {
+  putProject(idPro: string, name: string, desp: string, img:  File | string | undefined, files?: object) {
     const formData = new FormData();
 
     const url = `new_pro/?id=${idPro}`
@@ -187,6 +187,8 @@ export class RegisterUserService {
     }else{
       formData.append('img_proj', '')
     }
+
+    formData.append('files', JSON.stringify(files))
 
     return this.http.put<any>(url, formData).pipe(
       catchError(error => {

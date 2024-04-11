@@ -127,7 +127,7 @@ export class VisorGraphComponent implements OnInit {
   usere = ''
 
   // TODO: cambiar esto en Produccion a -1, 3 en dev
-  userId = -1
+  userId = 3
 
   plotedimages: any = []
 
@@ -207,7 +207,7 @@ export class VisorGraphComponent implements OnInit {
 
         if (value.username == null || value.email == null) {
           // TODO: cambiar esto en Produccion a -1, 3 en dev
-          this.userId == -1
+          this.userId == 3
         } else {
           this.group = value.groups
           this.name = value.name
@@ -233,7 +233,7 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         //TODO: cambiar esto en Produccion a -1, 3 en dev
-        this.userId == -1
+        this.userId == 3
         this.graphClientOption = true
       },
     })
@@ -255,8 +255,8 @@ export class VisorGraphComponent implements OnInit {
           this.btnSisHide = true
 
           this.proyectData = valueD
-          // console.log('Visor',this.proyectData);
-
+          console.log('Visor OnInit',this.proyectData);
+          
           from(this.proyectData).pipe(
             concatMap((e: any, index: number) =>
               this.obsApi.getData(e.urlconvert).pipe(
@@ -1462,7 +1462,8 @@ export class VisorGraphComponent implements OnInit {
   autoAjuste(index: number) {
 
     this.reloadSettingUser()
-
+    console.log();
+    
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
@@ -2663,17 +2664,16 @@ export class VisorGraphComponent implements OnInit {
   }
 
   savePorgressProyect() {
-    let uuid = this.proyectData[0].uuid
-    let tabInfo = this.tabs
-    this.obsUser.putProjectTab(uuid, tabInfo).subscribe({
-      error: err => {
-        console.log(err);
-      },
-      complete: () => {
-        console.log('Completo');
-
-      }
-    })
+    console.log('Proyecto Data',this.proyectData);
+    console.log('Info Tabs',this.tabs)
+    // let uuid = this.proyectData[0].uuid
+    // let tabInfo = this.tabs
+    // this.obsUser.putProjectTab(uuid, tabInfo).subscribe({
+    //   error: err => {
+    //   },
+    //   complete: () => {
+    //   }
+    // })
 
   }
 

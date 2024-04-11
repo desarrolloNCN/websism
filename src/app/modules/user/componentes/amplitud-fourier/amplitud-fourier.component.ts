@@ -89,8 +89,6 @@ export class AmplitudFourierComponent implements OnInit {
 
         const [rangoNumeros, rangoStrings] = this.encontrarRango(value.amplitud);
 
-        console.log(rangoNumeros, rangoStrings);
-        
 
         this.layout = {
           title: {

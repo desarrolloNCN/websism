@@ -216,8 +216,6 @@ export class ArchivoTXTComponent implements OnInit {
     snackBar.panelClass = ['snackBar-validator'];
 
     if (this.controlForm.valid) {
-      console.log(this.controlForm.value);
-      
 
       this.obsApi.convertToStream(this.controlForm.value).subscribe({
         next: value => {

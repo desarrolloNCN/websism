@@ -42,7 +42,8 @@ export class UserProjectsComponent implements OnInit {
     this.authService.getToken().subscribe({
       next: value => {
         this.username = value.username 
-        this.email, this.usere = value.email
+        this.email = value.email
+        this.usere = value.email
         this.group = value.groups
         this.name = value.name
 
@@ -60,21 +61,21 @@ export class UserProjectsComponent implements OnInit {
 
         // TODO: Borrar en Produccion
 
-        // this.username = 'ga'
-        // this.email = 'test@example.com'
+        this.username = 'ga'
+        this.email = 'test@example.com'
 
 
-        // this.userService.getProjectuser(this.username, this.email).subscribe({
-        //   next: value => {
-        //     this.proyectos = value
-        //   },
-        //   error: err => {
+        this.userService.getProjectuser(this.username, this.email).subscribe({
+          next: value => {
+            this.proyectos = value
+          },
+          error: err => {
 
-        //   },
-        //   complete: () => {
-        //     this.loadingSpinner = false
-        //   }
-        // })
+          },
+          complete: () => {
+            this.loadingSpinner = false
+          }
+        })
 
       },
       complete: () => {
@@ -123,16 +124,18 @@ export class UserProjectsComponent implements OnInit {
         }
       },
       error: err => {
-
+        this.snackBar.open(`⚠️ ${err}`, 'cerrar', snackBar)
       },
       complete: () => {
+        this.snackBar.open('✅ Proyecto Creado', 'cerrar', snackBar)
         // this.snackBar.open(`⚠️ ${matDialogConfig.data.msg}`, 'cerrar', snackBar)
       }
     })
   }
 
   abrirLector(item: any) {
-
+    console.log('abrirLector', item);
+    
     this.userService.resetService()
 
     let addFiles: any[] = []
@@ -151,6 +154,7 @@ export class UserProjectsComponent implements OnInit {
 
           addFiles.push({
             "uuid": item.uuid,
+            "id": e.id,
             "originalName": nombreArchivo,
             "extension": extension.toLocaleUpperCase() || 'NO EXT',
             "unit": e.unit,
@@ -166,7 +170,6 @@ export class UserProjectsComponent implements OnInit {
   }
 
   editProyec(item: any) {
-    console.log('EDIt', item);
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
     matDialogConfig.data = item
