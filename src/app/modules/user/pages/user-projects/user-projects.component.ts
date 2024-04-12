@@ -61,8 +61,8 @@ export class UserProjectsComponent implements OnInit {
 
         // TODO: Borrar en Produccion
 
-        this.username = 'ga'
-        this.email = 'test@example.com'
+        this.username = 'admin'
+        this.email = 'admin@example.com'
 
 
         this.userService.getProjectuser(this.username, this.email).subscribe({

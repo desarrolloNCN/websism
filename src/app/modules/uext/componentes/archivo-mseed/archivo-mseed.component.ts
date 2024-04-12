@@ -99,8 +99,8 @@ export class ArchivoMseedComponent implements OnInit {
         }
       },
       error: err => {
-        // TODO: CAMBIAR EN MODO PROD a -1 en DEV 3
-        this.userId = 3
+        // TODO: CAMBIAR EN MODO PROD a -1 en DEV 1
+        this.userId = 1
 
         this.obsApi.getData(this.url).subscribe({
           next: value => {

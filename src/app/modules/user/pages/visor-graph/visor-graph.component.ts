@@ -126,8 +126,8 @@ export class VisorGraphComponent implements OnInit {
   name = ''
   usere = ''
 
-  // TODO: cambiar esto en Produccion a -1, 3 en dev
-  userId = 3
+  // TODO: cambiar esto en Produccion a -1, 1 en dev
+  userId = 1
 
   plotedimages: any = []
 
@@ -152,6 +152,7 @@ export class VisorGraphComponent implements OnInit {
   stopMseed: Subscription | any
   stopTxt: Subscription | any
   stopData: Subscription | any
+  stopProjData: Subscription | any
   graphClientOption = false
 
   proyectData: any[] = [];
@@ -206,8 +207,8 @@ export class VisorGraphComponent implements OnInit {
       next: value => {
 
         if (value.username == null || value.email == null) {
-          // TODO: cambiar esto en Produccion a -1, 3 en dev
-          this.userId == 3
+          // TODO: cambiar esto en Produccion a -1, 1 en dev
+          this.userId == 1
         } else {
           this.group = value.groups
           this.name = value.name
@@ -232,8 +233,8 @@ export class VisorGraphComponent implements OnInit {
         }
       },
       error: err => {
-        //TODO: cambiar esto en Produccion a -1, 3 en dev
-        this.userId == 3
+        //TODO: cambiar esto en Produccion a -1, 1 en dev
+        this.userId == 1
         this.graphClientOption = true
       },
     })
@@ -339,6 +340,7 @@ export class VisorGraphComponent implements OnInit {
     if (this.navigationSubscription) {
       this.navigationSubscription.unsubscribe();
       this.obsUser.resetService()
+      this.deleteFile()
     }
   }
 
@@ -346,6 +348,7 @@ export class VisorGraphComponent implements OnInit {
     const confirmed = window.confirm('-¿Estás seguro de que deseas abandonar esta página?');
     if (!confirmed) {
       this.obsUser.resetService()
+      this.deleteFile()
       this.router.navigate(['/user/lectorAcel']);
     } else {
       return

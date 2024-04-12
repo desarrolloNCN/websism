@@ -139,9 +139,9 @@ export class NewProjectComponent implements OnInit {
           });
         }
 
-        this.username = 'ga'
-        this.email = 'test@example.com'
-        this.idUser = `${3}`
+        this.username = 'admin'
+        this.email = 'admin@example.com'
+        this.idUser = `${1}`
       },
       complete: () => {
 
