@@ -174,21 +174,20 @@ export class RegisterUserService {
     );
   }
 
-  putProject(idPro: string, name: string, desp: string, img:  File | string | undefined, files?: object) {
+  putProject(idPro: string, name: string, desp: string, img:  File | string | undefined, merge: string) {
     const formData = new FormData();
 
     const url = `new_pro/?id=${idPro}`
 
     formData.append('name', name)
     formData.append('desp', desp)
+    formData.append('merge', merge)
     
     if(img instanceof File){
       formData.append('img_proj', img)
     }else{
       formData.append('img_proj', '')
     }
-
-    formData.append('files', JSON.stringify(files))
 
     return this.http.put<any>(url, formData).pipe(
       catchError(error => {

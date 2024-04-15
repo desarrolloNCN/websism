@@ -506,13 +506,37 @@ export class NewProjectComponent implements OnInit {
 
     let projName = this.controlForm.get('projectName').value
     let projDesp = this.controlForm.get('descript').value
+    let checkMerge = this.controlForm.get('checkOps').value
 
     let img = this.imgproj || this.defImg
 
-    console.log('Redirector',this.addedFiles);
-    
+    let msg_proj = ''
 
-    this.regApi.putProject(idProj, projName, projDesp, img).subscribe({
+    console.log('Redirector', this.addedFiles);
+
+    this.regApi.putProject(idProj, projName, projDesp, img, checkMerge).subscribe({
+      next: (value: any[]) => {
+        if(value.length > 0){
+          this.addedFiles = []
+
+          value.forEach((e: any) => {
+  
+            let nombreArchivo: string = e.filename.substring(e.filename.lastIndexOf('/') + 1);
+            let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+  
+            this.addedFiles.push({
+              "id": e.id,
+              "fileName": e.filename,
+              "originalName": e.filename,
+              "status": e.status,
+              "extension": extension.toLocaleUpperCase() || 'NO EXT',
+              "urlconvert": e.url_gen,
+              "unit": e.unit
+            })
+  
+          });
+        }
+      },
       error: err => {
         this.snackBar.open('⚠️ Problema con el Registro ', 'cerrar', snackBar)
         this.matDailogRef.close()

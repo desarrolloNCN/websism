@@ -77,6 +77,10 @@
             <mat-progress-bar mode="indeterminate"></mat-progress-bar>
         </div>
 
+        <!-- <table mat-table>
+
+        </table> -->
+
         <div class="filesContainer">
 
             <div fxLayout="row" fxLayoutAlign="space-around center"
@@ -108,13 +112,13 @@
         </div>
 
         <div>
-            <mat-checkbox formControlName="checkOps">Opciones Avanzadas</mat-checkbox>
-            <div *ngIf="this.controlForm.get('checkOps').value" [@enterAnimation2]>
+            <mat-checkbox formControlName="checkOps">Realizar Merge</mat-checkbox>
+            <!-- <div *ngIf="this.controlForm.get('checkOps').value" [@enterAnimation2]>
                 <mat-form-field appearance="outline">
                     <mat-label>Merge</mat-label>
                     <input matInput>
                 </mat-form-field>
-            </div>
+            </div> -->
         </div>
 
         <button mat-flat-button color="primary" type="submit">

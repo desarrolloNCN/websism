@@ -205,6 +205,10 @@ export class ArchivoMseedComponent implements OnInit {
   }
 
   rellenarFactoresUser() {
+
+    let unidad = this.calibTraces[0].units
+    this.controlForm2.controls['unitst'].setValue(unidad)
+
     this.calibCoinc.forEach((e: any, index: number) => {
       const control = `c_${index}`
       this.controlForm2.controls[control].setValue(e.calib)

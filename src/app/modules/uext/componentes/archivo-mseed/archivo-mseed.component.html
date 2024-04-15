@@ -83,6 +83,7 @@
                             <h5> LOC. </h5>
                             <h5> CHA. </h5>
                             <h5> CAL. </h5>
+                            <h5> UND. </h5>
                         </div>
 
                         <div *ngFor="let item of calibCoinc">
@@ -101,6 +102,7 @@
                                         item.calib.toExponential(2)
                                         }}
                                 </h5>
+                                <h5> {{item.units || '-'}}</h5>
                             </div>
                         </div>
                     </div>
