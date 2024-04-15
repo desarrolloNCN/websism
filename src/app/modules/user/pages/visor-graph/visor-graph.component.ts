@@ -1,7 +1,7 @@
 import { trigger, transition, style, animate, keyframes } from '@angular/animations';
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { MatTab, MatTabChangeEvent } from '@angular/material/tabs';
@@ -18,6 +18,7 @@ import { CustomEvent, ImageViewerConfig } from 'ngx-image-viewer';
 import { AuthService } from 'src/app/service/auth.service';
 import { SismosHistoricosComponent } from 'src/app/modules/uext/componentes/sismos-historicos/sismos-historicos.component';
 import { RegisterUserService } from 'src/app/service/register-user.service';
+import { LabelType, Options } from '@angular-slider/ngx-slider';
 
 @Component({
   selector: 'app-visor-graph',
@@ -127,7 +128,7 @@ export class VisorGraphComponent implements OnInit {
   usere = ''
 
   // TODO: cambiar esto en Produccion a -1, 1 en dev
-  userId = 1
+  userId = -1
 
   plotedimages: any = []
 
@@ -208,7 +209,7 @@ export class VisorGraphComponent implements OnInit {
 
         if (value.username == null || value.email == null) {
           // TODO: cambiar esto en Produccion a -1, 1 en dev
-          this.userId == 1
+          this.userId == -1
         } else {
           this.group = value.groups
           this.name = value.name
@@ -234,7 +235,7 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         //TODO: cambiar esto en Produccion a -1, 1 en dev
-        this.userId == 1
+        this.userId == -1
         this.graphClientOption = true
       },
     })
@@ -256,8 +257,8 @@ export class VisorGraphComponent implements OnInit {
           this.btnSisHide = true
 
           this.proyectData = valueD
-          console.log('Visor OnInit',this.proyectData);
-          
+          console.log('Visor OnInit', this.proyectData);
+
           from(this.proyectData).pipe(
             concatMap((e: any, index: number) =>
               this.obsApi.getData(e.urlconvert).pipe(
@@ -754,11 +755,10 @@ export class VisorGraphComponent implements OnInit {
 
   leer(e: any, indexFile?: number) {
 
-
     for (const elem of this.tabs) {
       if (elem.label == `${e.station}.${e.channel}`) {
         alert('Ya hay una pestaña con esa estacion')
-        return
+        break
       }
     }
 
@@ -771,9 +771,7 @@ export class VisorGraphComponent implements OnInit {
 
     var dataString, dataFile = this.proyectData[indexFile || 0].urlconvert
     var og_unit: string = this.proyectData[indexFile || 0].unit
-    // var dataString: string = localStorage.getItem('urlSearched')!
-    // var dataFile: string = localStorage.getItem('urlFileUpload')!
-    //var og_unit: string = localStorage.getItem('ogUnit')!
+
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -877,7 +875,33 @@ export class VisorGraphComponent implements OnInit {
     const TrimForm = new FormGroup({
       t_min: new FormControl('', [Validators.required]),
       t_max: new FormControl('', [Validators.required]),
+      sliderControl: new FormControl([20, 80])
     })
+
+
+
+    const st = new Date(e.starttime).getTime()
+    const et = new Date(e.endtime).getTime()
+
+    const diff = et - st;
+    const s = diff / 1000
+
+    let sliderOption: Options = {
+      floor: 0,
+      ceil: s,
+      step: 0.1,
+      tickStep: 0.1,
+      translate: (value: number, label: LabelType): string => {
+        switch (label) {
+          case LabelType.Low:
+            return value + ' seg.';
+          case LabelType.High:
+            return value + ' seg.';
+          default:
+            return '' + value;
+        }
+      }
+    }
 
     this.tabs.push({
       label: `${e.station}.${e.channel}`,
@@ -888,7 +912,10 @@ export class VisorGraphComponent implements OnInit {
       TrimForm,
       graph,
       indexFilePanel: indexFilePanel,
-      img
+      img,
+      sliderOption,
+      tmin: 0,
+      tmax: s
     });
 
     this.lastIndexTab = this.tabs.length - 1
@@ -1466,7 +1493,7 @@ export class VisorGraphComponent implements OnInit {
 
     this.reloadSettingUser()
     console.log();
-    
+
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
@@ -1619,11 +1646,36 @@ export class VisorGraphComponent implements OnInit {
     let cha = this.tabs[index].dataEst.channel
     let allData = this.tabs[index].dataEst
 
+    const t_min = parseFloat(this.tabs[index].TrimForm.get('t_min').value);
+    const t_max = parseFloat(this.tabs[index].TrimForm.get('t_max').value);
+
+    let utc_min: any
+    let utc_max: any
+
+    let min = ''
+    let max = ''
+
+    if (isNaN(t_min) && isNaN(t_max)) {
+      min = ''
+      max = ''
+    } else {
+      utc_min = new Date(this.tabs[index].sttime);
+      utc_max = new Date(this.tabs[index].sttime);
+
+      utc_min.setUTCSeconds(utc_min.getUTCSeconds() + t_min);
+      utc_max.setUTCSeconds(utc_max.getUTCSeconds() + t_max);
+
+      min = utc_min.toISOString()
+      max = utc_max.toISOString()
+    }
+
     let sendData = {
       "url": dataToUse,
       "station": sta,
       "channel": cha,
-      "allData": allData
+      "allData": allData,
+      "t_min": min,
+      "t_max": max
     }
 
     matDialogConfig.data = sendData
@@ -1653,11 +1705,36 @@ export class VisorGraphComponent implements OnInit {
     let cha = this.tabs[index].dataEst.channel
     let allData = this.tabs[index].dataEst
 
+    const t_min = parseFloat(this.tabs[index].TrimForm.get('t_min').value);
+    const t_max = parseFloat(this.tabs[index].TrimForm.get('t_max').value);
+
+    let utc_min: any
+    let utc_max: any
+
+    let min = ''
+    let max = ''
+
+    if (isNaN(t_min) && isNaN(t_max)) {
+      min = ''
+      max = ''
+    } else {
+      utc_min = new Date(this.tabs[index].sttime);
+      utc_max = new Date(this.tabs[index].sttime);
+
+      utc_min.setUTCSeconds(utc_min.getUTCSeconds() + t_min);
+      utc_max.setUTCSeconds(utc_max.getUTCSeconds() + t_max);
+
+      min = utc_min.toISOString()
+      max = utc_max.toISOString()
+    }
+
     let sendData = {
       "url": dataToUse,
       "station": sta,
       "channel": cha,
-      "allData": allData
+      "allData": allData,
+      "t_min": min,
+      "t_max": max
     }
 
     matDialogConfig.data = sendData
@@ -2300,11 +2377,11 @@ export class VisorGraphComponent implements OnInit {
             next: val => {
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`)
               if (indx !== -1) {
-
-                this.tabs[indx].img = value.url
+  
+                this.tabs[indx].img = val.url
                 this.tabs[indx].base = ''
                 this.tabs[indx].unit = ''
-
+  
                 this.cdRef.detectChanges()
               }
             },
@@ -2312,11 +2389,12 @@ export class VisorGraphComponent implements OnInit {
               this.loadingBarGraph = false
             },
             complete: () => {
+              this.loadingBarGraph = false
               this.loadingSpinnerGraph = false
               this.loadingBarGraph = false
               this.ToggleGraph = true
             }
-
+  
           })
 
         } else {
@@ -2667,8 +2745,8 @@ export class VisorGraphComponent implements OnInit {
   }
 
   savePorgressProyect() {
-    console.log('Proyecto Data',this.proyectData);
-    console.log('Info Tabs',this.tabs)
+    console.log('Proyecto Data', this.proyectData);
+    console.log('Info Tabs', this.tabs)
     // let uuid = this.proyectData[0].uuid
     // let tabInfo = this.tabs
     // this.obsUser.putProjectTab(uuid, tabInfo).subscribe({

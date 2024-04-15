@@ -55,6 +55,9 @@ export class AmplitudFourierComponent implements OnInit {
     let sta = this.dataFourier.station
     let cha = this.dataFourier.channel
 
+    let min = this.dataFourier.t_min
+    let max = this.dataFourier.t_max
+
     let allData = this.dataFourier.allData
 
     let net = this.dataFourier.allData.network
@@ -73,7 +76,7 @@ export class AmplitudFourierComponent implements OnInit {
     let fechaFn = this.dateConverter(this.dataFourier.allData.endtime)
 
 
-    this.obsApi.createFourier(url, sta, cha).subscribe({
+    this.obsApi.createFourier(url, sta, cha, min, max).subscribe({
       next: value => {
 
         this.trace1 = {

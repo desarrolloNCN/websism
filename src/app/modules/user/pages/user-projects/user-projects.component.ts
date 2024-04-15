@@ -61,21 +61,21 @@ export class UserProjectsComponent implements OnInit {
 
         // TODO: Borrar en Produccion
 
-        this.username = 'admin'
-        this.email = 'admin@example.com'
+        // this.username = 'admin'
+        // this.email = 'admin@example.com'
 
 
-        this.userService.getProjectuser(this.username, this.email).subscribe({
-          next: value => {
-            this.proyectos = value
-          },
-          error: err => {
+        // this.userService.getProjectuser(this.username, this.email).subscribe({
+        //   next: value => {
+        //     this.proyectos = value
+        //   },
+        //   error: err => {
 
-          },
-          complete: () => {
-            this.loadingSpinner = false
-          }
-        })
+        //   },
+        //   complete: () => {
+        //     this.loadingSpinner = false
+        //   }
+        // })
 
       },
       complete: () => {
@@ -192,9 +192,19 @@ export class UserProjectsComponent implements OnInit {
 
     const indice = this.proyectos.indexOf(item);
 
+    const matDialogConfig = new MatDialogConfig()
+    matDialogConfig.disableClose = true;
+
+    let data = {
+      "title" : "Borrar Archivo",
+      "quest" : "Desea borrar este Archivo?"
+    }
+
+    matDialogConfig.data = data
+
     if (indice !== -1) {
 
-      this.matDialog.open(DeleteConfirmationComponent).afterClosed().subscribe({
+      this.matDialog.open(DeleteConfirmationComponent, matDialogConfig).afterClosed().subscribe({
         next: value => {
           if (value == true) {
             this.userService.delProject(item.uuid).subscribe({

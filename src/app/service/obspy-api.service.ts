@@ -371,7 +371,9 @@ export class ObspyAPIService {
   createFourier(
     data: string,
     station: string,
-    channel: string
+    channel: string,
+    tmin: string,
+    tmax: string
   ) {
 
     const url = 'fourier/'
@@ -379,7 +381,9 @@ export class ObspyAPIService {
     let senData = {
       "data": data,
       "station_selected": station,
-      "channel_selected": channel
+      "channel_selected": channel,
+      "t_min": tmin,
+      "t_max":tmax
     }
 
     return this.http.post<any>(url, senData).pipe(
@@ -393,7 +397,9 @@ export class ObspyAPIService {
   createFourierEspc(
     data: string,
     station: string,
-    channel: string
+    channel: string,
+    tmin: string,
+    tmax: string
   ) {
 
     const url = 'espectro-fourier/'
@@ -401,7 +407,9 @@ export class ObspyAPIService {
     let senData = {
       "data": data,
       "station_selected": station,
-      "channel_selected": channel
+      "channel_selected": channel,
+      "t_min": tmin,
+      "t_max":tmax
     }
 
     return this.http.post<any>(url, senData).pipe(

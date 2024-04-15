@@ -1,7 +1,8 @@
 <div *ngIf="hideStaPanel" fxLayout="row" fxLayoutAlign="space-between center " [@enterAnimation2] class="winTitle">
     <div>
         <h2><b>Lector de Archivos Acelerográficos</b></h2>
-        <h4 fxHide.lt-sm>Podras manipular archivos de diferentes <a (click)="redirectAcel()" matTooltip="Reftek SMA2">acelerografos</a> y aplicar las diferentes
+        <h4 fxHide.lt-sm>Podras manipular archivos de diferentes <a (click)="redirectAcel()"
+                matTooltip="Reftek SMA2">acelerografos</a> y aplicar las diferentes
             herramientas que ofrecemos
         </h4>
     </div>
@@ -13,12 +14,13 @@
             Sismos Historicos
         </button>
 
-        <button *ngIf="btnSisHide" mat-flat-button color="primary" matTooltip="Proximamente..." matTooltipPosition="left" (click)="savePorgressProyect()">
+        <button *ngIf="btnSisHide" mat-flat-button color="primary" matTooltip="Proximamente..."
+            matTooltipPosition="left" (click)="savePorgressProyect()">
             <mat-icon>save</mat-icon>
             Guardar
         </button>
     </div>
-   
+
 
 </div>
 
@@ -144,7 +146,7 @@
                                     [diameter]="50"></mat-progress-spinner>
                                 <h3> <b>Cargando Datos ....</b> </h3>
                             </div>
-                            
+
                             <ng-container style="width: 100%;"
                                 *ngFor="let sta of item.stations | keyvalue; let i = index">
 
@@ -157,8 +159,8 @@
                                             (click)="leer(item, ind)" style="cursor: pointer; padding: 3px;"
                                             *ngIf="filterDataT(item)">
                                             <mat-icon style="color: white;">router</mat-icon>
-                                            <p> {{item.network  || '-'}} </p>
-                                            <p> {{item.station  || '-'}} </p>
+                                            <p> {{item.network || '-'}} </p>
+                                            <p> {{item.station || '-'}} </p>
                                             <p> {{item.location || '-'}}</p>
                                             <p style="padding: 1px 4px 1px 4px; border-radius: 3px;"
                                                 [ngStyle]="setColorStationChannel(item.channel)">
@@ -452,35 +454,46 @@
                             </div>
 
                             <div *ngIf="toogleTrim" class="trimContainer">
-                                <form [formGroup]="tab.TrimForm" fxLayout="row" fxLayoutGap="10"
+                                <form [formGroup]="tab.TrimForm" fxLayout="column" fxLayoutGap="2"
                                     fxLayoutAlign="center center" (submit)="trim(i)">
 
-                                    <h4 style="padding-bottom: 13px ; padding-left: 10px;">
-                                        <b>Indicar Inicio y Fin: </b>
-                                    </h4>
+                                    <div fxLayout="row" fxLayoutGap="10" fxLayoutAlign="center center"
+                                        style="width: 100%;">
+                                        <h4 style="padding-bottom: 13px ; padding-left: 10px;">
+                                            <b>Indicar Inicio y Fin: </b>
+                                        </h4>
 
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Tiempo de Inicio (seg.)</mat-label>
-                                        <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
-                                        <input matInput formControlName="t_min">
-                                        <!-- <mat-error *ngIf="TrimForm.get('t_min')?.hasError('required')">
-                                            Ingrese <strong>Tiempo Min. </strong> </mat-error> -->
-                                    </mat-form-field>
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>Tiempo de Inicio (seg.)</mat-label>
+                                            <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
+                                            <input matInput formControlName="t_min" [(ngModel)]="tab.tmin">
+                                            <!-- <mat-error *ngIf="TrimForm.get('t_min')?.hasError('required')">
+                                                Ingrese <strong>Tiempo Min. </strong> </mat-error> -->
+                                        </mat-form-field>
 
-                                    <mat-form-field appearance="outline">
-                                        <mat-label>Tiempo de Fin (seg.)</mat-label>
-                                        <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
-                                        <input matInput formControlName="t_max">
-                                        <!-- <mat-error *ngIf="TrimForm.get('t_max')?.hasError('required')">
-                                            Ingrese <strong>Tiempo Max. </strong> </mat-error> -->
-                                    </mat-form-field>
+                                        <mat-form-field appearance="outline">
+                                            <mat-label>Tiempo de Fin (seg.)</mat-label>
+                                            <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
+                                            <input matInput formControlName="t_max" [(ngModel)]="tab.tmax">
+                                            <!-- <mat-error *ngIf="TrimForm.get('t_max')?.hasError('required')">
+                                                Ingrese <strong>Tiempo Max. </strong> </mat-error> -->
+                                        </mat-form-field>
 
-                                    <div style="padding-bottom: 16px; padding-left: 15px;">
-                                        <button type="submit" class="sendInfoSubBar" mat-raised-button color="primary">
-                                            <mat-icon>query_stats</mat-icon>
-                                            APLICAR
-                                        </button>
+                                        <div style="padding-bottom: 16px; padding-left: 15px;">
+                                            <button type="submit" class="sendInfoSubBar" mat-raised-button
+                                                color="primary">
+                                                <mat-icon>query_stats</mat-icon>
+                                                APLICAR
+                                            </button>
+                                        </div>
                                     </div>
+
+                                    <div class="custom-slider">
+                                        <ngx-slider [(value)]="tab.tmin" [(highValue)]="tab.tmax"
+                                            [options]="tab.sliderOption">
+                                        </ngx-slider>
+                                    </div>
+
 
                                 </form>
                             </div>

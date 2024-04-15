@@ -38,12 +38,15 @@ export class EspectroFourierComponent implements OnInit {
     let sta = this.dataFourier.station
     let cha = this.dataFourier.channel
 
+    let min = this.dataFourier.t_min
+    let max = this.dataFourier.t_max
+
     let allData = this.dataFourier.allData
 
     let net = this.dataFourier.allData.network
     let loc = this.dataFourier.allData.location
 
-    this.obsApi.createFourierEspc(url, sta, cha).subscribe({
+    this.obsApi.createFourierEspc(url, sta, cha,min,max).subscribe({
       next: value => {
 
         this.trace1 = {

@@ -17,6 +17,7 @@ import { ImageViewerModule } from 'ngx-image-viewer';
 import { NgxMatDatetimePickerModule, NgxMatTimepickerModule, NgxMatNativeDateModule } from '@angular-material-components/datetime-picker';
 import { NewProjectComponent } from './componentes/new-project/new-project.component';
 import { DeleteConfirmationComponent } from './componentes/delete-confirmation/delete-confirmation.component';
+import { NgxSliderModule } from '@angular-slider/ngx-slider';
 
 // import * as PlotlyJS from 'plotly.js-dist-min';
 // import { PlotlyModule } from 'angular-plotly.js';
@@ -49,6 +50,7 @@ PlotlyViaCDNModule.setPlotlyBundle('basic');
     NgxMatDatetimePickerModule,
     NgxMatTimepickerModule,
     NgxMatNativeDateModule,
+    NgxSliderModule
   ],
   providers: [
     DatePipe,
