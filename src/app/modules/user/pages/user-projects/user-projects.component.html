@@ -1,10 +1,10 @@
 <div>
 
     <div class="winTitle">
-        <div fxLayout="row" fxLayoutGap="10">
-            <h2><b>Mis Proyectos</b></h2>
-            <h2> {{' '+ name || ''}} </h2>
-            <h4>{{usere || ''}}</h4>
+        <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10">
+            <h2><b>Mis Proyectos </b></h2>
+            <h2> {{name || 'Asd User Test'}} </h2>
+            <h4>{{usere || 'asd@example.com'}}</h4>
         </div>
 
         <h4>Aca encontrarás tus projectos</h4>
@@ -30,45 +30,86 @@
     </div>
 
 
-    <div class="projectContainer" fxLayout="row wrap" fxLayoutAlign="center start" fxLayoutGap="10">
+    <div class="projectContainer" fxLayout="column" fxLayoutGap="10">
 
-        <div *ngFor="let proj of proyectos; let i = index" style="padding-bottom: 30px;">
+        <div fxLayout="row" fxLayoutGap="5">
 
-            <mat-card style="width: 400px;">
+            <div class="inputUrl" fxLayout="row" fxLayoutGap="5" fxFlex="50">
+                <mat-icon class="colorIcon">search</mat-icon>
+                <input matInput type="text" placeholder="Busque por Titulo, Fecha o Archivo" [(ngModel)]="buscarTexto">
+            </div>
 
-                <mat-card-title-group>
-                    <img mat-card-sm-image [src]="proj.img == null ? '/assets/ncnLogoColor.png' : proj.img ">
-                    <mat-card-title>{{proj.name || 'Sin Tutulo'}}</mat-card-title>
-                    <mat-card-subtitle>{{proj.fecha_creacion | date: 'short'}}</mat-card-subtitle>
-                </mat-card-title-group>
+        </div>
+
+
+        <div *ngFor="let proj of proyectos; let i = index">
+
+            <mat-card *ngIf="filterDataT(proj)" [class.mat-elevation-z0]="true" >
 
                 <mat-card-content>
-                    <h4><b>Descripcion:</b></h4>
-                    <h5> {{proj.descrip || 'No hay Descripcion'}} </h5>
-                    <br>
-                    <div>
-                        <mat-accordion>
-                            <mat-expansion-panel>
 
-                                <mat-expansion-panel-header>
-                                    Ver mas
-                                </mat-expansion-panel-header>
+                    <div fxLayout="row" fxLayoutGap="10">
 
-                                <h4><b>Archivos:</b></h4>
-                                <div *ngFor="let item of proj.files">
-                                    <div fxLayout="row" fxLayoutAlign="space-between" fxLayoutGap="10">
-                                        <h5 style="overflow: hidden;"><b>{{item.filename}}</b> </h5>
-                                        <a [href]="item.file">Descargar</a>
-                                    </div>
+                        <img mat-card-md-image [src]="proj.img == null ? '/assets/ncnLogoColor.png' : proj.img ">
+                        <div fxLayout="column" fxLayoutGap="3" style="width: 100%;">
+
+                            <div style="width: 100%;" fxLayout="row" fxLayoutAlign="space-between" fxLayoutGap="10">
+
+                                <div fxLayout="column">
+                                    <mat-card-title>{{proj.name || 'Sin Tutulo'}}</mat-card-title>
+                                    <mat-card-subtitle style="margin-bottom: 0;">{{proj.fecha_creacion | date:
+                                        'short'}}</mat-card-subtitle>
                                 </div>
-                            </mat-expansion-panel>
+
+                                <div style="height: 40px;" fxLayout="row" fxLayoutGap="10">
+                                    <button mat-flat-button color="warn" (click)="delProj(proj)">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                    <button mat-flat-button color="accent" (click)="editProyec(proj)">
+                                        <mat-icon>edit</mat-icon>
+                                    </button>
+                                    <button mat-flat-button color="primary" (click)="abrirLector(proj)">
+                                        <mat-icon>open_in_new</mat-icon>
+                                        Abrir
+                                    </button>
+                                </div>
+
+                            </div>
+
+                            <mat-divider></mat-divider>
+
+                            <div>
+                                <mat-accordion>
+                                    <mat-expansion-panel [class.mat-elevation-z0]="true">
+
+                                        <mat-expansion-panel-header>
+                                            Ver mas
+                                        </mat-expansion-panel-header>
+
+                                        <h4><b>Descripcion:</b></h4>
+                                        <h5> {{proj.descrip || 'No hay Descripcion'}} </h5>
+                                        <br>
+
+                                        <h4><b>Archivos:</b></h4>
+                                        <div *ngFor="let item of proj.files">
+                                            <div fxLayout="row" fxLayoutAlign="space-between" fxLayoutGap="10">
+                                                <h5 style="overflow: hidden;"><b>{{item.filename}}</b> </h5>
+                                                <a [href]="item.file">Descargar</a>
+                                            </div>
+                                        </div>
 
 
-                        </mat-accordion>
+                                    </mat-expansion-panel>
+
+
+                                </mat-accordion>
+                            </div>
+                        </div>
                     </div>
+
                 </mat-card-content>
 
-                <mat-card-actions align="end" fxLayoutGap="10">
+                <!-- <mat-card-actions align="end" fxLayoutGap="10">
                     <button mat-flat-button color="warn" (click)="delProj(proj)">
                         <mat-icon>delete</mat-icon>
                     </button>
@@ -79,34 +120,15 @@
                         <mat-icon>open_in_new</mat-icon>
                         Abrir
                     </button>
-                </mat-card-actions>
+                </mat-card-actions> -->
 
             </mat-card>
 
-            <!-- <div class="newProject" fxLayout="column" fxLayoutGap="5" fxLayoutAlign="center start">
-                <div fxLayout="row" fxLayoutGap="10">
-                    <img class="thumbnail" src="/assets/ncnLogoColor.png">
-                    <div fxLayout="column">
-                        <h4> <b>{{proj.name}}</b> </h4>
-                        <h5> {{proj.descrip}} </h5>
-                        <h4> {{proj.fecha_creacion | date: 'short'}}</h4>
-                    </div>
-                </div>
-                <h4>Archivos</h4>
-                <div *ngFor="let item of proj.files" style="width: 100%; padding-bottom: 2px;">
-                    <h5><b>{{item.filename}}</b> </h5>
-                </div>
-                <div fxLayout="row">
-                    <div class="spacer"></div>
-                    <button mat-flat-button color="primary" (click)="abrirLector(proj)">
-                        <mat-icon>open_in_new</mat-icon>
-                        Abrir Proyecto
-                    </button>
-                </div>
-
-            </div> -->
-
         </div>
+
+        <mat-paginator [length]="totalElementos" [pageSize]="10" [pageSizeOptions]="[5,10,25]"
+            (page)="onPageChange($event)">
+        </mat-paginator>
 
     </div>
 

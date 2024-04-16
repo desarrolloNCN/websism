@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { RegisterUserService } from 'src/app/service/register-user.service';
 import { NewProjectComponent } from '../../componentes/new-project/new-project.component';
@@ -6,6 +6,9 @@ import { AuthService } from 'src/app/service/auth.service';
 import { Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { DeleteConfirmationComponent } from '../../componentes/delete-confirmation/delete-confirmation.component';
+import { FormGroup } from '@angular/forms';
+import { DatePipe } from '@angular/common';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-user-projects',
@@ -14,34 +17,44 @@ import { DeleteConfirmationComponent } from '../../componentes/delete-confirmati
 })
 export class UserProjectsComponent implements OnInit {
 
-  proyectos: any = []
+  controlForm: FormGroup | any
+
+  proyectos: any[] = []
+  pageData: any[] = []
 
   loadingSpinner = false
 
   private username = ''
   private email = ''
   private group: any
-  private groupNro :any
+  private groupNro: any
   name = ''
   usere = ''
 
+  totalElementos: any
+
+  buscarTexto = ''
+
   showmsg = true
+
+  stdate: any;
+  endate: any;
 
   constructor(
     private userService: RegisterUserService,
     private authService: AuthService,
     private matDialog: MatDialog,
     private router: Router,
-    private snackBar: MatSnackBar
-  ) { }
+    private snackBar: MatSnackBar,
+    private datePipe: DatePipe
+  ) {
+    this.controlForm = new FormGroup({
 
-  ngOnInit(): void {
-
-    this.loadingSpinner = true
+    })
 
     this.authService.getToken().subscribe({
       next: value => {
-        this.username = value.username 
+        this.username = value.username
         this.email = value.email
         this.usere = value.email
         this.group = value.groups
@@ -68,6 +81,8 @@ export class UserProjectsComponent implements OnInit {
         // this.userService.getProjectuser(this.username, this.email).subscribe({
         //   next: value => {
         //     this.proyectos = value
+        //     this.pageData = this.proyectos
+        //     this.totalElementos = this.proyectos.length
         //   },
         //   error: err => {
 
@@ -89,6 +104,8 @@ export class UserProjectsComponent implements OnInit {
             this.userService.getProjectuser(this.username, this.email).subscribe({
               next: value => {
                 this.proyectos = value
+                this.pageData = this.proyectos
+                this.totalElementos = this.proyectos.length
               },
               error: err => {
 
@@ -101,6 +118,13 @@ export class UserProjectsComponent implements OnInit {
 
       }
     })
+  }
+
+  ngOnInit(): void {
+
+    this.loadingSpinner = true
+
+    
     // this.getProyectos()
   }
 
@@ -135,7 +159,7 @@ export class UserProjectsComponent implements OnInit {
 
   abrirLector(item: any) {
     console.log('abrirLector', item);
-    
+
     this.userService.resetService()
 
     let addFiles: any[] = []
@@ -159,6 +183,7 @@ export class UserProjectsComponent implements OnInit {
             "extension": extension.toLocaleUpperCase() || 'NO EXT',
             "unit": e.unit,
             "img": e.img,
+            "tab": item.tab,
             "urlconvert": urlconvert
           });
         }
@@ -196,8 +221,8 @@ export class UserProjectsComponent implements OnInit {
     matDialogConfig.disableClose = true;
 
     let data = {
-      "title" : "Borrar Archivo",
-      "quest" : "Desea borrar este Archivo?"
+      "title": "Borrar Archivo",
+      "quest": "Desea borrar este Archivo?"
     }
 
     matDialogConfig.data = data
@@ -230,6 +255,38 @@ export class UserProjectsComponent implements OnInit {
     }
 
 
+  }
+
+  filterDataT(data: any): boolean {
+    const searchLower = this.buscarTexto.toLowerCase();
+    const nameMatch = data.name.toLowerCase().includes(searchLower)
+    const despMatch = data.descrip.toLowerCase().includes(searchLower)
+
+    let date = data.fecha_creacion
+    let fechaFormated = this.datePipe.transform(date, 'M/d/yy, h:mm a')
+
+    const fechaMatch = fechaFormated?.toLocaleLowerCase().includes(searchLower)
+
+    let fileMatch = false;
+
+    if (data.files && data.files.length > 0) {
+      data.files.forEach((file: any) => {
+        if (file.filename.toLowerCase().includes(searchLower)) {
+          fileMatch = true;
+        }
+      });
+    }
+
+    return nameMatch || despMatch || fechaMatch || fileMatch
+  }
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  onPageChange(event: PageEvent) {
+    const startIndex = event.pageIndex * event.pageSize;
+    const endIndex = startIndex + event.pageSize;
+
+    this.proyectos = this.pageData.slice(startIndex, endIndex);
   }
 
 

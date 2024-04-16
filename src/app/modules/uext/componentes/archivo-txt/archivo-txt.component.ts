@@ -292,9 +292,19 @@ export class ArchivoTXTComponent implements OnInit {
     this.matDialogRef.close(respData)
   }
 
-  onKeyDown(event: KeyboardEvent) {
-    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+  preventScroll(event: WheelEvent) {
+    const target = event.target as HTMLElement;
+    if (target.tagName.toLowerCase() === 'input' && target.getAttribute('type') === 'number') {
       event.preventDefault();
+    }
+  }
+
+  preventArrowUpDown(event: KeyboardEvent) {
+    const target = event.target as HTMLElement;
+    if (target.tagName.toLowerCase() === 'input' && target.getAttribute('type') === 'number') {
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+        event.preventDefault();
+      }
     }
   }
 

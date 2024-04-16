@@ -466,7 +466,9 @@
                                         <mat-form-field appearance="outline">
                                             <mat-label>Tiempo de Inicio (seg.)</mat-label>
                                             <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
-                                            <input matInput formControlName="t_min" [(ngModel)]="tab.tmin">
+                                            <input matInput type="number" formControlName="t_min"
+                                                [(ngModel)]="tab.TrimForm.controls['t_min'].value"
+                                                (wheel)="preventScroll($event)" (keydown)="preventArrowUpDown($event)">
                                             <!-- <mat-error *ngIf="TrimForm.get('t_min')?.hasError('required')">
                                                 Ingrese <strong>Tiempo Min. </strong> </mat-error> -->
                                         </mat-form-field>
@@ -474,7 +476,9 @@
                                         <mat-form-field appearance="outline">
                                             <mat-label>Tiempo de Fin (seg.)</mat-label>
                                             <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
-                                            <input matInput formControlName="t_max" [(ngModel)]="tab.tmax">
+                                            <input matInput type="number" formControlName="t_max"
+                                                [(ngModel)]="tab.TrimForm.controls['t_max'].value"
+                                                (wheel)="preventScroll($event)" (keydown)="preventArrowUpDown($event)">
                                             <!-- <mat-error *ngIf="TrimForm.get('t_max')?.hasError('required')">
                                                 Ingrese <strong>Tiempo Max. </strong> </mat-error> -->
                                         </mat-form-field>
@@ -488,11 +492,10 @@
                                         </div>
                                     </div>
 
-                                    <div class="custom-slider">
-                                        <ngx-slider [(value)]="tab.tmin" [(highValue)]="tab.tmax"
-                                            [options]="tab.sliderOption">
-                                        </ngx-slider>
-                                    </div>
+                                    <ngx-slider [(value)]="tab.TrimForm.controls['t_min'].value"
+                                        [(highValue)]="tab.TrimForm.controls['t_max'].value"
+                                        [options]="tab.sliderOption">
+                                    </ngx-slider>
 
 
                                 </form>
@@ -523,7 +526,8 @@
                                     <mat-form-field appearance="outline" style="width: 160px;">
                                         <mat-label>Frecuencia Min</mat-label>
                                         <mat-icon class="colorIconSubBar" matPrefix>show_chart</mat-icon>
-                                        <input matInput type="number" formControlName="freqmin" placeholder="0.1">
+                                        <input matInput type="number" formControlName="freqmin" placeholder="0.1"
+                                            (wheel)="preventScroll($event)" (keydown)="preventArrowUpDown($event)">
                                         <mat-error *ngIf="FilterForm.get('freqmin')?.hasError('required')">
                                             Ingrese <strong>
                                                 Freq. Min. </strong> </mat-error>
@@ -532,7 +536,8 @@
                                     <mat-form-field appearance="outline" style="width: 160px;">
                                         <mat-label>Frecuencia Max</mat-label>
                                         <mat-icon class="colorIconSubBar" matPrefix>stacked_line_chart</mat-icon>
-                                        <input matInput type="number" formControlName="freqmax" placeholder="25">
+                                        <input matInput type="number" formControlName="freqmax" placeholder="25"
+                                            (wheel)="preventScroll($event)" (keydown)="preventArrowUpDown($event)">
                                         <mat-error *ngIf="FilterForm.get('freqmax')?.hasError('required')">
                                             Ingrese <strong>
                                                 Freq. Max. </strong> </mat-error>
@@ -541,7 +546,8 @@
                                     <mat-form-field appearance="outline" style="width: 160px;">
                                         <mat-label>Corner</mat-label>
                                         <mat-icon class="colorIconSubBar" matPrefix>stacked_line_chart</mat-icon>
-                                        <input matInput type="number" formControlName="order" placeholder="2">
+                                        <input matInput type="number" formControlName="order" placeholder="2"
+                                            (wheel)="preventScroll($event)" (keydown)="preventArrowUpDown($event)">
                                         <mat-error *ngIf="FilterForm.get('order')?.hasError('required')">
                                             Ingrese <strong>Corner</strong>
                                         </mat-error>

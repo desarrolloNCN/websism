@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, Inject, OnInit, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { LectorDemoComponent } from '../../pages/lector-demo/lector-demo.component';
@@ -50,7 +50,7 @@ export class ArchivoMseedComponent implements OnInit {
   private groupNro: any
   name = ''
   usere = ''
-  
+
   constructor(
     private matDialogRef: MatDialogRef<LectorDemoComponent>,
     private http: HttpClient,
@@ -508,9 +508,19 @@ export class ArchivoMseedComponent implements OnInit {
     this.matDialogRef.close(sendData)
   }
 
-  onKeyDown(event: KeyboardEvent) {
-    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+  preventScroll(event: WheelEvent) {
+    const target = event.target as HTMLElement;
+    if (target.tagName.toLowerCase() === 'input' && target.getAttribute('type') === 'number') {
       event.preventDefault();
+    }
+  }
+
+  preventArrowUpDown(event: KeyboardEvent) {
+    const target = event.target as HTMLElement;
+    if (target.tagName.toLowerCase() === 'input' && target.getAttribute('type') === 'number') {
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+        event.preventDefault();
+      }
     }
   }
 

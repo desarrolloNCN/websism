@@ -257,11 +257,15 @@ export class VisorGraphComponent implements OnInit {
           this.btnSisHide = true
 
           this.proyectData = valueD
+
           console.log('Visor OnInit', this.proyectData);
+
+
 
           from(this.proyectData).pipe(
             concatMap((e: any, index: number) =>
               this.obsApi.getData(e.urlconvert).pipe(
+
                 map((value: any) => {
                   if (value.data[0].und_calib == 'M/S**2') {
                     e.unit = 'm';
@@ -275,13 +279,73 @@ export class VisorGraphComponent implements OnInit {
                   this.groupedData = this.groupByNetworkAndStation(value.data, value.inv);
                   this.proyectData[index].stations = this.groupedData;
 
-                  this.leer(value.data[0], index);
+                  // this.leer(value.data[0], index);
                 })
-              )
+
+              ),
             )
+
           ).subscribe({
             complete: () => {
               this.loadingPanelInfo = false;
+
+              this.proyectData[0].tab.forEach((e: any) => {
+
+                const graph = e.graph
+                const img = e.img
+                
+                const FilterForm = new FormGroup({
+                  type: new FormControl(e.FilterForm.type, [Validators.required]),
+                  freqmin: new FormControl(e.FilterForm.freqmin, [Validators.required]),
+                  freqmax: new FormControl(e.FilterForm.freqmax, [Validators.required]),
+                  order: new FormControl(e.FilterForm.order, [Validators.required]),
+                  zero: new FormControl(e.FilterForm.zero)
+                })
+
+                const st = new Date(e.starttime).getTime()
+                const et = new Date(e.endtime).getTime()
+
+                const diff = et - st;
+                const s = diff / 1000
+
+                const TrimForm = new FormGroup({
+                  t_min: new FormControl(e.TrimForm.t_min, [Validators.required]),
+                  t_max: new FormControl(e.TrimForm.t_max, [Validators.required]),
+                })
+
+                let sliderOption: Options = {
+                  floor: e.sliderOption.floor,
+                  ceil: e.sliderOption.ceil,
+                  translate: (value: number, label: LabelType): string => {
+                    switch (label) {
+                      case LabelType.Low:
+                        return value + ' seg.';
+                      case LabelType.High:
+                        return value + ' seg.';
+                      default:
+                        return '' + value;
+                    }
+                  }
+                }
+
+                this.tabs.push({
+                  label: e.label,
+                  dataEst: e.dataEst,
+                  sttime: e.starttime,
+                  entime: e.endtime,
+                  FilterForm,
+                  TrimForm,
+                  graph,
+                  indexFilePanel: e.indexFilePanel,
+                  img,
+                  sliderOption,
+                });
+
+                this.lastIndexTab = this.tabs.length - 1
+
+                this.ToggleGraph = true;
+              });
+
             }
           });
 
@@ -872,25 +936,20 @@ export class VisorGraphComponent implements OnInit {
       zero: new FormControl(false)
     })
 
-    const TrimForm = new FormGroup({
-      t_min: new FormControl('', [Validators.required]),
-      t_max: new FormControl('', [Validators.required]),
-      sliderControl: new FormControl([20, 80])
-    })
-
-
-
     const st = new Date(e.starttime).getTime()
     const et = new Date(e.endtime).getTime()
 
     const diff = et - st;
     const s = diff / 1000
 
+    const TrimForm = new FormGroup({
+      t_min: new FormControl(0, [Validators.required]),
+      t_max: new FormControl(s, [Validators.required]),
+    })
+
     let sliderOption: Options = {
       floor: 0,
-      ceil: s,
-      step: 0.1,
-      tickStep: 0.1,
+      ceil: Math.round(s),
       translate: (value: number, label: LabelType): string => {
         switch (label) {
           case LabelType.Low:
@@ -914,8 +973,73 @@ export class VisorGraphComponent implements OnInit {
       indexFilePanel: indexFilePanel,
       img,
       sliderOption,
-      tmin: 0,
-      tmax: s
+    });
+
+    this.lastIndexTab = this.tabs.length - 1
+
+    this.ToggleGraph = true;
+
+  }
+
+  createTabInit(e: any, value: any, img: string, graphC?: string, indexFilePanel?: number): void {
+
+    this.ToggleGraph = false;
+
+    let graph = ''
+
+    if (this.graphClientOption) {
+      graph = ''
+    } else {
+      graph = this.graphGenerator(e, value, '(RAWDATA)', graphC || '#5470c6');
+    }
+
+    this.toggleTabs = true;
+
+    const FilterForm = new FormGroup({
+      type: new FormControl('', [Validators.required]),
+      freqmin: new FormControl('', [Validators.required]),
+      freqmax: new FormControl('', [Validators.required]),
+      order: new FormControl('', [Validators.required]),
+      zero: new FormControl(false)
+    })
+
+    const st = new Date(e.starttime).getTime()
+    const et = new Date(e.endtime).getTime()
+
+    const diff = et - st;
+    const s = diff / 1000
+
+    const TrimForm = new FormGroup({
+      t_min: new FormControl(0, [Validators.required]),
+      t_max: new FormControl(s, [Validators.required]),
+    })
+
+    let sliderOption: Options = {
+      floor: 0,
+      ceil: Math.round(s),
+      translate: (value: number, label: LabelType): string => {
+        switch (label) {
+          case LabelType.Low:
+            return value + ' seg.';
+          case LabelType.High:
+            return value + ' seg.';
+          default:
+            return '' + value;
+        }
+      }
+    }
+
+    this.tabs.push({
+      label: `${e.station}.${e.channel}`,
+      dataEst: e,
+      sttime: e.starttime,
+      entime: e.endtime,
+      FilterForm,
+      TrimForm,
+      graph,
+      indexFilePanel: indexFilePanel,
+      img,
+      sliderOption,
     });
 
     this.lastIndexTab = this.tabs.length - 1
@@ -2377,11 +2501,11 @@ export class VisorGraphComponent implements OnInit {
             next: val => {
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${tabInfo.dataEst.station}.${tabInfo.dataEst.channel}`)
               if (indx !== -1) {
-  
+
                 this.tabs[indx].img = val.url
                 this.tabs[indx].base = ''
                 this.tabs[indx].unit = ''
-  
+
                 this.cdRef.detectChanges()
               }
             },
@@ -2394,7 +2518,7 @@ export class VisorGraphComponent implements OnInit {
               this.loadingBarGraph = false
               this.ToggleGraph = true
             }
-  
+
           })
 
         } else {
@@ -2745,21 +2869,76 @@ export class VisorGraphComponent implements OnInit {
   }
 
   savePorgressProyect() {
-    console.log('Proyecto Data', this.proyectData);
-    console.log('Info Tabs', this.tabs)
-    // let uuid = this.proyectData[0].uuid
-    // let tabInfo = this.tabs
-    // this.obsUser.putProjectTab(uuid, tabInfo).subscribe({
-    //   error: err => {
-    //   },
-    //   complete: () => {
-    //   }
-    // })
+    //console.log('Proyecto Data', this.proyectData);
+    //console.log('Info Tabs', this.tabs)
+
+    let tabStatus: any[] = []
+
+    this.tabs.forEach((e: any) => {
+      const label = e.label
+      const base = e.base
+      const dataEst = e.dataEst
+      const img = e.img
+      const graph = e.graph
+      const unit = e.unit
+      const slider = { ceil: e.sliderOption.ceil, floor: e.sliderOption.floor }
+      const indexFilePanel = e.indexFilePanel
+      const filterData = e.FilterForm.value
+      const trimData = e.TrimForm.value
+      const st_start = e.sttime
+      const st_end = e.entime
+
+      const dataTab = {
+        "FilterForm": filterData,
+        "TrimForm": trimData,
+        "base": base,
+        "label": label,
+        "dataEst": dataEst,
+        "img": img,
+        "graph": graph,
+        "unit": unit,
+        "sliderOption": slider,
+        "indexFilePanel": indexFilePanel,
+        "sttime": st_start,
+        "entime": st_end
+      }
+
+      tabStatus.push(dataTab)
+
+    });
+
+    //console.log('TabStatus',tabStatus);
+
+
+    let uuid = this.proyectData[0].uuid
+
+    this.obsUser.putProjectTab(uuid, tabStatus).subscribe({
+      error: err => {
+      },
+      complete: () => {
+      }
+    })
 
   }
 
   redirectAcel() {
     window.open('https://ncn.pe/acelerografo-reftek-sma2')
+  }
+
+  preventScroll(event: WheelEvent) {
+    const target = event.target as HTMLElement;
+    if (target.tagName.toLowerCase() === 'input' && target.getAttribute('type') === 'number') {
+      event.preventDefault();
+    }
+  }
+
+  preventArrowUpDown(event: KeyboardEvent) {
+    const target = event.target as HTMLElement;
+    if (target.tagName.toLowerCase() === 'input' && target.getAttribute('type') === 'number') {
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+        event.preventDefault();
+      }
+    }
   }
 
 }

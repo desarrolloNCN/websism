@@ -222,19 +222,3 @@ a {
 .sendInfoSubBar {
     width: 140px;
 }
-
-.custom-slider {
-    width: 100%;
-}
-
-.custom-slider >* .ngx-slider .ngx-slider-selection {
-    background: rgb(255, 255, 0) !important;
-}
-
-.custom-slider .ngx-slider-pointer {
-    background-color: rgb(255, 255, 0) !important;
-}
-
-.ngx-slider .ngx-slider-pointer{
-    background-color: rgb(77, 115, 196) !important;
-}

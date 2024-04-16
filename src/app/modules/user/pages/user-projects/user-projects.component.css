@@ -44,6 +44,13 @@ h6 {
     color: #a1a1a1;
 }
 
+.colorIcon2 {
+    height: 25px;
+    width: 25px;
+    font-size: 25px;
+    color: #a1a1a1;
+}
+
 .projectContainer {
     width: 100%;
     padding: 20px 0 20px 0;
@@ -56,4 +63,11 @@ h6 {
     border-radius: 5px;
     object-fit: contain;
     border: 1px solid grey;
+}
+
+.inputUrl {
+    padding: 8px;
+    border-radius: 5px;
+    background-color: white;
+    box-shadow: 0px 1.5px rgba(128, 124, 124, 0.363);
 }
