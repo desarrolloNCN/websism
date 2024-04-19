@@ -92,7 +92,11 @@
             </div>
 
             <div *ngFor="let item of addedFiles; let i = index" fxLayout="row" fxLayoutAlign="space-around center">
-                <p class="filename" matTooltip="{{item.originalName}}" matTooltipPosition="above"> {{item.fileName}} </p>
+                <div fxLayout="row">
+                    <p class="filename" matTooltip="{{item.originalName}}" matTooltipPosition="above"> {{item.fileName}}
+                    </p>
+                    <mat-icon style="color: rgb(155, 155, 155); font-size: 15px;" matTooltip="{{item.info || 'Not Found'}}">help_outline</mat-icon>
+                </div>
                 <p class="filename"> {{item.extension}} </p>
                 <p class="filename" [ngStyle]="setColorStationChannel(item.status)"> {{item.status}}
                     <!-- <mat-progress-bar itemref="showCalibration" mode="indeterminate">

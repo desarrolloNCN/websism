@@ -36,6 +36,7 @@ export class UserProjectsComponent implements OnInit {
   buscarTexto = ''
 
   showmsg = true
+  disableBtns = false
 
   stdate: any;
   endate: any;
@@ -51,6 +52,13 @@ export class UserProjectsComponent implements OnInit {
     this.controlForm = new FormGroup({
 
     })
+
+  }
+
+  ngOnInit(): void {
+
+    this.loadingSpinner = true
+    this.disableBtns = true
 
     this.authService.getToken().subscribe({
       next: value => {
@@ -70,27 +78,28 @@ export class UserProjectsComponent implements OnInit {
 
       },
       error: err => {
-        this.loadingSpinner = false
+        this.loadingSpinner = true
 
         // TODO: Borrar en Produccion
 
-        // this.username = 'admin'
-        // this.email = 'admin@example.com'
+        this.username = 'admin'
+        this.email = 'admin@example.com'
 
 
-        // this.userService.getProjectuser(this.username, this.email).subscribe({
-        //   next: value => {
-        //     this.proyectos = value
-        //     this.pageData = this.proyectos
-        //     this.totalElementos = this.proyectos.length
-        //   },
-        //   error: err => {
+        this.userService.getProjectuser(this.username, this.email).subscribe({
+          next: value => {
+            this.proyectos = value
+            this.pageData = this.proyectos
+            this.totalElementos = this.proyectos.length
+          },
+          error: err => {
 
-        //   },
-        //   complete: () => {
-        //     this.loadingSpinner = false
-        //   }
-        // })
+          },
+          complete: () => {
+            this.loadingSpinner = false
+            this.disableBtns = true
+          }
+        })
 
       },
       complete: () => {
@@ -110,7 +119,11 @@ export class UserProjectsComponent implements OnInit {
               error: err => {
 
               },
-              complete: () => this.loadingSpinner = false
+              complete: () => {
+                this.loadingSpinner = false
+                this.disableBtns = true
+              }
+
             })
           }
         })
@@ -118,13 +131,7 @@ export class UserProjectsComponent implements OnInit {
 
       }
     })
-  }
 
-  ngOnInit(): void {
-
-    this.loadingSpinner = true
-
-    
     // this.getProyectos()
   }
 
@@ -258,20 +265,20 @@ export class UserProjectsComponent implements OnInit {
   }
 
   filterDataT(data: any): boolean {
-    const searchLower = this.buscarTexto.toLowerCase();
-    const nameMatch = data.name.toLowerCase().includes(searchLower)
-    const despMatch = data.descrip.toLowerCase().includes(searchLower)
+    const searchLower = this.buscarTexto ? this.buscarTexto.toLowerCase() : '';
+    const nameMatch = data.name && data.name.toLowerCase().includes(searchLower);
+    const despMatch = data.descrip && data.descrip.toLowerCase().includes(searchLower);
 
     let date = data.fecha_creacion
-    let fechaFormated = this.datePipe.transform(date, 'M/d/yy, h:mm a')
+    let fechaFormated = date ? this.datePipe.transform(date, 'M/d/yy, h:mm a') : '';
 
-    const fechaMatch = fechaFormated?.toLocaleLowerCase().includes(searchLower)
+    const fechaMatch = fechaFormated ? fechaFormated.toLowerCase().includes(searchLower) : false;
 
     let fileMatch = false;
 
     if (data.files && data.files.length > 0) {
       data.files.forEach((file: any) => {
-        if (file.filename.toLowerCase().includes(searchLower)) {
+        if (file && file.filename && file.filename.toLowerCase().includes(searchLower)) {
           fileMatch = true;
         }
       });

@@ -19,6 +19,7 @@ import { AuthService } from 'src/app/service/auth.service';
 import { SismosHistoricosComponent } from 'src/app/modules/uext/componentes/sismos-historicos/sismos-historicos.component';
 import { RegisterUserService } from 'src/app/service/register-user.service';
 import { LabelType, Options } from '@angular-slider/ngx-slider';
+import { SaveProgressComponent } from '../../componentes/save-progress/save-progress.component';
 
 @Component({
   selector: 'app-visor-graph',
@@ -128,7 +129,7 @@ export class VisorGraphComponent implements OnInit {
   usere = ''
 
   // TODO: cambiar esto en Produccion a -1, 1 en dev
-  userId = -1
+  userId = 1
 
   plotedimages: any = []
 
@@ -209,7 +210,7 @@ export class VisorGraphComponent implements OnInit {
 
         if (value.username == null || value.email == null) {
           // TODO: cambiar esto en Produccion a -1, 1 en dev
-          this.userId == -1
+          this.userId == 1
         } else {
           this.group = value.groups
           this.name = value.name
@@ -235,7 +236,7 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         //TODO: cambiar esto en Produccion a -1, 1 en dev
-        this.userId == -1
+        this.userId == 1
         this.graphClientOption = true
       },
     })
@@ -331,8 +332,10 @@ export class VisorGraphComponent implements OnInit {
                 this.tabs.push({
                   label: e.label,
                   dataEst: e.dataEst,
-                  sttime: e.starttime,
-                  entime: e.endtime,
+                  sttime: e.sttime,
+                  entime: e.entime,
+                  base: e.base,
+                  unit: e.unit,
                   FilterForm,
                   TrimForm,
                   graph,
@@ -1060,12 +1063,19 @@ export class VisorGraphComponent implements OnInit {
       this.snackBar.open('Debe elegir una Estacion', 'cerrar', snackBar)
       return
     }
+    console.log('TEST session Filter',this.tabs[index].FilterForm.value);
+    console.log('TEST session Trim',this.tabs[index].TrimForm.value);
 
+    console.log('TEST session date',this.tabs[index].sttime);
+    
+    
     let base = this.baseLineOptions[menuIndex]
     let unit = this.tabs[index].unit || ''
-
+    
     let indexFilePanel = this.tabs[index].indexFilePanel || 0
-
+    
+    console.log('url', this.proyectData[indexFilePanel].urlconvert);
+    
     var dataString, dataFile = this.proyectData[indexFilePanel].urlconvert
     var unit_from: string = this.proyectData[indexFilePanel].unit
 
@@ -1095,6 +1105,9 @@ export class VisorGraphComponent implements OnInit {
     } else {
       utc_min = new Date(this.tabs[index].sttime);
       utc_max = new Date(this.tabs[index].sttime);
+
+      console.log('min', utc_min, 'max', utc_max);
+      
 
       utc_min.setUTCSeconds(utc_min.getUTCSeconds() + t_min);
       utc_max.setUTCSeconds(utc_max.getUTCSeconds() + t_max);
@@ -2907,17 +2920,31 @@ export class VisorGraphComponent implements OnInit {
 
     });
 
+    let sendData = {
+      "uuid" : this.proyectData[0].uuid,
+      "data" : tabStatus
+    }
+
+    const matDialogConfig = new MatDialogConfig()
+    matDialogConfig.disableClose = true;
+    matDialogConfig.data = sendData
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.panelClass = ['snackBar-validator'];
+
+    this.matDialog.open(SaveProgressComponent, matDialogConfig)
+    
     //console.log('TabStatus',tabStatus);
 
 
-    let uuid = this.proyectData[0].uuid
+    // let uuid = this.proyectData[0].uuid
 
-    this.obsUser.putProjectTab(uuid, tabStatus).subscribe({
-      error: err => {
-      },
-      complete: () => {
-      }
-    })
+    // this.obsUser.putProjectTab(uuid, tabStatus).subscribe({
+    //   error: err => {
+    //   },
+    //   complete: () => {
+    //   }
+    // })
 
   }
 

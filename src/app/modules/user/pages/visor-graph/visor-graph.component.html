@@ -316,9 +316,9 @@
         <div *ngIf="loadingBarGraph" style="padding: 2px;">
             <mat-progress-bar mode="indeterminate"></mat-progress-bar>
         </div>
-        <div class="graphContainer" fxLayout="column" fxLayoutAlign="center center">
+        <div class="graphContainer" fxLayout="column" fxLayoutAlign="start center">
 
-            <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center">
+            <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center" style="padding-top: 20%;">
                 <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                     [diameter]="50"></mat-progress-spinner>
                 <h3> <b>Cargando Datos ....</b> </h3>

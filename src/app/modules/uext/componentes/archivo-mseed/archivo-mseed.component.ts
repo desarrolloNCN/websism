@@ -100,7 +100,7 @@ export class ArchivoMseedComponent implements OnInit {
       },
       error: err => {
         // TODO: CAMBIAR EN MODO PROD a -1 en DEV 1
-        this.userId = -1
+        this.userId = 1
 
         this.obsApi.getData(this.url).subscribe({
           next: value => {
@@ -174,6 +174,7 @@ export class ArchivoMseedComponent implements OnInit {
       this.showCalib = false
       this.showRegUser = true
       return
+      
     } else {
       this.userApi.mseedListCalibration(this.userId).subscribe({
         next: value => {

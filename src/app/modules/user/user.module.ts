@@ -18,6 +18,7 @@ import { NgxMatDatetimePickerModule, NgxMatTimepickerModule, NgxMatNativeDateMod
 import { NewProjectComponent } from './componentes/new-project/new-project.component';
 import { DeleteConfirmationComponent } from './componentes/delete-confirmation/delete-confirmation.component';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
+import { SaveProgressComponent } from './componentes/save-progress/save-progress.component';
 
 // import * as PlotlyJS from 'plotly.js-dist-min';
 // import { PlotlyModule } from 'angular-plotly.js';
@@ -36,6 +37,7 @@ PlotlyViaCDNModule.setPlotlyBundle('basic');
     EspectroFourierComponent,
     NewProjectComponent,
     DeleteConfirmationComponent,
+    SaveProgressComponent,
   ],
   imports: [
     CommonModule,

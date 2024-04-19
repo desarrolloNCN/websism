@@ -62,13 +62,13 @@
                                 </div>
 
                                 <div style="height: 40px;" fxLayout="row" fxLayoutGap="10">
-                                    <button mat-flat-button color="warn" (click)="delProj(proj)">
+                                    <button mat-flat-button color="warn" [disabled]="disableBtns" (click)="delProj(proj)">
                                         <mat-icon>delete</mat-icon>
                                     </button>
-                                    <button mat-flat-button color="accent" (click)="editProyec(proj)">
+                                    <button mat-flat-button color="accent" [disabled]="disableBtns" (click)="editProyec(proj)">
                                         <mat-icon>edit</mat-icon>
                                     </button>
-                                    <button mat-flat-button color="primary" (click)="abrirLector(proj)">
+                                    <button mat-flat-button color="primary" [disabled]="disableBtns" (click)="abrirLector(proj)">
                                         <mat-icon>open_in_new</mat-icon>
                                         Abrir
                                     </button>
