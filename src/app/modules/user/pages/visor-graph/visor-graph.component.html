@@ -1,10 +1,11 @@
 <div *ngIf="hideStaPanel" fxLayout="row" fxLayoutAlign="space-between center " [@enterAnimation2] class="winTitle">
     <div>
-        <h2><b>Lector de Archivos Acelerográficos</b></h2>
-        <h4 fxHide.lt-sm>Podras manipular archivos de diferentes <a (click)="redirectAcel()"
+        <h2><b>{{ proyecto_title  || 'Lector de Archivos Acelerográficos'}}</b></h2>
+        <h4 *ngIf="proyecto_desp == '' " fxHide.lt-sm>Podras manipular archivos de diferentes <a (click)="redirectAcel()"
                 matTooltip="Reftek SMA2">acelerografos</a> y aplicar las diferentes
             herramientas que ofrecemos
         </h4>
+        <h4 fxHide.lt-sm *ngIf="proyecto_desp != ''"> {{proyecto_desp}}  </h4>
     </div>
 
     <div fxLayout="row">
@@ -24,7 +25,7 @@
 
 </div>
 
-<div *ngIf="hideStaPanel" [@enterAnimation2] class="dndZoneContainer">
+<div *ngIf="hideStaPanel1_1" [@enterAnimation2] class="dndZoneContainer">
 
     <div class="dndZone" fxLayout="row" fxLayoutAlign="center start">
 
@@ -132,7 +133,7 @@
 
                     <mat-accordion>
 
-                        <mat-expansion-panel *ngFor="let item of proyectData; let ind = index" expanded="0">
+                        <mat-expansion-panel *ngFor="let item of proyectData; let ind = index">
 
                             <mat-expansion-panel-header>
                                 <mat-panel-title>
@@ -338,7 +339,7 @@
 
                     <div fxLayout="column" fxLayoutGap="20">
 
-                        <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10"
+                        <div fxLayout="column" fxLayoutAlign="start center" fxLayoutGap="10"
                             style="width: 100%; padding: 5px; background-color: rgb(250, 250, 250);">
 
                             <div class="graphBar" fxLayout="row">

@@ -58,7 +58,7 @@ export class UserProjectsComponent implements OnInit {
   ngOnInit(): void {
 
     this.loadingSpinner = true
-    this.disableBtns = true
+    // this.disableBtns = true
 
     this.authService.getToken().subscribe({
       next: value => {
@@ -82,24 +82,26 @@ export class UserProjectsComponent implements OnInit {
 
         // TODO: Borrar en Produccion
 
-        this.username = 'admin'
-        this.email = 'admin@example.com'
+        // this.username = 'admin'
+        // this.email = 'admin@example.com'
 
 
-        this.userService.getProjectuser(this.username, this.email).subscribe({
-          next: value => {
-            this.proyectos = value
-            this.pageData = this.proyectos
-            this.totalElementos = this.proyectos.length
-          },
-          error: err => {
+        // this.userService.getProjectuser(this.username, this.email).subscribe({
+        //   next: value => {
+        //     this.proyectos = value
+        //     console.log('Editar Button',this.proyectos);
+            
+        //     this.pageData = this.proyectos
+        //     this.totalElementos = this.proyectos.length
+        //   },
+        //   error: err => {
 
-          },
-          complete: () => {
-            this.loadingSpinner = false
-            this.disableBtns = true
-          }
-        })
+        //   },
+        //   complete: () => {
+        //     this.loadingSpinner = false
+        //    // this.disableBtns = true
+        //   }
+        // })
 
       },
       complete: () => {
@@ -121,7 +123,7 @@ export class UserProjectsComponent implements OnInit {
               },
               complete: () => {
                 this.loadingSpinner = false
-                this.disableBtns = true
+                // this.disableBtns = true
               }
 
             })
@@ -165,7 +167,7 @@ export class UserProjectsComponent implements OnInit {
   }
 
   abrirLector(item: any) {
-    console.log('abrirLector', item);
+    // console.log('abrirLector', item);
 
     this.userService.resetService()
 
@@ -191,7 +193,9 @@ export class UserProjectsComponent implements OnInit {
             "unit": e.unit,
             "img": e.img,
             "tab": item.tab,
-            "urlconvert": urlconvert
+            "urlconvert": urlconvert,
+            "projname" : item.name,
+            "projdesp" : item.descrip,
           });
         }
       }

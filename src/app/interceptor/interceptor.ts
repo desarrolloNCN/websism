@@ -12,8 +12,10 @@ import { environment } from 'src/environments/environment';
 
 @Injectable()
 export class HttpHeadersInterceptor implements HttpInterceptor {
-  private user = 'admin'
-  private pass = 'admin'
+  // private user = 'admin'
+  // private pass = 'admin'
+  private user = 'A'
+  private pass = 'A'
 
   private baseUrl = environment.baseUrl
 
@@ -25,18 +27,18 @@ export class HttpHeadersInterceptor implements HttpInterceptor {
       return next.handle(newReq);
     }
 
-    //const newUrl = `https://apiqs.ncn.pe/${req.url}`;
-    const newUrl = `http://localhost:8000/${req.url}`;
+    const newUrl = `https://apiqs.ncn.pe/${req.url}`;
+    //const newUrl = `http://localhost:8000/${req.url}`;
     //const newUrl = `${this.baseUrl}${req.url}`; 
 
     let modifiedReq = req.clone({ url: newUrl });
 
-    if (!modifiedReq.headers.has('Authorization')) {
-      const authHeader = 'Basic ' + btoa(`${this.user}:${this.pass}`);
-      modifiedReq = modifiedReq.clone({
-        setHeaders: { Authorization: authHeader }
-      });
-    }
+    // if (!modifiedReq.headers.has('Authorization')) {
+    //   const authHeader = 'Basic ' + btoa(`${this.user}:${this.pass}`);
+    //   modifiedReq = modifiedReq.clone({
+    //     setHeaders: { Authorization: authHeader }
+    //   });
+    // }
 
     return next.handle(modifiedReq);
   }

@@ -43,6 +43,7 @@ export class NewProjectComponent implements OnInit {
   showProgressBar = false
 
   showCalibration = false
+  showUpdate = false
 
   aceeptedFiles = ['.seed', '.mseed', '.evt', '.txt']
   aceeptedImgFiles = ['.png', '.jpg', '.jpeg', '.gif']
@@ -103,47 +104,49 @@ export class NewProjectComponent implements OnInit {
 
         // TODO: Borrar en Produccion
 
-        if (this.data.uuid) {
+        // if (this.data.uuid) {
 
-          this.titleDialog = 'Editar Proyecto'
-          this.subtitleDialog = 'Asigne un nuevo nombre a su proyecto, añada nuevos archivos con los que va a trabajar y'
-          this.subtitleStrong = 'Actualizar Proyecto'
+        //   this.titleDialog = 'Editar Proyecto'
+        //   this.subtitleDialog = 'Asigne un nuevo nombre a su proyecto, añada nuevos archivos con los que va a trabajar y'
+        //   this.subtitleStrong = 'Actualizar Proyecto'
 
-          this.buttonSubmitForm = 'Actualizar Proyecto'
+        //   this.buttonSubmitForm = 'Actualizar Proyecto'
 
-          let uuid = this.data.uuid
+        //   let uuid = this.data.uuid
 
-          let proj_name = this.controlForm.controls['projectName'].setValue(this.data.name)
-          let proj_desp = this.controlForm.controls['descript'].setValue(this.data.descrip)
+        //   this.controlForm.controls['projectName'].setValue(this.data.name)
+        //   this.controlForm.controls['descript'].setValue(this.data.descrip)
 
-          this.defImg = this.data.img || '/assets/ncnLogoColor.png'
+        //   this.controlForm.controls['checkOps'].setValue(this.data.checkM)
 
-          this.data.files.forEach((e: any) => {
-            let file_name = e.filename
+        //   this.defImg = this.data.img || '/assets/ncnLogoColor.png'
 
-            let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
-            let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+        //   this.data.files.forEach((e: any) => {
+        //     let file_name = e.filename
 
-            let formatoNombre = this.formatearNombreArchivo(file_name, extension, 12)
+        //     let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
+        //     let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
-            this.addedFiles.push({
-              "id": e.id,
-              "file": '',
-              "fileName": formatoNombre,
-              "originalName": file_name,
-              "status": e.status,
-              "info": e.info,
-              "extension": extension.toLocaleUpperCase() || 'NO EXT',
-              "string_data": e.string_data,
-              "urlconvert": e.url_gen,
-              "unit": e.unit
-            })
-          });
-        }
+        //     let formatoNombre = this.formatearNombreArchivo(file_name, extension, 12)
 
-        this.username = 'admin'
-        this.email = 'admin@example.com'
-        this.idUser = `${1}`
+        //     this.addedFiles.push({
+        //       "id": e.id,
+        //       "file": '',
+        //       "fileName": formatoNombre,
+        //       "originalName": file_name,
+        //       "status": e.status,
+        //       "info": e.info,
+        //       "extension": extension.toLocaleUpperCase() || 'NO EXT',
+        //       "string_data": e.string_data,
+        //       "urlconvert": e.url_gen,
+        //       "unit": e.unit
+        //     })
+        //   });
+        // }
+
+        // this.username = 'admin'
+        // this.email = 'admin@example.com'
+        // this.idUser = `${1}`
       },
       complete: () => {
 
@@ -157,8 +160,10 @@ export class NewProjectComponent implements OnInit {
 
           let uuid = this.data.uuid
 
-          let proj_name = this.controlForm.controls['projectName'].setValue(this.data.name)
-          let proj_desp = this.controlForm.controls['descript'].setValue(this.data.descrip)
+          this.controlForm.controls['projectName'].setValue(this.data.name)
+          this.controlForm.controls['descript'].setValue(this.data.descrip)
+
+          this.controlForm.controls['checkOps'].setValue(this.data.checkM)
 
           this.defImg = this.data.img || '/assets/ncnLogoColor.png'
 
@@ -191,7 +196,7 @@ export class NewProjectComponent implements OnInit {
           },
           error: err => {
             // TODO: Borrar en Produccion
-             this.idUser = `${1}`
+            this.idUser = `${-1}`
           }
         })
 
@@ -259,7 +264,7 @@ export class NewProjectComponent implements OnInit {
               "file": archivos[0],
               "fileName": formatoNombre,
               "originalName": archivos[0].name,
-              "info" : value.info,
+              "info": value.info,
               "status": statusCalib,
               "extension": value.f || extension.toLocaleUpperCase() || 'NO EXT',
               "id": value.id,
@@ -458,6 +463,37 @@ export class NewProjectComponent implements OnInit {
           }
         }
       })
+    } else if (item.extension == 'XMR') {
+      this.regApi.covertionXMR(item.urlconvert).subscribe({
+        next: val => {
+          matDialogConfig.data = val.url
+          this.matdialog.open(ArchivoTXTComponent, matDialogConfig).afterClosed().subscribe({
+            next: value => {
+
+              if (value.url == '') {
+                this.addedFiles[index].status = 'Error'
+              } else {
+
+                this.regApi.putFileProject(this.addedFiles[index].id, value.unit, 'Calibrado', this.addedFiles[index], value.url).subscribe({
+                  error: err => {
+                    this.addedFiles[index].status = 'Error'
+                  },
+                  complete: () => {
+                    this.addedFiles[index].status = 'Calibrado'
+                    this.addedFiles[index].unit = value.unit
+                    this.addedFiles[index].urlconvert = value.url
+                  }
+                })
+
+              }
+            }
+          })
+        },
+        error: err =>{
+          this.snackBar.open('⚠️ Error en conversion', 'cerrar', snackBar)
+        }
+      })
+
     }
   }
 
@@ -466,6 +502,9 @@ export class NewProjectComponent implements OnInit {
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 5 * 1000;
     snackBar.panelClass = ['snackBar-validator']
+
+    const matDialogConfig = new MatDialogConfig()
+    matDialogConfig.disableClose = true;
 
     let idProj = this.data.id || this.data.uuid
 
@@ -484,7 +523,27 @@ export class NewProjectComponent implements OnInit {
       return;
     }
 
-    this.redirectLector()
+    if (this.data.id) {
+      this.redirectLector()
+    } else {
+
+      let data = {
+        "title": "Abrir Proyecto",
+        "quest": "Desea abrir este Proyecto?"
+      }
+
+      matDialogConfig.data = data
+
+      this.matdialog.open(DeleteConfirmationComponent, matDialogConfig).afterClosed().subscribe({
+        next: value => {
+          if (value == true) {
+            this.redirectLector()
+          } else {
+            return
+          }
+        }
+      })
+    }
 
   }
 
@@ -516,18 +575,20 @@ export class NewProjectComponent implements OnInit {
 
     let msg_proj = ''
 
-    console.log('Redirector', this.addedFiles);
+    // console.log('Redirector', this.addedFiles);
+
+    this.showUpdate = true
 
     this.regApi.putProject(idProj, projName, projDesp, img, checkMerge).subscribe({
       next: (value: any[]) => {
-        if(value.length > 0){
+        if (value.length > 0) {
           this.addedFiles = []
 
           value.forEach((e: any) => {
-  
+
             let nombreArchivo: string = e.filename.substring(e.filename.lastIndexOf('/') + 1);
             let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
-  
+
             this.addedFiles.push({
               "uuid": idProj,
               "id": e.id,
@@ -539,16 +600,18 @@ export class NewProjectComponent implements OnInit {
               "unit": e.unit,
               "tab": e.tab
             })
-  
+
           });
         }
       },
       error: err => {
         this.snackBar.open('⚠️ Problema con el Registro ', 'cerrar', snackBar)
         this.matDailogRef.close()
+        this.showUpdate = false
       },
       complete: () => {
         this.sendData(this.addedFiles, '/user/lectorAcel')
+        this.showUpdate = false
         this.matDailogRef.close()
       }
     })
@@ -563,11 +626,11 @@ export class NewProjectComponent implements OnInit {
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
 
-    
+
 
     let data = {
-      "title" : "Borrar Archivo",
-      "quest" : "Desea borrar este Archivo?"
+      "title": "Borrar Archivo",
+      "quest": "Desea borrar este Archivo?"
     }
 
     matDialogConfig.data = data
@@ -575,7 +638,7 @@ export class NewProjectComponent implements OnInit {
     const indice = this.addedFiles.indexOf(item);
     this.matdialog.open(DeleteConfirmationComponent, matDialogConfig).afterClosed().subscribe({
       next: value => {
-        if(value == true){
+        if (value == true) {
           if (indice !== -1) {
             this.regApi.delFileProject(item.id).subscribe({
               error: err => {
@@ -589,7 +652,7 @@ export class NewProjectComponent implements OnInit {
         }
       }
     })
-    
+
   }
 
   setColorStationChannel(value: string): any {

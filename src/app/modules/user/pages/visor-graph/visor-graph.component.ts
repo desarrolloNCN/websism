@@ -113,6 +113,7 @@ export class VisorGraphComponent implements OnInit {
   panelOpenState = false
 
   hideStaPanel = true
+  hideStaPanel1_1 = true
   hideStaPanel2 = true
   showResponsivebar = false
 
@@ -122,6 +123,10 @@ export class VisorGraphComponent implements OnInit {
   idFile = ''
   stringdata = ''
   formatFile = ''
+
+  proyecto_title = ''
+  proyecto_desp = ''
+
   private userInfo = ''
   private group: any
   private groupNro: any
@@ -129,7 +134,7 @@ export class VisorGraphComponent implements OnInit {
   usere = ''
 
   // TODO: cambiar esto en Produccion a -1, 1 en dev
-  userId = 1
+  userId = -1
 
   plotedimages: any = []
 
@@ -210,7 +215,7 @@ export class VisorGraphComponent implements OnInit {
 
         if (value.username == null || value.email == null) {
           // TODO: cambiar esto en Produccion a -1, 1 en dev
-          this.userId == 1
+          this.userId == -1
         } else {
           this.group = value.groups
           this.name = value.name
@@ -227,16 +232,16 @@ export class VisorGraphComponent implements OnInit {
           })
         }
 
-        if (value.modo_grafico == null || value.modo_grafico == 'no') {
+        if (value.modo_grafico == null || value.modo_grafico == '' || value.modo_grafico == 'no') {
           this.colorGraph = value.color_grafico
           this.graphClientOption = true
         } else {
-          this.graphClientOption = false
+          this.graphClientOption = false 
         }
       },
       error: err => {
         //TODO: cambiar esto en Produccion a -1, 1 en dev
-        this.userId == 1
+        this.userId == -1
         this.graphClientOption = true
       },
     })
@@ -252,16 +257,17 @@ export class VisorGraphComponent implements OnInit {
           this.proyectData = []
           this.btnSisHide = false
         } else {
-
+          this.hideStaPanel1_1 = false
           this.loadingPanelInfo = true
 
           this.btnSisHide = true
 
           this.proyectData = valueD
 
-          console.log('Visor OnInit', this.proyectData);
+          this.proyecto_title = this.proyectData[0].projname
+          this.proyecto_desp = this.proyectData[0].projdesp
 
-
+          // console.log('Visor OnInit', this.proyectData);
 
           from(this.proyectData).pipe(
             concatMap((e: any, index: number) =>
@@ -290,64 +296,70 @@ export class VisorGraphComponent implements OnInit {
             complete: () => {
               this.loadingPanelInfo = false;
 
-              this.proyectData[0].tab.forEach((e: any) => {
+              if (this.proyectData[0].tab == null) {
+                return
+              } else {
+                this.proyectData[0].tab.forEach((e: any) => {
 
-                const graph = e.graph
-                const img = e.img
-                
-                const FilterForm = new FormGroup({
-                  type: new FormControl(e.FilterForm.type, [Validators.required]),
-                  freqmin: new FormControl(e.FilterForm.freqmin, [Validators.required]),
-                  freqmax: new FormControl(e.FilterForm.freqmax, [Validators.required]),
-                  order: new FormControl(e.FilterForm.order, [Validators.required]),
-                  zero: new FormControl(e.FilterForm.zero)
-                })
+                  const graph = e.graph
+                  const img = e.img
 
-                const st = new Date(e.starttime).getTime()
-                const et = new Date(e.endtime).getTime()
+                  const FilterForm = new FormGroup({
+                    type: new FormControl(e.FilterForm.type, [Validators.required]),
+                    freqmin: new FormControl(e.FilterForm.freqmin, [Validators.required]),
+                    freqmax: new FormControl(e.FilterForm.freqmax, [Validators.required]),
+                    order: new FormControl(e.FilterForm.order, [Validators.required]),
+                    zero: new FormControl(e.FilterForm.zero)
+                  })
 
-                const diff = et - st;
-                const s = diff / 1000
+                  const st = new Date(e.starttime).getTime()
+                  const et = new Date(e.endtime).getTime()
 
-                const TrimForm = new FormGroup({
-                  t_min: new FormControl(e.TrimForm.t_min, [Validators.required]),
-                  t_max: new FormControl(e.TrimForm.t_max, [Validators.required]),
-                })
+                  const diff = et - st;
+                  const s = diff / 1000
 
-                let sliderOption: Options = {
-                  floor: e.sliderOption.floor,
-                  ceil: e.sliderOption.ceil,
-                  translate: (value: number, label: LabelType): string => {
-                    switch (label) {
-                      case LabelType.Low:
-                        return value + ' seg.';
-                      case LabelType.High:
-                        return value + ' seg.';
-                      default:
-                        return '' + value;
+                  const TrimForm = new FormGroup({
+                    t_min: new FormControl(e.TrimForm.t_min, [Validators.required]),
+                    t_max: new FormControl(e.TrimForm.t_max, [Validators.required]),
+                  })
+
+                  let sliderOption: Options = {
+                    floor: e.sliderOption.floor,
+                    ceil: e.sliderOption.ceil,
+                    translate: (value: number, label: LabelType): string => {
+                      switch (label) {
+                        case LabelType.Low:
+                          return value + ' seg.';
+                        case LabelType.High:
+                          return value + ' seg.';
+                        default:
+                          return '' + value;
+                      }
                     }
                   }
-                }
 
-                this.tabs.push({
-                  label: e.label,
-                  dataEst: e.dataEst,
-                  sttime: e.sttime,
-                  entime: e.entime,
-                  base: e.base,
-                  unit: e.unit,
-                  FilterForm,
-                  TrimForm,
-                  graph,
-                  indexFilePanel: e.indexFilePanel,
-                  img,
-                  sliderOption,
+                  this.tabs.push({
+                    label: e.label,
+                    dataEst: e.dataEst,
+                    sttime: e.sttime,
+                    entime: e.entime,
+                    base: e.base,
+                    unit: e.unit,
+                    FilterForm,
+                    TrimForm,
+                    graph,
+                    indexFilePanel: e.indexFilePanel,
+                    img,
+                    sliderOption,
+                  });
+
+                  this.lastIndexTab = this.tabs.length - 1
+
+                  this.ToggleGraph = true;
                 });
+              }
 
-                this.lastIndexTab = this.tabs.length - 1
 
-                this.ToggleGraph = true;
-              });
 
             }
           });
@@ -507,7 +519,6 @@ export class VisorGraphComponent implements OnInit {
 
 
 
-  @ViewChild('fileInput') fileInput!: ElementRef
 
   leerArchivo() {
     this.clearData()
@@ -822,12 +833,12 @@ export class VisorGraphComponent implements OnInit {
 
   leer(e: any, indexFile?: number) {
 
-    for (const elem of this.tabs) {
-      if (elem.label == `${e.station}.${e.channel}`) {
-        alert('Ya hay una pestaña con esa estacion')
-        break
-      }
-    }
+    // for (const elem of this.tabs) {
+    //   if (elem.label == `${e.station}.${e.channel}`) {
+    //     alert('Ya hay una pestaña con esa estacion')
+    //     break
+    //   }
+    // }
 
     this.loadingSpinnerGraph = true
     this.loadingBarGraph = true
@@ -846,7 +857,7 @@ export class VisorGraphComponent implements OnInit {
       next: value => {
         this.colorGraph = value.color_grafico
 
-        if (value.modo_grafico == null || value.modo_grafico == 'no') {
+        if (value.modo_grafico == null || value.modo_grafico == '' || value.modo_grafico == 'no') {
 
           this.graphClientOption = true
 
@@ -1063,19 +1074,19 @@ export class VisorGraphComponent implements OnInit {
       this.snackBar.open('Debe elegir una Estacion', 'cerrar', snackBar)
       return
     }
-    console.log('TEST session Filter',this.tabs[index].FilterForm.value);
-    console.log('TEST session Trim',this.tabs[index].TrimForm.value);
+    // console.log('TEST session Filter', this.tabs[index].FilterForm.value);
+    // console.log('TEST session Trim', this.tabs[index].TrimForm.value);
 
-    console.log('TEST session date',this.tabs[index].sttime);
-    
-    
+    // console.log('TEST session date', this.tabs[index].sttime);
+
+
     let base = this.baseLineOptions[menuIndex]
     let unit = this.tabs[index].unit || ''
-    
+
     let indexFilePanel = this.tabs[index].indexFilePanel || 0
-    
-    console.log('url', this.proyectData[indexFilePanel].urlconvert);
-    
+
+    // console.log('url', this.proyectData[indexFilePanel].urlconvert);
+
     var dataString, dataFile = this.proyectData[indexFilePanel].urlconvert
     var unit_from: string = this.proyectData[indexFilePanel].unit
 
@@ -1106,8 +1117,8 @@ export class VisorGraphComponent implements OnInit {
       utc_min = new Date(this.tabs[index].sttime);
       utc_max = new Date(this.tabs[index].sttime);
 
-      console.log('min', utc_min, 'max', utc_max);
-      
+      // console.log('min', utc_min, 'max', utc_max);
+
 
       utc_min.setUTCSeconds(utc_min.getUTCSeconds() + t_min);
       utc_max.setUTCSeconds(utc_max.getUTCSeconds() + t_max);
@@ -1124,7 +1135,7 @@ export class VisorGraphComponent implements OnInit {
       next: value => {
         this.colorGraph = value.color_grafico
 
-        if (value.modo_grafico == null || value.modo_grafico == 'no') {
+        if (value.modo_grafico == null || value.modo_grafico == '' || value.modo_grafico == 'no') {
 
           this.graphClientOption = true
 
@@ -1263,7 +1274,7 @@ export class VisorGraphComponent implements OnInit {
 
         this.colorGraph = value.color_grafico
 
-        if (value.modo_grafico == null || value.modo_grafico == 'no') {
+        if (value.modo_grafico == null || value.modo_grafico == '' || value.modo_grafico == 'no') {
           this.graphClientOption = true
           this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit, this.colorGraph).subscribe({
 
@@ -1400,7 +1411,7 @@ export class VisorGraphComponent implements OnInit {
 
         this.colorGraph = value.color_grafico
 
-        if (value.modo_grafico == null || value.modo_grafico == 'no') {
+        if (value.modo_grafico == null || value.modo_grafico == '' || value.modo_grafico == 'no') {
           this.graphClientOption = true
           this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit, this.colorGraph).subscribe({
             next: value => {
@@ -1552,7 +1563,7 @@ export class VisorGraphComponent implements OnInit {
 
         this.colorGraph = value.color_grafico
 
-        if (value.modo_grafico == null || value.modo_grafico == 'no') {
+        if (value.modo_grafico == null || value.modo_grafico == '' || value.modo_grafico == 'no') {
           this.graphClientOption = true
           this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to, this.colorGraph).subscribe({
             next: value => {
@@ -1629,7 +1640,7 @@ export class VisorGraphComponent implements OnInit {
   autoAjuste(index: number) {
 
     this.reloadSettingUser()
-    console.log();
+    // console.log();
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 3 * 1000;
@@ -1686,7 +1697,7 @@ export class VisorGraphComponent implements OnInit {
 
         this.colorGraph = value.color_grafico
 
-        if (value.modo_grafico == null || value.modo_grafico == 'no') {
+        if (value.modo_grafico == null || value.modo_grafico == '' || value.modo_grafico == 'no') {
           this.graphClientOption = true
           this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from, this.colorGraph, '', '', '', '', '', '', min, max).subscribe({
             next: value => {
@@ -2392,7 +2403,7 @@ export class VisorGraphComponent implements OnInit {
     this.loadingSpinner = false
     this.loadingSpinnerStaInfo = false
 
-    this.fileInput.nativeElement.value = ''
+
 
     this.groupedData = {}
     this.arch = ''
@@ -2506,7 +2517,7 @@ export class VisorGraphComponent implements OnInit {
       next: value => {
         this.colorGraph = value.color_grafico
 
-        if (value.modo_grafico == null || value.modo_grafico == 'no') {
+        if (value.modo_grafico == null || value.modo_grafico == '' || value.modo_grafico == 'no') {
 
           this.graphClientOption = true
 
@@ -2921,8 +2932,8 @@ export class VisorGraphComponent implements OnInit {
     });
 
     let sendData = {
-      "uuid" : this.proyectData[0].uuid,
-      "data" : tabStatus
+      "uuid": this.proyectData[0].uuid,
+      "data": tabStatus
     }
 
     const matDialogConfig = new MatDialogConfig()
@@ -2933,7 +2944,7 @@ export class VisorGraphComponent implements OnInit {
     snackBar.panelClass = ['snackBar-validator'];
 
     this.matDialog.open(SaveProgressComponent, matDialogConfig)
-    
+
     //console.log('TabStatus',tabStatus);
 
 

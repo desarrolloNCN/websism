@@ -225,4 +225,22 @@ export class RegisterUserService {
       })
     );
   }
+
+  covertionXMR(file: File | string | undefined) {
+    const url = `convert/`
+    let formData = new FormData()
+
+    if (file instanceof File) {
+      formData.append('file', file);
+    } else {
+      throw new Error('SREV-POST-99: Se espera un archivo (File) o una cadena (string).');
+    }
+
+    return this.http.post<any>(url, formData).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    );
+  }
+  
 }
