@@ -103,7 +103,7 @@ export class UserProjectsComponent implements OnInit {
 
             this.pageData = this.proyectos
             this.totalElementos = this.proyectos.length
-            console.log('user proj', this.proyectos);
+            // console.log('user proj', this.proyectos);
 
           },
           error: err => {

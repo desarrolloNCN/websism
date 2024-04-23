@@ -19,6 +19,7 @@ import { NewProjectComponent } from './componentes/new-project/new-project.compo
 import { DeleteConfirmationComponent } from './componentes/delete-confirmation/delete-confirmation.component';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { SaveProgressComponent } from './componentes/save-progress/save-progress.component';
+import { DownloadFileComponent } from './componentes/download-file/download-file.component';
 
 // import * as PlotlyJS from 'plotly.js-dist-min';
 // import { PlotlyModule } from 'angular-plotly.js';
@@ -38,6 +39,7 @@ PlotlyViaCDNModule.setPlotlyBundle('basic');
     NewProjectComponent,
     DeleteConfirmationComponent,
     SaveProgressComponent,
+    DownloadFileComponent,
   ],
   imports: [
     CommonModule,

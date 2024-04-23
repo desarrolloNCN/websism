@@ -20,6 +20,7 @@ import { SismosHistoricosComponent } from 'src/app/modules/uext/componentes/sism
 import { RegisterUserService } from 'src/app/service/register-user.service';
 import { LabelType, Options } from '@angular-slider/ngx-slider';
 import { SaveProgressComponent } from '../../componentes/save-progress/save-progress.component';
+import { DownloadFileComponent } from '../../componentes/download-file/download-file.component';
 
 @Component({
   selector: 'app-visor-graph',
@@ -237,7 +238,7 @@ export class VisorGraphComponent implements OnInit {
           this.colorGraph = value.color_grafico
           this.graphClientOption = true
         } else {
-          this.graphClientOption = false 
+          this.graphClientOption = false
         }
       },
       error: err => {
@@ -302,8 +303,13 @@ export class VisorGraphComponent implements OnInit {
               } else {
                 this.proyectData[0].tab.forEach((e: any) => {
 
-                  const graph = e.graph
-                  const img = e.img
+                  let graph: EChartsOption = e.graph
+                  let img = e.img
+
+                  if (graph) {
+                    this.graphClientOption = false
+                    img = ''
+                  }
 
                   const FilterForm = new FormGroup({
                     type: new FormControl(e.FilterForm.type, [Validators.required]),
@@ -443,6 +449,9 @@ export class VisorGraphComponent implements OnInit {
     return confirmationMessage;
   }
 
+  returnedGraph(elemt: any[]): any[] {
+    return elemt
+  }
 
   onFileSelected(event: any) {
     let archivos = event.target.files;
@@ -563,7 +572,7 @@ export class VisorGraphComponent implements OnInit {
                 "format": '',
                 "unit": ''
               })
-              
+
               this.leerTxt(value.url)
             },
             error: err => {
@@ -694,7 +703,7 @@ export class VisorGraphComponent implements OnInit {
     this.matDialog.open(ArchivoTXTComponent, matDialogConfig).afterClosed()
       .subscribe({
         next: value => {
-          
+
           // this.toggleTabs = true
 
           if (value.url == '') {
@@ -709,7 +718,7 @@ export class VisorGraphComponent implements OnInit {
 
             this.proyectData[0].urlconvert = value.url
             this.proyectData[0].unit = value.unit
-         
+
 
             this.stopTxt = this.obsApi.getData(this.proyectData[0].urlconvert).subscribe({
               next: value => {
@@ -909,7 +918,23 @@ export class VisorGraphComponent implements OnInit {
         }
       },
       error: err => {
-        this.graphClientOption = true
+        // TODO: true si es imagen, false si es dinamico
+         this.graphClientOption = true
+
+        // TODO: Eliminar en produccion
+        // this.obsApi.getTraceData(dataToUse, e.station, e.channel, og_unit).subscribe({
+        //   next: value => { this.createTab(e, value, '', this.colorGraph, indexFile) },
+        //   error: err => {
+        //     this.loadingBarGraph = false
+        //   },
+        //   complete: () => {
+        //     this.loadingSpinnerGraph = false
+        //     this.loadingBarGraph = false
+        //     this.ToggleGraph = true
+        //   }
+        // })
+
+        // TODO: Descomentar en produccion
         this.obsApi.plotGraph(dataToUse, e.station, e.channel, og_unit, '', '').subscribe({
           next: val => {
             if (!val.url) {
@@ -928,8 +953,7 @@ export class VisorGraphComponent implements OnInit {
           }
 
         })
-        // this.graphClientOption = true
-        // this.loadingBarGraph = false
+
       },
 
     })
@@ -1138,8 +1162,8 @@ export class VisorGraphComponent implements OnInit {
     }
 
     this.ToggleGraph = false
-    this.isLoading =
-      this.loadingBarGraph = true
+    this.isLoading = true
+    this.loadingBarGraph = true
 
     this.auth.getToken().subscribe({
       next: value => {
@@ -1150,7 +1174,7 @@ export class VisorGraphComponent implements OnInit {
           this.graphClientOption = true
 
 
-          this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit, this.colorGraph,this.widthGraph).subscribe({
+          this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit, this.colorGraph, this.widthGraph).subscribe({
             next: value => {
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
               if (indx !== -1) {
@@ -1201,22 +1225,57 @@ export class VisorGraphComponent implements OnInit {
         }
       },
       error: err => {
-        this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit, this.colorGraph).subscribe({
+
+        this.graphClientOption = false
+        this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
           next: value => {
+
+            this.ToggleGraph = false
+
+
             const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+
             if (indx !== -1) {
 
-              this.tabs[indx].img = value.url
+              const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)', this.colorGraph)
+
+              this.tabs[indx].graph = graph;
               this.tabs[indx].base = base
+
               this.cdRef.detectChanges();
             }
+
+
+          },
+          error: err => {
+            this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
+            this.loadingSpinnerGraph = false
           },
           complete: () => {
-            this.loadingSpinnerGraph = false
+            this.actApli.push(`Linea Base: ${base} a ${sta}.${cha}`)
+            this.loadingSpinnerData = false
             this.loadingBarGraph = false
             this.ToggleGraph = true
+            this.isLoading = false
           }
         })
+        //TODO: Descomentar para paso a Produccion
+        // this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit, this.colorGraph).subscribe({
+        //   next: value => {
+        //     const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
+        //     if (indx !== -1) {
+
+        //       this.tabs[indx].img = value.url
+        //       this.tabs[indx].base = base
+        //       this.cdRef.detectChanges();
+        //     }
+        //   },
+        //   complete: () => {
+        //     this.loadingSpinnerGraph = false
+        //     this.loadingBarGraph = false
+        //     this.ToggleGraph = true
+        //   }
+        // })
       },
     })
 
@@ -1917,7 +1976,7 @@ export class VisorGraphComponent implements OnInit {
 
 
   // ! Generador de Graficos
-  graphGenerator(e: any, value: any, dataformat: any, colorg?: string, widthg? : string) {
+  graphGenerator(e: any, value: any, dataformat: any, colorg?: string, widthg?: string) {
 
     const st = new Date(e.starttime).getTime()
     const et = new Date(e.endtime).getTime()
@@ -2056,7 +2115,7 @@ export class VisorGraphComponent implements OnInit {
           name: 'Aceleracion',
           type: 'line',
           showSymbol: false,
-          lineStyle:{
+          lineStyle: {
             width: widthg || 0.3
           },
           data: value[0].traces_a,
@@ -2185,7 +2244,7 @@ export class VisorGraphComponent implements OnInit {
           name: 'Velocidad',
           type: 'line',
           showSymbol: false,
-          lineStyle:{
+          lineStyle: {
             width: widthg || 0.3
           },
           data: value[0].traces_v,
@@ -2314,7 +2373,7 @@ export class VisorGraphComponent implements OnInit {
           name: 'Desplazamiento',
           type: 'line',
           showSymbol: false,
-          lineStyle:{
+          lineStyle: {
             width: widthg || 0.3
           },
           data: value[0].traces_d,
@@ -2985,6 +3044,53 @@ export class VisorGraphComponent implements OnInit {
 
   }
 
+  processFileDownload(tabInfo: any, m: string, index: number) {
+    console.log('Proyecto Entero', this.proyectData);
+    console.log('Info Tab', tabInfo);
+
+    const matDialogConfig = new MatDialogConfig()
+
+    let claveEspecifica = `${tabInfo.dataEst.network}.${tabInfo.dataEst.station}`
+
+    console.log('clave', claveEspecifica);
+    
+    let info: any[] = []
+    let sendData = {}
+
+    this.proyectData.forEach((elmt: any, index: number) => {
+
+      let objetosConAb = elmt.stations[claveEspecifica]
+      if(objetosConAb){
+        let a = {
+          "unit": elmt.unit,
+          "url_gen": elmt.urlconvert
+        }
+        info.push(a)
+      }
+
+    });
+
+    sendData = {
+      "unit": tabInfo.unit,
+      "og_data": tabInfo.dataEst,
+      "start_time" : tabInfo.sttime,
+      "end_time" : tabInfo.entime,
+      "trim": tabInfo.TrimForm.value,
+      "filter": tabInfo.FilterForm.value,
+      "base": tabInfo.base,
+      "urls": info
+    }
+
+    matDialogConfig.data = sendData
+    
+    this.matDialog.open(DownloadFileComponent, matDialogConfig).afterClosed().subscribe({
+
+    })
+
+    console.log('filter',info);
+
+  }
+
   redirectAcel() {
     window.open('https://ncn.pe/acelerografo-reftek-sma2')
   }
@@ -3005,8 +3111,6 @@ export class VisorGraphComponent implements OnInit {
     }
   }
 
-  formatLabel(value: number) {
-    return value + ' s';
-  }
+
 
 }

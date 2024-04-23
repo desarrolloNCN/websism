@@ -141,11 +141,15 @@
                                 </mat-panel-title>
                             </mat-expansion-panel-header>
 
-                            <div *ngIf="loadingPanelInfo" fxLayout="column" fxLayoutGap="10"
+                            <!-- <div *ngIf="loadingPanelInfo" fxLayout="column" fxLayoutGap="10"
                                 fxLayoutAlign="center center" style="padding-top: 10%;">
                                 <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                                     [diameter]="50"></mat-progress-spinner>
                                 <h3> <b>Cargando Datos ....</b> </h3>
+                            </div> -->
+
+                            <div *ngIf="loadingPanelInfo" style="padding: 2px;">
+                                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
                             </div>
 
                             <ng-container style="width: 100%;"
@@ -444,6 +448,9 @@
                                     <button mat-menu-item (click)="donwloadData(tab, 'des', i)">
                                         Desplazamiento
                                     </button>
+                                    <button mat-menu-item (click)="processFileDownload(tab, 'des', i)">
+                                        MSEED
+                                    </button>
                                 </mat-menu>
 
                                 <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
@@ -589,9 +596,9 @@
                         </div>
 
                         <div [fxHide]="graphClientOption" fxLayout="column" fxLayoutGap="10">
-                            <div echarts [options]="tab.graph[0]" [loading]="isLoading" class="divGraph"></div>
-                            <div echarts [options]="tab.graph[1]" [loading]="isLoading" class="divGraph"></div>
-                            <div echarts [options]="tab.graph[2]" [loading]="isLoading" class="divGraph"></div>
+                            <div echarts [options]="tab.graph[0]" [loading]="isLoading || false" class="divGraph"></div>
+                            <div echarts [options]="tab.graph[1]" [loading]="isLoading || false" class="divGraph"></div>
+                            <div echarts [options]="tab.graph[2]" [loading]="isLoading || false" class="divGraph"></div>
                         </div>
                     </div>
 

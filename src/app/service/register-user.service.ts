@@ -174,7 +174,7 @@ export class RegisterUserService {
     );
   }
 
-  putProject(idPro: string, name: string, desp: string, img:  File | string | undefined, merge: string) {
+  putProject(idPro: string, name: string, desp: string, img: File | string | undefined, merge: string) {
     const formData = new FormData();
 
     const url = `new_pro/?id=${idPro}`
@@ -182,10 +182,10 @@ export class RegisterUserService {
     formData.append('name', name)
     formData.append('desp', desp)
     formData.append('merge', merge)
-    
-    if(img instanceof File){
+
+    if (img instanceof File) {
       formData.append('img_proj', img)
-    }else{
+    } else {
       formData.append('img_proj', '')
     }
 
@@ -242,5 +242,45 @@ export class RegisterUserService {
       })
     );
   }
-  
+
+  mseedDownload(
+    urls: any,
+    info_sta: any,
+    checked_sta: any,
+    base_line: string,
+    filter: string,
+    freqmin: string,
+    freqmax: string,
+    corner: string,
+    zero: string,
+    t_min: string,
+    t_max: string,
+    unit_from: string,
+    unit_to: string,
+  ): Observable<any> {
+    const formData = new FormData();
+    const url = 'mseed/'
+
+    formData.append('data', JSON.stringify(urls));
+    formData.append('data_sta', JSON.stringify(info_sta))
+    formData.append('check_sta', JSON.stringify(checked_sta))
+    formData.append('base_line', base_line)
+    formData.append('filter_type', filter)
+    formData.append('freq_min', freqmin)
+    formData.append('freq_max', freqmax)
+    formData.append('corner', corner)
+    formData.append('zero', zero)
+    formData.append('t_min', t_min)
+    formData.append('t_max', t_max)
+    formData.append('unit_from', unit_from)
+    formData.append('unit_to', unit_to)
+
+    return this.http.post<any>(url, formData).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    );
+
+  }
+
 }

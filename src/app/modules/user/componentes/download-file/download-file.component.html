@@ -1,0 +1,46 @@
+<mat-dialog-content>
+    <pre>{{data | json}}</pre>
+
+    <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="5">
+        <div *ngIf="loadData" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center"
+            style="padding-top: 10%;">
+            <mat-progress-spinner mode="indeterminate" style="margin:0 auto;" [diameter]="50"></mat-progress-spinner>
+            <h3> <b>Cargando Datos ....</b> </h3>
+        </div>
+
+
+        <div fxLayout="column" fxLayoutAlign="center center" *ngFor="let item of stream_info, let i = index"
+            style="width: 300px;">
+
+            <div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="5"
+                style="padding: 2px; background-color: rgb(255, 182, 73); color: white; width: 100%;">
+                <mat-checkbox (change)="onChange($event, item)"
+                    [checked]="item.network == this.data.og_data.network && item.station == this.data.og_data.station && item.location == this.data.og_data.location && item.channel == this.data.og_data.channel && itemSelect"></mat-checkbox>
+                <p> {{item.network || '-'}} </p>
+                <p> {{item.station}} </p>
+                <p> {{item.location || '-'}} </p>
+                <p style="padding: 1px 4px 1px 4px; border-radius: 3px;"
+                    [ngStyle]="setColorStationChannel(item.channel)">
+                    {{item.channel}} </p>
+            </div>
+        </div>
+
+
+        <div fxLayout="column" fxLayoutAlign="center center">
+            <h4 style="text-decoration: underline;">Duracion Evento</h4>
+            <h5>{{h+' hrs. '+m+' min. '+s+' seg. '+ms+' ms. '}}</h5>
+            <h4 style="text-decoration: underline;">Recorte de Tiempo</h4>
+            <h5> De: <b>{{min_time}}</b> Hasta: <b>{{max_time}}</b> </h5>
+            <h4 style="text-decoration: underline;">Duracion Recorte</h4>
+            <h5>{{og_h+' hrs. '+og_m+' min. '+og_s+' seg. '+og_ms+' ms. '}}</h5>
+        </div>
+        <br>
+        <div>
+            <button mat-flat-button color="primary" (click)="sendDatatoProcess()">
+                <mat-icon>file_download</mat-icon>
+                Descargar
+            </button>
+        </div>
+    </div>
+
+</mat-dialog-content>
