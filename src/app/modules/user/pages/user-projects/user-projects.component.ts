@@ -9,6 +9,8 @@ import { DeleteConfirmationComponent } from '../../componentes/delete-confirmati
 import { FormGroup } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { ObspyAPIService } from 'src/app/service/obspy-api.service';
+import { concat, concatMap, from, map } from 'rxjs';
 
 @Component({
   selector: 'app-user-projects',
@@ -42,6 +44,7 @@ export class UserProjectsComponent implements OnInit {
   endate: any;
 
   constructor(
+    private obsService: ObspyAPIService,
     private userService: RegisterUserService,
     private authService: AuthService,
     private matDialog: MatDialog,
@@ -58,7 +61,10 @@ export class UserProjectsComponent implements OnInit {
   ngOnInit(): void {
 
     this.loadingSpinner = true
-    // this.disableBtns = true
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 5 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
 
     this.authService.getToken().subscribe({
       next: value => {
@@ -82,26 +88,31 @@ export class UserProjectsComponent implements OnInit {
 
         // TODO: Borrar en Produccion
 
-        // this.username = 'admin'
-        // this.email = 'admin@example.com'
+        this.username = 'admin'
+        this.email = 'admin@example.com'
 
 
-        // this.userService.getProjectuser(this.username, this.email).subscribe({
-        //   next: value => {
-        //     this.proyectos = value
-        //     console.log('Editar Button',this.proyectos);
-            
-        //     this.pageData = this.proyectos
-        //     this.totalElementos = this.proyectos.length
-        //   },
-        //   error: err => {
+        this.userService.getProjectuser(this.username, this.email).subscribe({
+          next: value => {
 
-        //   },
-        //   complete: () => {
-        //     this.loadingSpinner = false
-        //    // this.disableBtns = true
-        //   }
-        // })
+            value.forEach((item: any) => {
+              item.fecha_creacion = new Date(item.fecha_creacion);
+            });
+
+            this.proyectos = value.sort((a: { fecha_creacion: { getTime: () => number; }; }, b: { fecha_creacion: { getTime: () => number; }; }) => b.fecha_creacion.getTime() - a.fecha_creacion.getTime());
+
+            this.pageData = this.proyectos
+            this.totalElementos = this.proyectos.length
+            console.log('user proj', this.proyectos);
+
+          },
+          error: err => {
+            this.snackBar.open(`⚠️ Error en Carga de Proyectos`, 'cerrar', snackBar)
+          },
+          complete: () => {
+            this.loadingSpinner = false
+          }
+        })
 
       },
       complete: () => {
@@ -114,16 +125,20 @@ export class UserProjectsComponent implements OnInit {
           complete: () => {
             this.userService.getProjectuser(this.username, this.email).subscribe({
               next: value => {
-                this.proyectos = value
+                value.forEach((item: any) => {
+                  item.fecha_creacion = new Date(item.fecha_creacion);
+                });
+
+                this.proyectos = value.sort((a: { fecha_creacion: { getTime: () => number; }; }, b: { fecha_creacion: { getTime: () => number; }; }) => b.fecha_creacion.getTime() - a.fecha_creacion.getTime());
+
                 this.pageData = this.proyectos
                 this.totalElementos = this.proyectos.length
               },
               error: err => {
-
+                this.snackBar.open(`⚠️ Error en Carga de Proyectos`, 'cerrar', snackBar)
               },
               complete: () => {
                 this.loadingSpinner = false
-                // this.disableBtns = true
               }
 
             })
@@ -175,11 +190,61 @@ export class UserProjectsComponent implements OnInit {
 
     let shouldContinueIteration = true;
 
+    this.disableBtns = true
+    this.loadingSpinner = true
+
     item.files.forEach((e: any) => {
       if (shouldContinueIteration) {
         if (e.status === "No Calibrado") {
           shouldContinueIteration = false;
-        } else {
+          this.disableBtns = false
+          this.loadingSpinner = false
+        }
+      }
+    });
+
+    if (shouldContinueIteration) {
+      if (item.checkM == true) {
+        this.userService.putProject(item.uuid, item.name, item.descrip, '', item.checkM).subscribe({
+          next: value => {
+            if (value.length > 0) {
+              addFiles = []
+
+              value.forEach((e: any) => {
+
+                let nombreArchivo: string = e.filename.substring(e.filename.lastIndexOf('/') + 1);
+                let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+
+                addFiles.push({
+                  "uuid": item.uuid,
+                  "id": e.id,
+                  "fileName": e.filename,
+                  "originalName": e.filename,
+                  "status": e.status,
+                  "extension": extension.toLocaleUpperCase() || 'NO EXT',
+                  "urlconvert": e.url_gen,
+                  "unit": e.unit,
+                  "tab": e.tab,
+                  "projname": item.name,
+                  "projdesp": item.descrip,
+                })
+
+              });
+            }
+          },
+          error: err => {
+            this.disableBtns = false
+            this.loadingSpinner = false
+          },
+          complete: () => {
+            this.disableBtns = false
+            this.loadingSpinner = false
+            this.sendData(addFiles, 'user/lectorAcel')
+          }
+        })
+      } else {
+
+        item.files.forEach((e: any) => {
           let url = e.file || e.string_data;
           let urlconvert = e.url_gen;
           let nombreArchivo: string = url.substring(url.lastIndexOf('/') + 1);
@@ -194,26 +259,78 @@ export class UserProjectsComponent implements OnInit {
             "img": e.img,
             "tab": item.tab,
             "urlconvert": urlconvert,
-            "projname" : item.name,
-            "projdesp" : item.descrip,
+            "projname": item.name,
+            "projdesp": item.descrip,
           });
-        }
-      }
-    });
+        })
 
-    this.sendData(addFiles, 'user/lectorAcel')
+        this.sendData(addFiles, 'user/lectorAcel')
+
+      }
+
+    }
+
+
 
   }
 
   editProyec(item: any) {
+    // console.log('Edit Proyect', item);
+
+    this.disableBtns = true
+    this.loadingSpinner = true
+
     const matDialogConfig = new MatDialogConfig()
     matDialogConfig.disableClose = true;
-    matDialogConfig.data = item
-    this.matDialog.open(NewProjectComponent, matDialogConfig).afterClosed().subscribe({
+
+    from(item.files).pipe(
+      concatMap((e: any, index: number) =>
+        this.obsService.getData(e.url_gen).pipe(
+          map((value: any) => {
+            let info_string = ''
+
+            value.data.forEach((e: any) => {
+              info_string += `|    ${e.network}.${e.station}.${e.location}.${e.channel}    |`
+              // console.log(info_string);
+            });
+
+            item.files[index] = { ...e, "info": info_string }
+
+          })
+        )
+      )
+    ).subscribe({
       complete: () => {
-        this.ngOnInit()
+        matDialogConfig.data = item
+        this.disableBtns = false
+        this.loadingSpinner = false
+        // console.log('Edit Proyect - Info', item);
+        this.matDialog.open(NewProjectComponent, matDialogConfig).afterClosed().subscribe({
+          complete: () => {
+            this.ngOnInit()
+          }
+        })
       }
     })
+
+    // item.files.forEach((e: any, index: number) => {
+    //   this.obsService.getData(e.url_gen).subscribe({
+    //     next: value => {
+    //       let info_string = ''
+    //       value.data.forEach((e: any) => {
+    //         info_string += `${e.network}.${e.station}.${e.location}.${e.channel} || `
+    //         console.log(info_string);
+    //       });
+
+    //       item.files[index] = { ...e, "info": info_string }
+    //     }
+    //   })
+
+    // });
+
+
+
+
   }
 
   sendData(data: any, route?: string) {
@@ -232,8 +349,8 @@ export class UserProjectsComponent implements OnInit {
     matDialogConfig.disableClose = true;
 
     let data = {
-      "title": "Borrar Archivo",
-      "quest": "Desea borrar este Archivo?"
+      "title": "Borrar Proyecto",
+      "quest": "Desea borrar este Proyecto?"
     }
 
     matDialogConfig.data = data

@@ -21,7 +21,7 @@
                     <mat-icon class="colorIcon">file_upload</mat-icon>
                 </button>
 
-                <input hidden (change)="onFileSelected2($event)" #fileImgInput [accept]="aceeptedImgFiles" type="file"
+                <input hidden (change)="onFileSelected2($event)"  #fileImgInput [accept]="aceeptedImgFiles" type="file"
                     id="fileImg">
 
             </div>
@@ -58,7 +58,7 @@
                             <mat-icon class="colorIcon">file_upload</mat-icon>
                         </button>
 
-                        <input hidden (change)="onFileSelected($event)" #fileInput [accept]="aceeptedFiles" type="file"
+                        <input hidden (change)="onFileSelected($event)" multiple #fileInput [accept]="aceeptedFiles" type="file"
                             id="file">
                     </div>
 
@@ -92,7 +92,7 @@
             </div>
 
             <div *ngFor="let item of addedFiles; let i = index" fxLayout="row" fxLayoutAlign="space-around center">
-                <div fxLayout="row">
+                <div fxLayout="row" fxLayoutGap="5">
                     <p class="filename" matTooltip="{{item.originalName}}" matTooltipPosition="above"> {{item.fileName}}
                     </p>
                     <mat-icon style="color: rgb(155, 155, 155); font-size: 15px;"

@@ -451,7 +451,8 @@ export class ObspyAPIService {
     station_selected: string,
     channel_selected: string,
     unit?: string,
-    color_graph?: string
+    color_graph?: string,
+    widthGraph? : string
   ): Observable<any> {
 
     const formData = new FormData();
@@ -465,6 +466,7 @@ export class ObspyAPIService {
       formData.append('station_selected', station_selected)
       formData.append('channel_selected', channel_selected)
       formData.append('unit_from', unit)
+      formData.append('width', widthGraph || "0.3")
       formData.append('graph_color', color_graph || '')
     } else {
       throw new Error('SREV-GET-02: Se espera un archivo datos para Lectura');
@@ -492,7 +494,8 @@ export class ObspyAPIService {
     t_max: string,
     unit_from: string,
     unit_to: string,
-    color_graph?: string
+    color_graph?: string,
+    widthGraph? : string
   ): Observable<any> {
     const formData = new FormData();
     const url = 'plot-tool/'
@@ -512,6 +515,7 @@ export class ObspyAPIService {
       formData.append('unit_from', unit_from)
       formData.append('unit_to', unit_to)
       formData.append('graph_color', color_graph || '')
+      formData.append('width', widthGraph || "0.3")
     } else {
       throw new Error('SREV-GET-03: Se espera un archivo datos para Lectura');
     }
@@ -538,6 +542,7 @@ export class ObspyAPIService {
     zero?: string,
     t_min?: string,
     t_max?: string,
+    widthGraph? : string
   ): Observable<any> {
     const formData = new FormData();
     const url = 'plot-tool-auto/'
@@ -564,6 +569,7 @@ export class ObspyAPIService {
       formData.append('t_max', t_max || '')
       formData.append('unit_from', unit)
       formData.append('graph_color', color_graph || '')
+      formData.append('width', widthGraph || "0.3")
     } else {
       throw new Error('SREV-GET-04: Se espera un archivo datos para Lectura');
     }

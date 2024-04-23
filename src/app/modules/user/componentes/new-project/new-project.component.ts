@@ -104,49 +104,52 @@ export class NewProjectComponent implements OnInit {
 
         // TODO: Borrar en Produccion
 
-        // if (this.data.uuid) {
+        if (this.data.uuid) {
 
-        //   this.titleDialog = 'Editar Proyecto'
-        //   this.subtitleDialog = 'Asigne un nuevo nombre a su proyecto, añada nuevos archivos con los que va a trabajar y'
-        //   this.subtitleStrong = 'Actualizar Proyecto'
+          this.titleDialog = 'Editar Proyecto'
+          this.subtitleDialog = 'Asigne un nuevo nombre a su proyecto, añada nuevos archivos con los que va a trabajar y'
+          this.subtitleStrong = 'Actualizar Proyecto'
 
-        //   this.buttonSubmitForm = 'Actualizar Proyecto'
+          this.buttonSubmitForm = 'Actualizar Proyecto'
 
-        //   let uuid = this.data.uuid
+          let uuid = this.data.uuid
 
-        //   this.controlForm.controls['projectName'].setValue(this.data.name)
-        //   this.controlForm.controls['descript'].setValue(this.data.descrip)
+          this.controlForm.controls['projectName'].setValue(this.data.name)
+          this.controlForm.controls['descript'].setValue(this.data.descrip)
 
-        //   this.controlForm.controls['checkOps'].setValue(this.data.checkM)
+          this.controlForm.controls['checkOps'].setValue(this.data.checkM)
 
-        //   this.defImg = this.data.img || '/assets/ncnLogoColor.png'
+          this.defImg = this.data.img || '/assets/ncnLogoColor.png'
 
-        //   this.data.files.forEach((e: any) => {
-        //     let file_name = e.filename
+          this.data.files.forEach((e: any) => {
+            let file_name = e.filename
 
-        //     let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
-        //     let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+            let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
+            let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
-        //     let formatoNombre = this.formatearNombreArchivo(file_name, extension, 12)
+            let formatoNombre = this.formatearNombreArchivo(file_name, '', 12)
 
-        //     this.addedFiles.push({
-        //       "id": e.id,
-        //       "file": '',
-        //       "fileName": formatoNombre,
-        //       "originalName": file_name,
-        //       "status": e.status,
-        //       "info": e.info,
-        //       "extension": extension.toLocaleUpperCase() || 'NO EXT',
-        //       "string_data": e.string_data,
-        //       "urlconvert": e.url_gen,
-        //       "unit": e.unit
-        //     })
-        //   });
-        // }
+            this.addedFiles.push({
+              "id": e.id,
+              "uuid": uuid,
+              "projname": this.data.name,
+              "projdesp": this.data.descrip,
+              "file": '',
+              "fileName": formatoNombre,
+              "originalName": file_name,
+              "status": e.status,
+              "info": e.info,
+              "extension": extension.toLocaleUpperCase() || 'NO EXT',
+              "string_data": e.string_data,
+              "urlconvert": e.url_gen,
+              "unit": e.unit
+            })
+          });
+        }
 
-        // this.username = 'admin'
-        // this.email = 'admin@example.com'
-        // this.idUser = `${1}`
+        this.username = 'admin'
+        this.email = 'admin@example.com'
+        this.idUser = `${1}`
       },
       complete: () => {
 
@@ -173,10 +176,13 @@ export class NewProjectComponent implements OnInit {
             let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
             let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
-            let formatoNombre = this.formatearNombreArchivo(file_name, extension, 12)
+            let formatoNombre = this.formatearNombreArchivo(file_name, '', 12)
 
             this.addedFiles.push({
               "id": e.id,
+              "uuid": uuid,
+              "projname": this.data.name,
+              "projdesp": this.data.descrip,
               "file": '',
               "fileName": formatoNombre,
               "originalName": file_name,
@@ -196,7 +202,7 @@ export class NewProjectComponent implements OnInit {
           },
           error: err => {
             // TODO: Borrar en Produccion
-            this.idUser = `${-1}`
+            this.idUser = `${1}`
           }
         })
 
@@ -217,8 +223,11 @@ export class NewProjectComponent implements OnInit {
     snackBar.duration = 5 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
-    let archivos = event.target.files;
+    let archivos = event.target.files
     this.controlForm2.get('url').setValue('')
+
+    let projName = this.controlForm.get('projectName').value
+    let projDesp = this.controlForm.get('descript').value
 
     let statusCalib = ''
 
@@ -226,71 +235,68 @@ export class NewProjectComponent implements OnInit {
 
     if (archivos && archivos.length > 0) {
 
-      let idProj = this.data.id || this.data.uuid
+      for (let index = 0; index < archivos.length; index++) {
+  
+        let idProj = this.data.id || this.data.uuid
 
-      let nombreArchivo: string = archivos[0].name.substring(archivos[0].name.lastIndexOf('/') + 1);
-      let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+        let nombreArchivo: string = archivos[index].name.substring(archivos[index].name.lastIndexOf('/') + 1);
+        let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
-      this.arch = ''
-      this.arch = archivos[0];
+        this.arch = ''
+        this.arch = archivos[index];
 
-      //this.controlForm2.get('url').disable()
-      if (extension == 'seed' || extension == 'evt') {
-        statusCalib = 'Calibrado'
-      } else if (extension == nombreArchivo) {
-        extension = ''
-      } else {
-        statusCalib = 'No Calibrado'
-      }
+        //this.controlForm2.get('url').disable()
+        if (extension == 'seed' || extension == 'evt') {
+          statusCalib = 'Calibrado'
+        } else if (extension == nombreArchivo) {
+          extension = ''
+        } else {
+          statusCalib = 'No Calibrado'
+        }
 
-      let formatoNombre = this.formatearNombreArchivo(archivos[0].name, extension, 12)
+        let formatoNombre = this.formatearNombreArchivo(archivos[index].name, extension, 12)
 
-      this.regApi.uploadProjectFileUser(this.arch, this.idUser, idProj, archivos[0].name, statusCalib).subscribe({
-        next: value => {
+        this.regApi.uploadProjectFileUser(this.arch, this.idUser, idProj, archivos[index].name, statusCalib).subscribe({
+          next: value => {
 
-          if (value.msg) {
-            this.snackBar.open(`⚠️ ${value.msg}`, 'cerrar', snackBar)
-          } else {
-            let urlconvert = ''
+            if (value.msg) {
+              this.snackBar.open(`⚠️ ${value.msg}`, 'cerrar', snackBar)
+            } else {
+              let urlconvert = ''
 
-            if (value.f == 'MSEED' || extension == 'TXT') {
-              statusCalib = 'No Calibrado'
-              urlconvert = value.file
-            } else if (value.f == 'KINEMETRICS_EVT' || extension == 'EVT') {
-              urlconvert = value.file
+              if (value.f == 'MSEED' || extension == 'TXT' || extension == 'XMR') {
+                statusCalib = 'No Calibrado'
+                urlconvert = value.file
+              } else if (value.f == 'KINEMETRICS_EVT' || extension == 'EVT') {
+                urlconvert = value.file
+              }
+
+              this.addedFiles.push({
+                "file": archivos[index],
+                "uuid": idProj,
+                "projname": projName,
+                "projdesp": projDesp,
+                "fileName": formatoNombre,
+                "originalName": archivos[index].name,
+                "info": value.info,
+                "status": statusCalib,
+                "extension": value.f || extension.toLocaleUpperCase() || 'NO EXT',
+                "id": value.id,
+                "url": value.file,
+                "urlconvert": value.file
+              })
             }
 
-            this.addedFiles.push({
-              "file": archivos[0],
-              "fileName": formatoNombre,
-              "originalName": archivos[0].name,
-              "info": value.info,
-              "status": statusCalib,
-              "extension": value.f || extension.toLocaleUpperCase() || 'NO EXT',
-              "id": value.id,
-              "url": value.file,
-              "urlconvert": value.file
-            })
+          },
+          error: err => {
+            this.showProgressBar = false
+          },
+          complete: () => {
+            this.showProgressBar = false
           }
+        })
+      }
 
-        },
-        error: err => {
-          this.showProgressBar = false
-        },
-        complete: () => {
-          this.showProgressBar = false
-        }
-      })
-
-
-      // this.addedFiles.push({
-      //   "file": archivos[0],
-      //   "fileName": formatoNombre,
-      //   "originalName": archivos[0].name,
-      //   "status": statusCalib,
-      //   "extension": extension.toLocaleUpperCase() || 'NO EXT',
-      //   "url": ''
-      // })
 
     } else {
       this.arch = null;
@@ -341,6 +347,8 @@ export class NewProjectComponent implements OnInit {
     }
 
     const urlData = this.controlForm2.get('url').value
+    let projName = this.controlForm.get('projectName').value
+    let projDesp = this.controlForm.get('descript').value
 
     this.showProgressBar = true
 
@@ -368,7 +376,7 @@ export class NewProjectComponent implements OnInit {
           } else {
             let urlconvert = ''
 
-            if (value.f == 'MSEED' || extension == 'TXT') {
+            if (value.f == 'MSEED' || extension == 'TXT' || extension == 'XMR') {
               statusCalib = 'No Calibrado'
               urlconvert = value.string_data
             } else if (value.f == 'KINEMETRICS_EVT' || extension == 'EVT') {
@@ -379,6 +387,9 @@ export class NewProjectComponent implements OnInit {
               "file": '',
               "fileName": formatoNombre,
               "originalName": nombreArchivo,
+              "uuid": idProj,
+              "projname": projName,
+              "projdesp": projDesp,
               "status": statusCalib,
               "extension": extension.toLocaleUpperCase() || 'NO EXT',
               "id": value.id,
@@ -464,7 +475,7 @@ export class NewProjectComponent implements OnInit {
         }
       })
     } else if (item.extension == 'XMR') {
-      this.regApi.covertionXMR(item.urlconvert).subscribe({
+      this.regApi.covertionXMR(item.file).subscribe({
         next: val => {
           matDialogConfig.data = val.url
           this.matdialog.open(ArchivoTXTComponent, matDialogConfig).afterClosed().subscribe({
@@ -489,7 +500,7 @@ export class NewProjectComponent implements OnInit {
             }
           })
         },
-        error: err =>{
+        error: err => {
           this.snackBar.open('⚠️ Error en conversion', 'cerrar', snackBar)
         }
       })
@@ -524,7 +535,7 @@ export class NewProjectComponent implements OnInit {
     }
 
     if (this.data.id) {
-      this.redirectLector()
+      this.redirectLector(true)
     } else {
 
       let data = {
@@ -537,8 +548,9 @@ export class NewProjectComponent implements OnInit {
       this.matdialog.open(DeleteConfirmationComponent, matDialogConfig).afterClosed().subscribe({
         next: value => {
           if (value == true) {
-            this.redirectLector()
+            this.redirectLector(true)
           } else {
+            this.redirectLector(false)
             return
           }
         }
@@ -559,13 +571,16 @@ export class NewProjectComponent implements OnInit {
 
 
 
-  redirectLector() {
+  redirectLector(redirect: boolean) {
 
     const snackBar = new MatSnackBarConfig();
     snackBar.duration = 5 * 1000;
     snackBar.panelClass = ['snackBar-validator']
 
     let idProj = this.data.id || this.data.uuid
+
+    // console.log('Id proy', idProj);
+
 
     let projName = this.controlForm.get('projectName').value
     let projDesp = this.controlForm.get('descript').value
@@ -581,6 +596,7 @@ export class NewProjectComponent implements OnInit {
 
     this.regApi.putProject(idProj, projName, projDesp, img, checkMerge).subscribe({
       next: (value: any[]) => {
+        // * value es vacio si no hay merge
         if (value.length > 0) {
           this.addedFiles = []
 
@@ -610,9 +626,12 @@ export class NewProjectComponent implements OnInit {
         this.showUpdate = false
       },
       complete: () => {
-        this.sendData(this.addedFiles, '/user/lectorAcel')
+        // console.log('Redirector after push', this.addedFiles);
+        if (redirect) {
+          this.sendData(this.addedFiles, '/user/lectorAcel')
+          this.matDailogRef.close()
+        }
         this.showUpdate = false
-        this.matDailogRef.close()
       }
     })
 

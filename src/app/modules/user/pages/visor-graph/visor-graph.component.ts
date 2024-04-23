@@ -91,6 +91,7 @@ export class VisorGraphComponent implements OnInit {
 
   stationInfo: any = {}
   colorGraph = '#0000ff'
+  widthGraph = '0.3'
 
   loadingSpinner = false
   loadingBarGraph = false
@@ -134,7 +135,7 @@ export class VisorGraphComponent implements OnInit {
   usere = ''
 
   // TODO: cambiar esto en Produccion a -1, 1 en dev
-  userId = -1
+  userId = 1
 
   plotedimages: any = []
 
@@ -215,7 +216,7 @@ export class VisorGraphComponent implements OnInit {
 
         if (value.username == null || value.email == null) {
           // TODO: cambiar esto en Produccion a -1, 1 en dev
-          this.userId == -1
+          this.userId == 1
         } else {
           this.group = value.groups
           this.name = value.name
@@ -241,7 +242,7 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         //TODO: cambiar esto en Produccion a -1, 1 en dev
-        this.userId == -1
+        this.userId == 1
         this.graphClientOption = true
       },
     })
@@ -267,7 +268,7 @@ export class VisorGraphComponent implements OnInit {
           this.proyecto_title = this.proyectData[0].projname
           this.proyecto_desp = this.proyectData[0].projdesp
 
-          // console.log('Visor OnInit', this.proyectData);
+          console.log('Visor OnInit', this.proyectData);
 
           from(this.proyectData).pipe(
             concatMap((e: any, index: number) =>
@@ -420,7 +421,7 @@ export class VisorGraphComponent implements OnInit {
     if (this.navigationSubscription) {
       this.navigationSubscription.unsubscribe();
       this.obsUser.resetService()
-      this.deleteFile()
+      //this.deleteFile()
     }
   }
 
@@ -428,7 +429,7 @@ export class VisorGraphComponent implements OnInit {
     const confirmed = window.confirm('-¿Estás seguro de que deseas abandonar esta página?');
     if (!confirmed) {
       this.obsUser.resetService()
-      this.deleteFile()
+      //this.deleteFile()
       this.router.navigate(['/user/lectorAcel']);
     } else {
       return
@@ -555,6 +556,14 @@ export class VisorGraphComponent implements OnInit {
         if (ext == 'XMR') {
           this.stopXmr = this.obsApi.covertionXMR(archivoValue).subscribe({
             next: value => {
+
+              this.proyectData.push({
+                "originalName": na,
+                "urlconvert": value.url,
+                "format": '',
+                "unit": ''
+              })
+              
               this.leerTxt(value.url)
             },
             error: err => {
@@ -685,7 +694,7 @@ export class VisorGraphComponent implements OnInit {
     this.matDialog.open(ArchivoTXTComponent, matDialogConfig).afterClosed()
       .subscribe({
         next: value => {
-
+          
           // this.toggleTabs = true
 
           if (value.url == '') {
@@ -700,9 +709,9 @@ export class VisorGraphComponent implements OnInit {
 
             this.proyectData[0].urlconvert = value.url
             this.proyectData[0].unit = value.unit
+         
 
-
-            this.stopTxt = this.obsApi.getData(value.url).subscribe({
+            this.stopTxt = this.obsApi.getData(this.proyectData[0].urlconvert).subscribe({
               next: value => {
                 this.toggleTabs = true
 
@@ -856,12 +865,13 @@ export class VisorGraphComponent implements OnInit {
     this.auth.getToken().subscribe({
       next: value => {
         this.colorGraph = value.color_grafico
+        this.widthGraph = value.ancho_plot || '0.3'
 
         if (value.modo_grafico == null || value.modo_grafico == '' || value.modo_grafico == 'no') {
 
           this.graphClientOption = true
 
-          this.obsApi.plotGraph(dataToUse, e.station, e.channel, og_unit, this.colorGraph).subscribe({
+          this.obsApi.plotGraph(dataToUse, e.station, e.channel, og_unit, this.colorGraph, this.widthGraph).subscribe({
             next: val => {
               if (!val.url) {
                 this.createTab(e, val, '', this.colorGraph, indexFile)
@@ -900,7 +910,7 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         this.graphClientOption = true
-        this.obsApi.plotGraph(dataToUse, e.station, e.channel, og_unit).subscribe({
+        this.obsApi.plotGraph(dataToUse, e.station, e.channel, og_unit, '', '').subscribe({
           next: val => {
             if (!val.url) {
               this.createTab(e, val, '', this.colorGraph, indexFile)
@@ -1140,7 +1150,7 @@ export class VisorGraphComponent implements OnInit {
           this.graphClientOption = true
 
 
-          this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit, this.colorGraph).subscribe({
+          this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit, this.colorGraph,this.widthGraph).subscribe({
             next: value => {
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
               if (indx !== -1) {
@@ -1273,6 +1283,7 @@ export class VisorGraphComponent implements OnInit {
       next: value => {
 
         this.colorGraph = value.color_grafico
+        this.widthGraph = value.ancho_plot || '0.3'
 
         if (value.modo_grafico == null || value.modo_grafico == '' || value.modo_grafico == 'no') {
           this.graphClientOption = true
@@ -1410,10 +1421,11 @@ export class VisorGraphComponent implements OnInit {
       next: value => {
 
         this.colorGraph = value.color_grafico
+        this.widthGraph = value.ancho_plot || '0.3'
 
         if (value.modo_grafico == null || value.modo_grafico == '' || value.modo_grafico == 'no') {
           this.graphClientOption = true
-          this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit, this.colorGraph).subscribe({
+          this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit, this.colorGraph, this.widthGraph).subscribe({
             next: value => {
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
               if (indx !== -1) {
@@ -1469,7 +1481,8 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         this.graphClientOption = true
-        this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit, this.colorGraph).subscribe({
+        this.widthGraph = '0.3'
+        this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit, this.colorGraph, this.widthGraph).subscribe({
           next: value => {
             const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
             if (indx !== -1) {
@@ -1562,10 +1575,11 @@ export class VisorGraphComponent implements OnInit {
       next: value => {
 
         this.colorGraph = value.color_grafico
+        this.widthGraph = value.ancho_plot || '0.3'
 
         if (value.modo_grafico == null || value.modo_grafico == '' || value.modo_grafico == 'no') {
           this.graphClientOption = true
-          this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to, this.colorGraph).subscribe({
+          this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to, this.colorGraph, this.widthGraph).subscribe({
             next: value => {
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
               if (indx !== -1) {
@@ -1617,7 +1631,8 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         this.graphClientOption = true
-        this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to, this.colorGraph).subscribe({
+        this.widthGraph = '0.3'
+        this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit_to, this.colorGraph, this.widthGraph).subscribe({
           next: value => {
             const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
             if (indx !== -1) {
@@ -1696,10 +1711,11 @@ export class VisorGraphComponent implements OnInit {
       next: value => {
 
         this.colorGraph = value.color_grafico
+        this.widthGraph = value.ancho_plot || '0.3'
 
         if (value.modo_grafico == null || value.modo_grafico == '' || value.modo_grafico == 'no') {
           this.graphClientOption = true
-          this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from, this.colorGraph, '', '', '', '', '', '', min, max).subscribe({
+          this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from, this.colorGraph, '', '', '', '', '', '', min, max, this.widthGraph).subscribe({
             next: value => {
               const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
               if (indx !== -1) {
@@ -1752,7 +1768,8 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         this.graphClientOption = true
-        this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from, this.colorGraph, '', '', '', '', '', '', min, max).subscribe({
+        this.widthGraph = '0.3'
+        this.obsApi.plotToolauto(dataToUse, sta, cha, unit_from, this.colorGraph, '', '', '', '', '', '', min, max, this.widthGraph).subscribe({
           next: value => {
             const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
             if (indx !== -1) {
@@ -1900,7 +1917,7 @@ export class VisorGraphComponent implements OnInit {
 
 
   // ! Generador de Graficos
-  graphGenerator(e: any, value: any, dataformat: any, colorg?: string) {
+  graphGenerator(e: any, value: any, dataformat: any, colorg?: string, widthg? : string) {
 
     const st = new Date(e.starttime).getTime()
     const et = new Date(e.endtime).getTime()
@@ -2039,6 +2056,9 @@ export class VisorGraphComponent implements OnInit {
           name: 'Aceleracion',
           type: 'line',
           showSymbol: false,
+          lineStyle:{
+            width: widthg || 0.3
+          },
           data: value[0].traces_a,
           animationDelay: (idx: number) => idx * 10,
         },
@@ -2165,6 +2185,9 @@ export class VisorGraphComponent implements OnInit {
           name: 'Velocidad',
           type: 'line',
           showSymbol: false,
+          lineStyle:{
+            width: widthg || 0.3
+          },
           data: value[0].traces_v,
           animationDelay: (idx: number) => idx * 10,
         },
@@ -2291,6 +2314,9 @@ export class VisorGraphComponent implements OnInit {
           name: 'Desplazamiento',
           type: 'line',
           showSymbol: false,
+          lineStyle:{
+            width: widthg || 0.3
+          },
           data: value[0].traces_d,
           animationDelay: (idx: number) => idx * 10,
         },
@@ -2977,6 +3003,10 @@ export class VisorGraphComponent implements OnInit {
         event.preventDefault();
       }
     }
+  }
+
+  formatLabel(value: number) {
+    return value + ' s';
   }
 
 }

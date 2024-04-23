@@ -1,11 +1,11 @@
 <div *ngIf="hideStaPanel" fxLayout="row" fxLayoutAlign="space-between center " [@enterAnimation2] class="winTitle">
     <div>
-        <h2><b>{{ proyecto_title  || 'Lector de Archivos Acelerográficos'}}</b></h2>
-        <h4 *ngIf="proyecto_desp == '' " fxHide.lt-sm>Podras manipular archivos de diferentes <a (click)="redirectAcel()"
-                matTooltip="Reftek SMA2">acelerografos</a> y aplicar las diferentes
+        <h2><b>{{ proyecto_title || 'Lector de Archivos Acelerográficos'}}</b></h2>
+        <h4 *ngIf="proyecto_desp == '' " fxHide.lt-sm>Podras manipular archivos de diferentes <a
+                (click)="redirectAcel()" matTooltip="Reftek SMA2">acelerografos</a> y aplicar las diferentes
             herramientas que ofrecemos
         </h4>
-        <h4 fxHide.lt-sm *ngIf="proyecto_desp != ''"> {{proyecto_desp}}  </h4>
+        <h4 fxHide.lt-sm *ngIf="proyecto_desp != ''"> {{proyecto_desp}} </h4>
     </div>
 
     <div fxLayout="row">
@@ -133,7 +133,7 @@
 
                     <mat-accordion>
 
-                        <mat-expansion-panel *ngFor="let item of proyectData; let ind = index">
+                        <mat-expansion-panel *ngFor="let item of proyectData; let ind = index" [expanded]="ind == 0">
 
                             <mat-expansion-panel-header>
                                 <mat-panel-title>
@@ -319,7 +319,8 @@
         </div>
         <div class="graphContainer" fxLayout="column" fxLayoutAlign="start center">
 
-            <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center" style="padding-top: 20%;">
+            <div *ngIf="loadingSpinnerGraph" fxLayout="column" fxLayoutGap="10" fxLayoutAlign="center center"
+                style="padding-top: 20%;">
                 <mat-progress-spinner mode="indeterminate" style="margin:0 auto;"
                     [diameter]="50"></mat-progress-spinner>
                 <h3> <b>Cargando Datos ....</b> </h3>
@@ -468,7 +469,7 @@
                                             <mat-label>Tiempo de Inicio (seg.)</mat-label>
                                             <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
                                             <input matInput type="number" formControlName="t_min"
-                                                [(ngModel)]="tab.TrimForm.controls['t_min'].value"
+                                                [(ngModel)]="tab.TrimForm.get('t_min').value"
                                                 (wheel)="preventScroll($event)" (keydown)="preventArrowUpDown($event)">
                                             <!-- <mat-error *ngIf="TrimForm.get('t_min')?.hasError('required')">
                                                 Ingrese <strong>Tiempo Min. </strong> </mat-error> -->
@@ -478,7 +479,7 @@
                                             <mat-label>Tiempo de Fin (seg.)</mat-label>
                                             <mat-icon class="colorIconSubBar" matPrefix>timer</mat-icon>
                                             <input matInput type="number" formControlName="t_max"
-                                                [(ngModel)]="tab.TrimForm.controls['t_max'].value"
+                                                [(ngModel)]="tab.TrimForm.get('t_max').value"
                                                 (wheel)="preventScroll($event)" (keydown)="preventArrowUpDown($event)">
                                             <!-- <mat-error *ngIf="TrimForm.get('t_max')?.hasError('required')">
                                                 Ingrese <strong>Tiempo Max. </strong> </mat-error> -->
@@ -493,11 +494,11 @@
                                         </div>
                                     </div>
 
-                                    <ngx-slider [(value)]="tab.TrimForm.controls['t_min'].value"
-                                        [(highValue)]="tab.TrimForm.controls['t_max'].value"
+                                    <ngx-slider 
+                                        [(value)]="tab.TrimForm.get('t_min').value"
+                                        [(highValue)]="tab.TrimForm.get('t_max').value"
                                         [options]="tab.sliderOption">
                                     </ngx-slider>
-
 
                                 </form>
                             </div>
