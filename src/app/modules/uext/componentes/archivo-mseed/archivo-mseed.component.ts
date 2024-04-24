@@ -208,11 +208,14 @@ export class ArchivoMseedComponent implements OnInit {
   rellenarFactoresUser() {
 
     let unidad = this.calibTraces[0].units
+    console.log('fill unit', unidad);
+    
     this.controlForm2.controls['unitst'].setValue(unidad)
 
     this.calibCoinc.forEach((e: any, index: number) => {
       const control = `c_${index}`
       this.controlForm2.controls[control].setValue(e.calib)
+      console.log('setValue factor', control, e.calib);
     });
   }
 

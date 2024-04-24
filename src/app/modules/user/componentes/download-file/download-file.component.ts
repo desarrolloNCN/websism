@@ -66,6 +66,9 @@ export class DownloadFileComponent implements OnInit {
       this.s = Math.floor((diff % (1000 * 60)) / 1000);
       this.ms = diff % 1000;
 
+      utc_min = new Date(this.data.start_time);
+      utc_max = new Date(this.data.start_time);
+
       utc_min.setUTCSeconds(utc_min.getUTCSeconds() + t_min);
       utc_max.setUTCSeconds(utc_max.getUTCSeconds() + t_max);
 
