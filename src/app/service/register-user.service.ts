@@ -283,4 +283,14 @@ export class RegisterUserService {
 
   }
 
+  delCalib(idCalib: string): Observable<any> {
+    const url = `mseed_list_user/?id=${idCalib}`;
+
+    return this.http.delete<any>(url).pipe(
+      catchError(error => {
+        return throwError(() => error);
+      })
+    );
+  }
+
 }

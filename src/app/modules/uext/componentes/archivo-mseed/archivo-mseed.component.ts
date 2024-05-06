@@ -164,6 +164,14 @@ export class ArchivoMseedComponent implements OnInit {
 
   }
 
+  delCalib(item : any, index: number){
+    this.userApi.delCalib(item.id).subscribe({
+      complete: () => {
+        this.calibCoinc.splice(index, 1)
+      }
+    })
+  }
+
   getCalib(data: any) {
 
     this.showRegUser = false
@@ -179,7 +187,7 @@ export class ArchivoMseedComponent implements OnInit {
       this.userApi.mseedListCalibration(this.userId).subscribe({
         next: value => {
 
-          this.calibTraces = value
+          this.calibTraces = value         
           this.calibCoinc.push(['NET.', 'STA.', 'CHA.', 'CALIB.'])
           this.calibCoinc = this.calibTraces.filter((obj1: any) =>
             data.some((obj2: any) => this.encontrarCoincidencias(obj1, obj2))
@@ -207,15 +215,14 @@ export class ArchivoMseedComponent implements OnInit {
 
   rellenarFactoresUser() {
 
-    let unidad = this.calibTraces[0].units
-    console.log('fill unit', unidad);
+    let unidad = this.calibCoinc[0].units
     
     this.controlForm2.controls['unitst'].setValue(unidad)
 
     this.calibCoinc.forEach((e: any, index: number) => {
       const control = `c_${index}`
       this.controlForm2.controls[control].setValue(e.calib)
-      console.log('setValue factor', control, e.calib);
+      //console.log('setValue factor', control, e.calib);
     });
   }
 

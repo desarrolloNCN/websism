@@ -7,21 +7,7 @@
             fxLayoutAlign="start center" matTooltip="Ocultar Panel" matTooltipPosition="right">
             <img src="/assets/ncnLogo.png" class="logoQs">
             <div fxLayout="column">
-                <h2 *ngIf="isExpanded"  class="empTitle">QuakeSense </h2>
-            </div>
-        </div>
-
-        <div class="separator" fxLayout="row" fxLayoutAlign="center center">
-            <mat-divider></mat-divider>
-        </div>
-        <!-- <mat-sidenav #sidenav mode="side" opened [opened]="isSidenavOpened" [style.width.px]="sidenavWidth" class="example-sidenav"
-        [class.mat-elevation-z5]="true"> -->
-
-        <!-- <div class="logo-container" routerLink="/home" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="10">
-
-            <div fxLayout="column" fxLayoutAlign="center ">
-                <span class="empTitle"> NCN | QuakeSense </span>
-
+                <h2 *ngIf="isExpanded" class="empTitle">QuakeSense </h2>
             </div>
         </div>
 
@@ -29,67 +15,37 @@
             <mat-divider></mat-divider>
         </div>
 
-        <div class="mini-profile" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10">
+        <!-- <div class="mini-profile" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10">
 
             <div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="5">
-                <span> <strong>USER 01</strong> </span>
+                <span style="color: white;"> <strong>{{name}}</strong> </span>
                 <div class="rol-profile" fxLayout="row" fxLayoutGap="5" fxLayoutAlign="start center">
                     <div class="led"></div>
-                    <span>rol_user</span>
+                    <span style="color: white;">{{username}}</span>
                 </div>
             </div>
-        </div>
-
-        <div class="separator" fxLayout="row" fxLayoutAlign="center center">
-            <mat-divider></mat-divider>
-        </div> -->
-
-        <!-- <div class="sidenavList">
-            <mat-selection-list [multiple]="false">
-
-                <mat-list-option routerLink="/user/home">
-                    <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" class="iconNavList">
-                        <span><mat-icon inline="true">dashboard</mat-icon></span>
-                        <h2>Dashboard</h2>
-                    </div>
-                </mat-list-option>
-
-                <mat-list-option routerLink="/user/proyectos">
-                    <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" class="iconNavList">
-                        <span><mat-icon inline="true">description</mat-icon></span>
-                        <h2>Proyectos</h2>
-                    </div>
-                </mat-list-option>
-
-                <mat-list-option routerLink="/user/lectorAcel">
-                    <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" class="iconNavList">
-                        <span><mat-icon inline="true">description</mat-icon></span>
-                        <h2>Lector</h2>
-                    </div>
-                </mat-list-option>
-
-            </mat-selection-list>
         </div> -->
 
         <mat-nav-list class="sidenavList">
 
-            <mat-list-item routerLink="/user/home" matTooltip="Dashboard" matTooltipPosition="right">
+            <!-- <mat-list-item routerLink="/user/home" matTooltip="Dashboard" matTooltipPosition="right">
                 <div fxLayout="row" fxLayoutGap="10" fxLayoutAlign="start center" class="iconNavList">
                     <mat-icon inline="true" class="iconSideBar">dashboard</mat-icon>
                     <h2 *ngIf="isExpanded" >Dashboard</h2>
                 </div>
-            </mat-list-item>
+            </mat-list-item> -->
+            
             <mat-list-item routerLink="/user/proyectos" matTooltip="Proyectos" matTooltipPosition="right">
                 <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" class="iconNavList">
                     <mat-icon inline="true" class="iconSideBar">description</mat-icon>
-                    <h2 *ngIf="isExpanded" >Proyectos</h2>
+                    <h2 *ngIf="isExpanded">Proyectos</h2>
                 </div>
             </mat-list-item>
 
             <mat-list-item routerLink="/user/lectorAcel" matTooltip="Lector de Archivos" matTooltipPosition="right">
                 <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" class="iconNavList">
                     <mat-icon inline="true" class="iconSideBar">sensors</mat-icon>
-                    <h2 *ngIf="isExpanded" >Lector</h2>
+                    <h2 *ngIf="isExpanded">Lector</h2>
                 </div>
             </mat-list-item>
             <div class="separator" fxLayout="row" fxLayoutAlign="center center">
@@ -98,59 +54,29 @@
             <mat-list-item routerLink="/home" matTooltip="QuakeSense" matTooltipPosition="right">
                 <div fxLayout="row" fxLayoutGap="10" fxLayoutAlign="start center" class="iconNavList">
                     <mat-icon inline="true" class="iconSideBar">home</mat-icon>
-                    <h2 *ngIf="isExpanded" >Inicio</h2>
+                    <h2 *ngIf="isExpanded">Inicio</h2>
                 </div>
             </mat-list-item>
             <mat-list-item matTooltip="Perfil" matTooltipPosition="right">
                 <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" (click)="profileRedirect()"
                     class="iconNavList">
                     <mat-icon inline="true" class="iconSideBar">person</mat-icon>
-                    <h2 *ngIf="isExpanded" >Perfil</h2>
+                    <h2 *ngIf="isExpanded">Perfil</h2>
                 </div>
             </mat-list-item>
             <mat-list-item matTooltip="Cerra Sesion" matTooltipPosition="right">
                 <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center" (click)="redirect()"
                     class="iconNavList">
                     <mat-icon inline="true" class="iconSideBar">logout</mat-icon>
-                    <h2 *ngIf="isExpanded" >Cerrar Sesion</h2>
+                    <h2 *ngIf="isExpanded">Cerrar Sesion</h2>
                 </div>
             </mat-list-item>
         </mat-nav-list>
 
-
-        <!-- </mat-sidenav> -->
     </mat-drawer>
-
-    <!-- <div style="padding: 10px;">
-
-        <mat-toolbar [class.mat-elevation-z2]="true" style="border-radius: 10px;">
-            <mat-toolbar-row> -->
-
-    <!-- <div>
-                    <button (click)="sidenav.toggle()" mat-icon-button>
-                        <mat-icon>menu</mat-icon>
-                    </button>
-                </div> -->
-
-    <!-- <div>
-                    <input matInput type="text" placeholder="Buscar...">
-                </div> -->
-
-    <!-- <span class="spacer"></span>
-
-
-                <button mat-icon-button (click)="logout()">
-                    <mat-icon>logout</mat-icon>
-                </button>
-
-            </mat-toolbar-row>
-        </mat-toolbar>
-
-    </div> -->
 
     <div class="container">
         <router-outlet></router-outlet>
     </div>
 
-    <!-- </mat-sidenav-container> -->
 </mat-drawer-container>

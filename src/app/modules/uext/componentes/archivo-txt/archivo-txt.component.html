@@ -65,6 +65,9 @@
                 <h4> Asignacion de Columnas</h4>
                 <mat-icon style="color: rgb(155, 155, 155); font-size: 15px;">help_outline</mat-icon>
             </span>
+            <span>
+                <mat-checkbox (change)="cambiarxFila($event)" formControlName="ckOneTrace">Agrupar Datos</mat-checkbox>
+            </span>
 
             <div>
 
@@ -113,12 +116,15 @@
                         <mat-form-field appearance="outline" class="mtff">
                             <mat-label>Factor Calibracion {{i+1}}</mat-label>
                             <mat-icon class="colorIconSubBar" matPrefix>track_changes</mat-icon>
-                            <input matInput formControlName='ccc_{{i}}' type="number" (wheel)="preventScroll($event)" (keydown)="preventArrowUpDown($event)">
+                            <input matInput formControlName='ccc_{{i}}' type="number" (wheel)="preventScroll($event)"
+                                (keydown)="preventArrowUpDown($event)">
                         </mat-form-field>
                     </div>
+
                 </div>
 
             </div>
+
             <br>
 
             <div fxLayout="row" fxLayoutGap="10" fxLayoutAlign="center center">

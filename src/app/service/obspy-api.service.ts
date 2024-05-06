@@ -383,7 +383,7 @@ export class ObspyAPIService {
       "station_selected": station,
       "channel_selected": channel,
       "t_min": tmin,
-      "t_max":tmax
+      "t_max": tmax
     }
 
     return this.http.post<any>(url, senData).pipe(
@@ -409,7 +409,7 @@ export class ObspyAPIService {
       "station_selected": station,
       "channel_selected": channel,
       "t_min": tmin,
-      "t_max":tmax
+      "t_max": tmax
     }
 
     return this.http.post<any>(url, senData).pipe(
@@ -452,7 +452,7 @@ export class ObspyAPIService {
     channel_selected: string,
     unit?: string,
     color_graph?: string,
-    widthGraph? : string
+    widthGraph?: string
   ): Observable<any> {
 
     const formData = new FormData();
@@ -495,7 +495,7 @@ export class ObspyAPIService {
     unit_from: string,
     unit_to: string,
     color_graph?: string,
-    widthGraph? : string
+    widthGraph?: string
   ): Observable<any> {
     const formData = new FormData();
     const url = 'plot-tool/'
@@ -542,7 +542,7 @@ export class ObspyAPIService {
     zero?: string,
     t_min?: string,
     t_max?: string,
-    widthGraph? : string
+    widthGraph?: string
   ): Observable<any> {
     const formData = new FormData();
     const url = 'plot-tool-auto/'
@@ -602,6 +602,16 @@ export class ObspyAPIService {
     const headers = new HttpHeaders().set('No-Interceptor', 'true');
     const url = 'https://api.ipify.org?format=json'
     return this.http.get(url, { headers }).pipe(
+      catchError(error => {
+        return of(error)
+      })
+    );
+  }
+
+  showAlert() {
+    const url = 'alert/'
+    
+    return this.http.get<any>(url).pipe(
       catchError(error => {
         return of(error)
       })

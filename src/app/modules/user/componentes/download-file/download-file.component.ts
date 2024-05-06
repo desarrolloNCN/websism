@@ -3,6 +3,7 @@ import { VisorGraphComponent } from '../../pages/visor-graph/visor-graph.compone
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
 import { RegisterUserService } from 'src/app/service/register-user.service';
+import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-download-file',
@@ -13,6 +14,8 @@ export class DownloadFileComponent implements OnInit {
 
   min_time = ''
   max_time = ''
+  send_min_time = ''
+  send_max_time = ''
   dur_recorte = ''
 
   h = 0
@@ -29,6 +32,7 @@ export class DownloadFileComponent implements OnInit {
   checked_sta: any[] = []
 
   loadData = false
+  disablebtn = false
 
   itemSelect: boolean = false;
 
@@ -36,6 +40,7 @@ export class DownloadFileComponent implements OnInit {
     public dialogRef: MatDialogRef<VisorGraphComponent>,
     private obsApi: ObspyAPIService,
     private userApi: RegisterUserService,
+    private snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) { }
 
@@ -75,6 +80,9 @@ export class DownloadFileComponent implements OnInit {
       min = utc_min.toISOString()
       max = utc_max.toISOString()
 
+      this.send_min_time = min
+      this.send_max_time = max
+
       this.min_time = this.dateConverter(min)
       this.max_time = this.dateConverter(max)
 
@@ -88,13 +96,20 @@ export class DownloadFileComponent implements OnInit {
       this.og_ms = diff_2 % 1000;
     }
 
+    this.disablebtn = true
+
     this.data.urls.forEach((e: any) => {
       this.obsApi.getData(e.url_gen).subscribe({
         next: value => {
+          //TODO: Mejorar este paso de informacion
           this.stream_info = value.data
+        },
+        error: err => {
+          this.disablebtn = false
         },
         complete: () => {
           this.loadData = false
+          this.disablebtn = false
           const find_og = this.stream_info.find(item => item.network == this.data.og_data.network && item.station == this.data.og_data.station && item.location == this.data.og_data.location && item.channel == this.data.og_data.channel)
           if (find_og) {
             this.checked_sta.push(find_og)
@@ -104,21 +119,42 @@ export class DownloadFileComponent implements OnInit {
       })
     });
 
+
   }
 
   sendDatatoProcess() {
-    let base = this.data.base
-    let f_type = this.data.filter.type
-    let f_fre_min = this.data.filter.freqmin
-    let f_fre_max = this.data.filter.freqmax
-    let f_order = this.data.filter.order
-    let f_zero = this.data.filter.zero
-    let t_min = this.data.trim.t_min
-    let t_max = this.data.trim.t_max
+    const snackBar = new MatSnackBarConfig();
+    snackBar.panelClass = ['snackBar-validator'];
 
-    this.userApi.mseedDownload(this.data.urls, this.data.og_data, this.checked_sta, base, f_type, f_fre_min, f_fre_max, f_order, f_zero, t_min, t_max, '', '')
+    let url_download = ''
+
+    let base = this.data.base || ''
+    let f_type = this.data.filter.type || ''
+    let f_fre_min = this.data.filter.freqmin || ''
+    let f_fre_max = this.data.filter.freqmax || ''
+    let f_order = this.data.filter.order || ''
+    let f_zero = this.data.filter.zero || ''
+    let t_min = this.send_min_time || ''
+    let t_max = this.send_max_time || ''
+    let unit_from = this.data.urls[0].unit || ''
+    let unit_to = this.data.unit || ''
+
+    this.snackBar.open('⌛ Cargando ...', '', snackBar)
+
+    this.userApi.mseedDownload(this.data.urls, this.data.og_data, this.checked_sta, base, f_type, f_fre_min, f_fre_max, f_order, f_zero, t_min, t_max, unit_from, unit_to)
       .subscribe({
-
+        next: value => {
+          url_download = value.url
+        },
+        error: err => {
+          this.snackBar.dismiss()
+          this.snackBar.open('⚠️ Error al Generar MSEED', '', snackBar)
+        },
+        complete: () => {
+          this.snackBar.dismiss()
+          this.snackBar.open('✔️ Carga Completa', '', { panelClass: ['snackBar-validator'], duration: 2000 })
+          this.dialogRef.close(url_download)
+        }
       })
   }
 
@@ -130,8 +166,6 @@ export class DownloadFileComponent implements OnInit {
     } else {
       this.checked_sta.splice(index, 1);
     }
-
-    console.log(this.checked_sta);
   }
 
   setColorStationChannel(value: string): any {

@@ -36,7 +36,7 @@
         </div>
         <br>
         <div>
-            <button mat-flat-button color="primary" (click)="sendDatatoProcess()">
+            <button mat-flat-button color="primary" [disabled]="disablebtn" (click)="sendDatatoProcess()">
                 <mat-icon>file_download</mat-icon>
                 Descargar
             </button>

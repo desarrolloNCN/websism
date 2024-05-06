@@ -84,9 +84,10 @@
                             <h5> CHA. </h5>
                             <h5> CAL. </h5>
                             <h5> UND. </h5>
+                            <h5> ACT. </h5>
                         </div>
 
-                        <div *ngFor="let item of calibCoinc">
+                        <div *ngFor="let item of calibCoinc, let i = index">
                             <div *ngIf="filterDataT(item)" fxLayout="row" fxLayoutAlign="space-around"
                                 style="background-color: white; border-radius: 5px; padding: 5px;">
                                 <h5> {{item.network}} </h5>
@@ -103,6 +104,9 @@
                                         }}
                                 </h5>
                                 <h5> {{item.units || '-'}}</h5>
+                                <div mat-icon-button (click)="delCalib(item, i)" style="height: 10px; width: 10px; cursor: pointer;">
+                                    <mat-icon style="font-size: 10px; height: 10px; width: 10px; overflow: hidden;">clear</mat-icon>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -75,6 +75,7 @@ import { DownloadFileComponent } from '../../componentes/download-file/download-
 export class VisorGraphComponent implements OnInit {
 
   private navigationSubscription: Subscription;
+  private isDownloading: boolean = false;
 
   accel: EChartsOption | any;
   vel: EChartsOption | any;
@@ -269,7 +270,7 @@ export class VisorGraphComponent implements OnInit {
           this.proyecto_title = this.proyectData[0].projname
           this.proyecto_desp = this.proyectData[0].projdesp
 
-          console.log('Visor OnInit', this.proyectData);
+          //console.log('Visor OnInit', this.proyectData);
 
           from(this.proyectData).pipe(
             concatMap((e: any, index: number) =>
@@ -278,7 +279,7 @@ export class VisorGraphComponent implements OnInit {
                 map((value: any) => {
                   if (value.data[0].und_calib == 'M/S**2') {
                     e.unit = 'm';
-                  } else if (value.data[0].und_calib == 'CM/S**2' || e.extension == 'EVT' || e.extension == 'KINEMETRICS_EVT') {
+                  } else if (value.data[0].und_calib == 'CM/S**2' || e.extension == 'EVT' || e.extension == 'KINEMETRICS_EVT' || value.data[0].format == 'REFTEK130') {
                     e.unit = 'gal';
                   } else if (value.data[0].und_calib == 'G') {
                     e.unit = 'g';
@@ -444,9 +445,16 @@ export class VisorGraphComponent implements OnInit {
 
   @HostListener('window:beforeunload', ['$event'])
   unloadNotification($event: any) {
-    const confirmationMessage = '¿Estás seguro de que deseas abandonar esta página?';
-    $event.returnValue = confirmationMessage;
-    return confirmationMessage;
+    // const confirmationMessage = '¿Estás seguro de que deseas abandonar esta página?';
+    // $event.returnValue = confirmationMessage;
+    // return confirmationMessage;
+    if (!this.isDownloading) {
+      const confirmationMessage = '¿Estás seguro de que deseas abandonar esta página?';
+      $event.returnValue = confirmationMessage;
+      return confirmationMessage;
+    } else {
+      return undefined;
+    }
   }
 
   returnedGraph(elemt: any[]): any[] {
@@ -837,11 +845,9 @@ export class VisorGraphComponent implements OnInit {
           this.loadingSpinnerStaInfo = false
           this.btnDisable = false
           this.loadingPanelInfo = false
-          this.loadingPanelInfo = false
         },
         complete: () => {
           this.loadingSpinner = false
-          this.loadingPanelInfo = false
         }
       }
 
@@ -919,7 +925,7 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         // TODO: true si es imagen, false si es dinamico
-         this.graphClientOption = true
+        this.graphClientOption = true
 
         // TODO: Eliminar en produccion
         // this.obsApi.getTraceData(dataToUse, e.station, e.channel, og_unit).subscribe({
@@ -1226,56 +1232,23 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
 
-        this.graphClientOption = false
-        this.obsApi.getTraceDataBaseLine(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit).subscribe({
+        this.graphClientOption = true
+        this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit, this.colorGraph).subscribe({
           next: value => {
-
-            this.ToggleGraph = false
-
-
             const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-
             if (indx !== -1) {
 
-              const graph = this.graphGenerator(this.stationInfo, value, '(MODIFIED)', this.colorGraph)
-
-              this.tabs[indx].graph = graph;
+              this.tabs[indx].img = value.url
               this.tabs[indx].base = base
-
               this.cdRef.detectChanges();
             }
-
-
-          },
-          error: err => {
-            this.snackBar.open('No hay Datos para Renderizar', 'cerrar', snackBar)
-            this.loadingSpinnerGraph = false
           },
           complete: () => {
-            this.actApli.push(`Linea Base: ${base} a ${sta}.${cha}`)
-            this.loadingSpinnerData = false
+            this.loadingSpinnerGraph = false
             this.loadingBarGraph = false
             this.ToggleGraph = true
-            this.isLoading = false
           }
         })
-        //TODO: Descomentar para paso a Produccion
-        // this.obsApi.plotToolGraph(dataToUse, sta, cha, base, type, fmin, fmax, corn, zero, min, max, unit_from, unit, this.colorGraph).subscribe({
-        //   next: value => {
-        //     const indx = this.tabs.findIndex((tab: { label: string; }) => tab.label === `${sta}.${cha}`);
-        //     if (indx !== -1) {
-
-        //       this.tabs[indx].img = value.url
-        //       this.tabs[indx].base = base
-        //       this.cdRef.detectChanges();
-        //     }
-        //   },
-        //   complete: () => {
-        //     this.loadingSpinnerGraph = false
-        //     this.loadingBarGraph = false
-        //     this.ToggleGraph = true
-        //   }
-        // })
       },
     })
 
@@ -3053,14 +3026,14 @@ export class VisorGraphComponent implements OnInit {
     let claveEspecifica = `${tabInfo.dataEst.network}.${tabInfo.dataEst.station}`
 
     console.log('clave', claveEspecifica);
-    
+
     let info: any[] = []
     let sendData = {}
 
     this.proyectData.forEach((elmt: any, index: number) => {
 
       let objetosConAb = elmt.stations[claveEspecifica]
-      if(objetosConAb){
+      if (objetosConAb) {
         let a = {
           "unit": elmt.unit,
           "url_gen": elmt.urlconvert
@@ -3073,8 +3046,8 @@ export class VisorGraphComponent implements OnInit {
     sendData = {
       "unit": tabInfo.unit,
       "og_data": tabInfo.dataEst,
-      "start_time" : tabInfo.sttime,
-      "end_time" : tabInfo.entime,
+      "start_time": tabInfo.sttime,
+      "end_time": tabInfo.entime,
       "trim": tabInfo.TrimForm.value,
       "filter": tabInfo.FilterForm.value,
       "base": tabInfo.base,
@@ -3082,12 +3055,28 @@ export class VisorGraphComponent implements OnInit {
     }
 
     matDialogConfig.data = sendData
-    
-    this.matDialog.open(DownloadFileComponent, matDialogConfig).afterClosed().subscribe({
 
+    this.matDialog.open(DownloadFileComponent, matDialogConfig).afterClosed().subscribe({
+      next: value => {
+        if (value == '' || value == undefined) {
+
+        } else {
+          this.isDownloading = true;
+
+          const downloadLink = document.createElement('a');
+          downloadLink.href = value
+          downloadLink.download = `${tabInfo.label}.mseed`;
+
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+          this.isDownloading = false; 
+        }
+
+      }
     })
 
-    console.log('filter',info);
+    //console.log('filter', info);
 
   }
 

@@ -1,69 +1,25 @@
-import { trigger, transition, style, animate } from '@angular/animations';
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
-import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
-import { EChartsOption } from 'echarts';
-import { ObspyAPIService } from 'src/app/service/obspy-api.service';
-import { ArchivoTXTComponent } from '../../componentes/archivo-txt/archivo-txt.component';
-import { ArchivoMseedComponent } from '../../componentes/archivo-mseed/archivo-mseed.component';
-import { RegisterDialogComponent } from '../../componentes/register-dialog/register-dialog.component';
-import { DecimalPipe } from '@angular/common';
-import { Subscription } from 'rxjs';
-import { CustomEvent, ImageViewerComponent, ImageViewerConfig } from 'ngx-image-viewer';
-import { HttpClient } from '@angular/common/http';
-import { SismosHistoricosComponent } from '../../componentes/sismos-historicos/sismos-historicos.component';
-import { ReCaptchaV3Service } from 'ng-recaptcha';
+import { MatTab, MatTabChangeEvent } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
+import { EChartsOption } from 'echarts';
+import { CustomEvent, ImageViewerComponent, ImageViewerConfig } from 'ngx-image-viewer';
+import { Subscription } from 'rxjs';
+import { ObspyAPIService } from 'src/app/service/obspy-api.service';
+import { RegisterDialogComponent } from '../register-dialog/register-dialog.component';
+import { ArchivoMseedComponent } from '../archivo-mseed/archivo-mseed.component';
+import { ArchivoTXTComponent } from '../archivo-txt/archivo-txt.component';
+import { SismosHistoricosComponent } from '../sismos-historicos/sismos-historicos.component';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-lector-demo',
-  animations: [
-    trigger(
-      'enterAnimation', [
-      transition(':enter', [
-        style({ transform: 'translateX(-100%)', opacity: 0 }),
-        animate('300ms', style({ transform: 'translateX(0)', opacity: 1 }))
-      ]),
-      transition(':leave', [
-        style({ transform: 'translateX(0)', opacity: 1 }),
-        animate('300ms', style({ transform: 'translateX(-100%)', opacity: 0 }))
-      ])
-    ]),
-    trigger(
-      'enterAnimation2', [
-      transition(':enter', [
-        style({ transform: 'translateY(-100%)', opacity: 0 }),
-        animate('300ms', style({ transform: 'translateX(0)', opacity: 1 }))
-      ]),
-      transition(':leave', [
-        style({ transform: 'translateY(0)', opacity: 1 }),
-        animate('300ms', style({ transform: 'translateY(-100%)', opacity: 0 }))
-      ])
-    ]),
-    trigger(
-      'enterAnimation3', [
-      transition(':enter', [
-        style({ transform: 'translateX(100%)', opacity: 0 }),
-        animate('300ms', style({ transform: 'translateX(0)', opacity: 1 }))
-      ]),
-      transition(':leave', [
-        style({ transform: 'translateX(0)', opacity: 1 }),
-        animate('300ms', style({ transform: 'translateX(100%)', opacity: 0 }))
-      ])
-    ]),
-    trigger('aparecer', [
-      transition(':enter', [
-        style({ opacity: 0 }),
-        animate('500ms ease-in', style({ opacity: 1 })),
-      ]),
-    ]),
-  ],
-  templateUrl: './lector-demo.component.html',
-  styleUrls: ['./lector-demo.component.css']
+  selector: 'app-read-data',
+  templateUrl: './read-data.component.html',
+  styleUrls: ['./read-data.component.css']
 })
-export class LectorDemoComponent implements OnInit {
+export class ReadDataComponent implements OnInit {
 
   url: string = ''
 
@@ -133,24 +89,15 @@ export class LectorDemoComponent implements OnInit {
   stopMseed: Subscription | any
   stopTxt: Subscription | any
 
-  headerText = {
-    title: "(DEMO) - Lector de Archivos Acelerográficos",
-    preSub: "Podras manipular archivos de diferentes",
-    redirect: "acelerografos",
-    sufSub: "y aplicar las diferentes herramientas que ofrecemos",
-
-  }
 
   constructor(
     private activatedRoute: ActivatedRoute,
+    private router: Router,
     private obsApi: ObspyAPIService,
     private snackBar: MatSnackBar,
-    private cdRef: ChangeDetectorRef,
     private matDialog: MatDialog,
+    private cdRef: ChangeDetectorRef,
     private decimalPipe: DecimalPipe,
-    private router: Router,
-    //TODO: Habilitar para usar captcha
-    //private recaptchaV3Service: ReCaptchaV3Service,
   ) {
 
     this.FilterForm = new FormGroup({
@@ -166,14 +113,24 @@ export class LectorDemoComponent implements OnInit {
       t_max: new FormControl('', [Validators.required])
     });
 
+    // ----------- NO BORRAR -----------------------
+    this.activatedRoute.paramMap.subscribe({
+      next: value => {
+        if (value.get('url')! == '' || value.get('url')! == null || undefined) {
+          this.router.navigateByUrl('/home')
+        } else {
+          this.url = decodeURIComponent(value.get('url')!)
+        }
+      }
+    })
+    // ----------- NO BORRAR -----------------------
+
+
   }
 
   ngOnInit(): void {
+    // const a = encodeURIComponent('https://www.youtube.com/watch?v=hmMlLyLmrLg&t=4273s')
     localStorage.clear()
-
-    // ----------- NO BORRAR -----------------------
-
-    // ----------- NO BORRAR -----------------------
 
     this.obsApi.getIpAddress().subscribe({
       next: value => {
@@ -184,33 +141,8 @@ export class LectorDemoComponent implements OnInit {
     this.controlForm = new FormGroup({
       url: new FormControl(''),
     })
-
-    this.activatedRoute.paramMap.subscribe({
-      next: value => {
-        if (value.get('url')! == '' || value.get('url')! == null || undefined) {
-          this.router.navigateByUrl('/lectorDemo/demo')
-        } else {
-          if (this.esURL(decodeURIComponent(value.get('url')!))) {
-            this.headerText = {
-              title: "(VISTA) - Lector de Archivos Acelerográficos",
-              preSub: "Estas viendo la vista de un",
-              redirect: "acelerografo,",
-              sufSub: " puedes aplicar algunas funcionalidades",
-
-            }
-            this.url = decodeURIComponent(value.get('url')!)
-            this.controlForm.controls['url'].setValue(this.url)
-            this.leerArchivo()
-          }
-        }
-      }
-    })
   }
 
-  esURL(url: string): boolean {
-    const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
-    return urlRegex.test(url);
-  }
 
   // ! Manipulacion de Archivos 
 
@@ -2451,4 +2383,4 @@ export class LectorDemoComponent implements OnInit {
     window.open('https://ncn.pe/acelerografo-reftek-sma2')
   }
 
-} 
+}

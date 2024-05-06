@@ -1,10 +1,26 @@
 <div>
 
+    <div *ngFor="let item of showinfo">
+        <div *ngIf="showInfoBanner" fxLayout="column" class="infoBox"
+            [ngStyle]="{'border': item.border,'background-color': item.background}" fxLayoutAlign="center start">
+            <div fxLayout="row" fxLayoutGap="10" fxLayoutAlign="start center" style="width: 100%;">
+                <mat-icon class="infoBoxIcon" [ngStyle]="{'color': item.colorIcon}">{{item.icon}}</mat-icon>
+                <h5>{{item.info}}</h5>
+                <span class="spacer"></span>
+                <button mat-icon-button (click)="closeAler()">
+                    <mat-icon style="color: rgb(173, 173, 173);">close</mat-icon>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+
     <div class="winTitle">
         <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10">
             <h2><b>Mis Proyectos </b></h2>
-            <h2> {{name || 'Asd User Test'}} </h2>
-            <h4>{{usere || 'asd@example.com'}}</h4>
+            <h2> {{name}} </h2>
+            <h4>{{usere}}</h4>
         </div>
 
         <h4>Aca encontrarás tus projectos</h4>
@@ -44,7 +60,7 @@
 
         <div *ngFor="let proj of proyectos; let i = index">
 
-            <mat-card *ngIf="filterDataT(proj)" [class.mat-elevation-z0]="true" >
+            <mat-card *ngIf="filterDataT(proj)" [class.mat-elevation-z0]="true">
 
                 <mat-card-content>
 
@@ -62,13 +78,16 @@
                                 </div>
 
                                 <div style="height: 40px;" fxLayout="row" fxLayoutGap="10">
-                                    <button mat-flat-button color="warn" [disabled]="disableBtns" (click)="delProj(proj)">
+                                    <button mat-flat-button color="warn" [disabled]="disableBtns"
+                                        (click)="delProj(proj)">
                                         <mat-icon>delete</mat-icon>
                                     </button>
-                                    <button mat-flat-button color="accent" [disabled]="disableBtns" (click)="editProyec(proj)">
+                                    <button mat-flat-button color="accent" [disabled]="disableBtns"
+                                        (click)="editProyec(proj)">
                                         <mat-icon>edit</mat-icon>
                                     </button>
-                                    <button mat-flat-button color="primary" [disabled]="disableBtns" (click)="abrirLector(proj)">
+                                    <button mat-flat-button color="primary" [disabled]="disableBtns"
+                                        (click)="abrirLector(proj)">
                                         <mat-icon>open_in_new</mat-icon>
                                         Abrir
                                     </button>

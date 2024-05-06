@@ -5,6 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-archivo-txt',
@@ -49,6 +50,7 @@ export class ArchivoTXTComponent implements OnInit {
       location: new FormControl('',),
       starttime: new FormControl(''),
       ckInfo: new FormControl(false),
+      ckOneTrace: new FormControl(false),
     })
   }
 
@@ -175,22 +177,66 @@ export class ArchivoTXTComponent implements OnInit {
 
   }
 
+  onlyCol() {
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 5 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    let encabezados: string[] = []
+
+    const lineas = this.infoText.trim().split('\n');
+
+    let indiceInicioDatos = parseInt(this.controlForm.get('fr_line').value) - 1;
+    const datosPrimeraLinea = lineas[indiceInicioDatos].trim().split(/[,;]\s*|\s+/).filter(Boolean);
+
+    const valoresAgrupados: any[] = [];
+
+    for (let i = indiceInicioDatos; i < lineas.length; i++) {
+      const valoresLinea = lineas[i].trim().split(/[,;]\s*|\s+/).filter(Boolean);
+      valoresAgrupados.push(...valoresLinea.map(parseFloat));
+    }
+
+    encabezados.push(`C${1}`);
+
+    this.columnDetector = [valoresAgrupados]
+    this.columHead = encabezados
+
+    Object.keys(this.controlForm.controls).forEach(key => {
+      if (key.startsWith('c_') || key.startsWith('cc_') || key.startsWith('ccc_')) {
+        this.controlForm.removeControl(key);
+      }
+    });
+
+    this.controlForm.addControl('c_0', new FormControl(this.columnDetector, Validators.required));
+    this.controlForm.addControl('cc_0', new FormControl('', Validators.required));
+    this.controlForm.addControl('ccc_0', new FormControl(1, Validators.required));
+
+  }
+
+  cambiarxFila(evt: MatCheckboxChange) {
+    if (evt.checked) {
+      this.onlyCol()
+    } else {
+      this.splitCols()
+    }
+  }
+
   encabezadosGen(valores: any, headers: any) {
 
     // ! Remueve los controles que empiezan por 'c_'
 
-    // Object.keys(this.controlForm.controls).forEach(key => {
-    //   if (key.startsWith('c_')) {
-    //     this.controlForm.removeControl(key);
-    //   }
+    // headers.forEach((encabezado: any) => {
+    //   this.controlForm.removeControl(encabezado);
     // });
 
-    headers.forEach((encabezado: any) => {
-      this.controlForm.removeControl(encabezado);
-    });
+    // valores.forEach((encabezado: any) => {
+    //   this.controlForm.removeControl(encabezado);
+    // });
 
-    valores.forEach((encabezado: any) => {
-      this.controlForm.removeControl(encabezado);
+    Object.keys(this.controlForm.controls).forEach(key => {
+      if (key.startsWith('c_') || key.startsWith('cc_') || key.startsWith('ccc_')) {
+        this.controlForm.removeControl(key);
+      }
     });
 
     // ! Añade los controles que empiezan por 'c_'

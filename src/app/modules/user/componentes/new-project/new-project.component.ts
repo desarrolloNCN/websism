@@ -83,7 +83,8 @@ export class NewProjectComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
+    // console.log('Editar', this.data);
+    
     this.regApi.resetService()
 
     this.authService.getToken().subscribe({
@@ -123,23 +124,26 @@ export class NewProjectComponent implements OnInit {
 
           this.data.files.forEach((e: any) => {
             let file_name = e.filename
-
             let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
             let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
             let formatoNombre = this.formatearNombreArchivo(file_name, '', 12)
+
+            if(e.format == 'REFTEK130'){
+              e.status = 'Calibrado'
+            }
 
             this.addedFiles.push({
               "id": e.id,
               "uuid": uuid,
               "projname": this.data.name,
               "projdesp": this.data.descrip,
-              "file": '',
+              "file": '', 
               "fileName": formatoNombre,
               "originalName": file_name,
               "status": e.status,
               "info": e.info,
-              "extension": extension.toLocaleUpperCase() || 'NO EXT',
+              "extension": e.format || extension.toLocaleUpperCase() || 'NO EXT',
               "string_data": e.string_data,
               "urlconvert": e.url_gen,
               "unit": e.unit
@@ -172,23 +176,26 @@ export class NewProjectComponent implements OnInit {
 
           this.data.files.forEach((e: any) => {
             let file_name = e.filename
-
             let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
             let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
             let formatoNombre = this.formatearNombreArchivo(file_name, '', 12)
+
+            if(e.format == 'REFTEK130'){
+              e.status = 'Calibrado'
+            }
 
             this.addedFiles.push({
               "id": e.id,
               "uuid": uuid,
               "projname": this.data.name,
               "projdesp": this.data.descrip,
-              "file": '',
+              "file": '', 
               "fileName": formatoNombre,
               "originalName": file_name,
               "status": e.status,
               "info": e.info,
-              "extension": extension.toLocaleUpperCase() || 'NO EXT',
+              "extension": e.format || extension.toLocaleUpperCase() || 'NO EXT',
               "string_data": e.string_data,
               "urlconvert": e.url_gen,
               "unit": e.unit
@@ -236,7 +243,7 @@ export class NewProjectComponent implements OnInit {
     if (archivos && archivos.length > 0) {
 
       for (let index = 0; index < archivos.length; index++) {
-  
+
         let idProj = this.data.id || this.data.uuid
 
         let nombreArchivo: string = archivos[index].name.substring(archivos[index].name.lastIndexOf('/') + 1);
@@ -263,11 +270,17 @@ export class NewProjectComponent implements OnInit {
               this.snackBar.open(`⚠️ ${value.msg}`, 'cerrar', snackBar)
             } else {
               let urlconvert = ''
+              let unit = ''
 
               if (value.f == 'MSEED' || extension == 'TXT' || extension == 'XMR') {
                 statusCalib = 'No Calibrado'
                 urlconvert = value.file
-              } else if (value.f == 'KINEMETRICS_EVT' || extension == 'EVT') {
+              } else if (value.f == 'KINEMETRICS_EVT' || value.f == 'REFTEK130' || extension == 'EVT') {
+                statusCalib = 'Calibrado'
+                if(value.f == 'REFTEK130'){
+                  unit = 'gal'
+                  statusCalib = 'Calibrado'
+                }
                 urlconvert = value.file
               }
 
@@ -283,6 +296,7 @@ export class NewProjectComponent implements OnInit {
                 "extension": value.f || extension.toLocaleUpperCase() || 'NO EXT',
                 "id": value.id,
                 "url": value.file,
+                "unit": unit || '',
                 "urlconvert": value.file
               })
             }
@@ -374,13 +388,19 @@ export class NewProjectComponent implements OnInit {
           if (value.msg) {
             this.snackBar.open(`⚠️ ${value.msg}`, 'cerrar', snackBar)
           } else {
+
             let urlconvert = ''
+            let unit = ''
 
             if (value.f == 'MSEED' || extension == 'TXT' || extension == 'XMR') {
               statusCalib = 'No Calibrado'
               urlconvert = value.string_data
-            } else if (value.f == 'KINEMETRICS_EVT' || extension == 'EVT') {
+            } else if (value.f == 'KINEMETRICS_EVT' || value.f == 'REFTEK130' || extension == 'EVT') {
               urlconvert = value.string_data
+              if (value.f == 'REFTEK130') {
+                unit = 'gal'
+              }
+              statusCalib = 'Calibrado'
             }
 
             this.addedFiles.push({
@@ -393,7 +413,7 @@ export class NewProjectComponent implements OnInit {
               "status": statusCalib,
               "extension": extension.toLocaleUpperCase() || 'NO EXT',
               "id": value.id,
-              "unit": '',
+              "unit": unit || '',
               "url": value.string_data,
               "urlconvert": urlconvert
             })

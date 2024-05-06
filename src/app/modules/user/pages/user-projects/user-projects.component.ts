@@ -10,7 +10,7 @@ import { FormGroup } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { ObspyAPIService } from 'src/app/service/obspy-api.service';
-import { concat, concatMap, from, map } from 'rxjs';
+import { concat, concatMap, from, interval, map } from 'rxjs';
 
 @Component({
   selector: 'app-user-projects',
@@ -20,6 +20,8 @@ import { concat, concatMap, from, map } from 'rxjs';
 export class UserProjectsComponent implements OnInit {
 
   controlForm: FormGroup | any
+
+  showInfoBanner = false
 
   proyectos: any[] = []
   pageData: any[] = []
@@ -43,6 +45,8 @@ export class UserProjectsComponent implements OnInit {
   stdate: any;
   endate: any;
 
+  showinfo: any[] = []
+  
   constructor(
     private obsService: ObspyAPIService,
     private userService: RegisterUserService,
@@ -59,6 +63,13 @@ export class UserProjectsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    localStorage.clear()
+
+    this.ejecutarFuncionInicial();
+
+    const inter = setInterval(() => {
+      this.ejecutarFuncionConIntervalo();
+    }, 300000);
 
     this.loadingSpinner = true
 
@@ -90,7 +101,8 @@ export class UserProjectsComponent implements OnInit {
 
         this.username = 'admin'
         this.email = 'admin@example.com'
-
+        this.usere = 'admin@example.com'
+        this.name = 'admin'
 
         this.userService.getProjectuser(this.username, this.email).subscribe({
           next: value => {
@@ -111,6 +123,7 @@ export class UserProjectsComponent implements OnInit {
           },
           complete: () => {
             this.loadingSpinner = false
+
           }
         })
 
@@ -149,9 +162,42 @@ export class UserProjectsComponent implements OnInit {
       }
     })
 
+
     // this.getProyectos()
   }
 
+  closeAler() {
+    this.showInfoBanner = !this.showInfoBanner
+    localStorage.setItem('alertOff', 'true')
+  }
+
+  ejecutarFuncionInicial() {
+    this.showInfoBanner = true
+
+    this.obsService.showAlert().subscribe({
+      next: value => {
+        this.showinfo = []
+        value.forEach((elem: any) => {
+          this.showinfo.push(elem.info)
+        });
+      }
+    });
+  }
+
+  ejecutarFuncionConIntervalo() {
+    if (localStorage.getItem('alertOff') == 'true') {
+      this.showinfo = []
+    } else {
+      this.obsService.showAlert().subscribe({
+        next: value => {
+          this.showinfo = []
+          value.forEach((elem: any) => {
+            this.showinfo.push(elem.info)
+          });
+        }
+      });
+    }
+  }
 
   crearProyecto() {
 
@@ -182,7 +228,7 @@ export class UserProjectsComponent implements OnInit {
   }
 
   abrirLector(item: any) {
-    // console.log('abrirLector', item);
+    //console.log('abrirLector', item);
 
     this.userService.resetService()
 
@@ -275,7 +321,7 @@ export class UserProjectsComponent implements OnInit {
   }
 
   editProyec(item: any) {
-    // console.log('Edit Proyect', item);
+    //console.log('Edit Proyect', item);
 
     this.disableBtns = true
     this.loadingSpinner = true
@@ -288,13 +334,14 @@ export class UserProjectsComponent implements OnInit {
         this.obsService.getData(e.url_gen).pipe(
           map((value: any) => {
             let info_string = ''
-
+            let format = ''
             value.data.forEach((e: any) => {
+              format = e.format
               info_string += `|    ${e.network}.${e.station}.${e.location}.${e.channel}    |`
               // console.log(info_string);
             });
 
-            item.files[index] = { ...e, "info": info_string }
+            item.files[index] = { ...e, "info": info_string, "format": format }
 
           })
         )

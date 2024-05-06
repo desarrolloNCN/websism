@@ -71,3 +71,20 @@ h6 {
     background-color: white;
     box-shadow: 0px 1.5px rgba(128, 124, 124, 0.363);
 }
+
+.infoBox {
+    border-radius: 10px;
+    border: 1px dashed #ff3d3d;
+    height: 50px;
+    margin-top: 10px;
+    padding: 5px;
+    background-color: #ffe9e9;
+}
+
+.infoBoxIcon {
+    color: #ff3030;
+    font-size: 30px;
+    height: 30px;
+    width: 30px;
+    overflow: visible;
+}

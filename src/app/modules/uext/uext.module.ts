@@ -24,6 +24,7 @@ import {
   NgxMatTimepickerModule
 } from '@angular-material-components/datetime-picker';
 import { RECAPTCHA_SETTINGS, RECAPTCHA_V3_SITE_KEY, RecaptchaFormsModule, RecaptchaModule, RecaptchaSettings, RecaptchaV3Module } from 'ng-recaptcha';
+import { ReadDataComponent } from './componentes/read-data/read-data.component';
 
 
 @NgModule({
@@ -37,7 +38,8 @@ import { RECAPTCHA_SETTINGS, RECAPTCHA_V3_SITE_KEY, RecaptchaFormsModule, Recapt
     ArchivoMseedComponent,
     RegisterDialogComponent,
     SismosHistoricosComponent,
-    AboutUsComponent
+    AboutUsComponent,
+    ReadDataComponent
   ],
   imports: [
     CommonModule,
