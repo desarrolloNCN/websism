@@ -137,7 +137,7 @@ export class VisorGraphComponent implements OnInit {
   usere = ''
 
   // TODO: cambiar esto en Produccion a -1, 1 en dev
-  userId = 1
+  userId = -1
 
   plotedimages: any = []
 
@@ -218,7 +218,7 @@ export class VisorGraphComponent implements OnInit {
 
         if (value.username == null || value.email == null) {
           // TODO: cambiar esto en Produccion a -1, 1 en dev
-          this.userId == 1
+          this.userId == -1
         } else {
           this.group = value.groups
           this.name = value.name
@@ -244,7 +244,7 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         //TODO: cambiar esto en Produccion a -1, 1 en dev
-        this.userId == 1
+        this.userId == -1
         this.graphClientOption = true
       },
     })
@@ -625,7 +625,7 @@ export class VisorGraphComponent implements OnInit {
 
             let url = this.proyectData[0].urlconvert
 
-            if (ext == 'txt') {
+            if (ext == 'txt' || this.formatFile == 'TXT') {
               this.leerTxt(url)
             } else if (this.proyectData[0].format == 'MSEED' || ext == 'mseed') {
               this.leerMseed(url)
@@ -871,7 +871,9 @@ export class VisorGraphComponent implements OnInit {
 
     this.stationInfo = e
 
-    var dataString, dataFile = this.proyectData[indexFile || 0].urlconvert
+    //TODO: evaluar esta definicion de variables
+    var dataFile = this.proyectData[indexFile || 0].urlconvert;
+    var dataString = dataFile;
     var og_unit: string = this.proyectData[indexFile || 0].unit
 
 
@@ -3070,7 +3072,7 @@ export class VisorGraphComponent implements OnInit {
           document.body.appendChild(downloadLink);
           downloadLink.click();
           document.body.removeChild(downloadLink);
-          this.isDownloading = false; 
+          this.isDownloading = false;
         }
 
       }

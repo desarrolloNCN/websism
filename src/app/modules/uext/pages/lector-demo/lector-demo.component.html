@@ -403,23 +403,23 @@
                                         </button>
 
                                         <mat-menu #downData="matMenu">
-                                            <button mat-menu-item (click)="donwloadData(tab, 'all')">
+                                            <button mat-menu-item (click)="donwloadData(tab, 'all', i)">
                                                 Todas
                                             </button>
-                                            <button mat-menu-item (click)="donwloadData(tab, 'acel')">
+                                            <button mat-menu-item (click)="donwloadData(tab, 'acel', i)">
                                                 Aceleracion
                                             </button>
-                                            <button mat-menu-item (click)="donwloadData(tab, 'vel')">
+                                            <button mat-menu-item (click)="donwloadData(tab, 'vel', i)">
                                                 Velocidad
                                             </button>
-                                            <button mat-menu-item (click)="donwloadData(tab, 'des')">
+                                            <button mat-menu-item (click)="donwloadData(tab, 'des', i)">
                                                 Desplazamiento
                                             </button>
                                         </mat-menu>
 
                                         <div fxLayout="row" fxLayoutGap="5" fxLayoutAlign="center center">
                                             <mat-divider class="separator" vertical="true"></mat-divider>
-                                            <button mat-icon-button type="button" (click)="resetGraph(tab)">
+                                            <button mat-icon-button type="button" (click)="resetGraph(tab, i)">
                                                 <mat-icon class="colorIconBar"
                                                     title="Reestablecer Datos">refresh</mat-icon>
                                             </button>

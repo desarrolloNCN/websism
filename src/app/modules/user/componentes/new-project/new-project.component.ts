@@ -105,55 +105,55 @@ export class NewProjectComponent implements OnInit {
 
         // TODO: Borrar en Produccion
 
-        if (this.data.uuid) {
+        // if (this.data.uuid) {
 
-          this.titleDialog = 'Editar Proyecto'
-          this.subtitleDialog = 'Asigne un nuevo nombre a su proyecto, añada nuevos archivos con los que va a trabajar y'
-          this.subtitleStrong = 'Actualizar Proyecto'
+        //   this.titleDialog = 'Editar Proyecto'
+        //   this.subtitleDialog = 'Asigne un nuevo nombre a su proyecto, añada nuevos archivos con los que va a trabajar y'
+        //   this.subtitleStrong = 'Actualizar Proyecto'
 
-          this.buttonSubmitForm = 'Actualizar Proyecto'
+        //   this.buttonSubmitForm = 'Actualizar Proyecto'
 
-          let uuid = this.data.uuid
+        //   let uuid = this.data.uuid
 
-          this.controlForm.controls['projectName'].setValue(this.data.name)
-          this.controlForm.controls['descript'].setValue(this.data.descrip)
+        //   this.controlForm.controls['projectName'].setValue(this.data.name)
+        //   this.controlForm.controls['descript'].setValue(this.data.descrip)
 
-          this.controlForm.controls['checkOps'].setValue(this.data.checkM)
+        //   this.controlForm.controls['checkOps'].setValue(this.data.checkM)
 
-          this.defImg = this.data.img || '/assets/ncnLogoColor.png'
+        //   this.defImg = this.data.img || '/assets/ncnLogoColor.png'
 
-          this.data.files.forEach((e: any) => {
-            let file_name = e.filename
-            let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
-            let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
+        //   this.data.files.forEach((e: any) => {
+        //     let file_name = e.filename
+        //     let nombreArchivo: string = file_name.substring(file_name.lastIndexOf('/') + 1);
+        //     let extension: string = nombreArchivo.substring(nombreArchivo.lastIndexOf('.') + 1);
 
-            let formatoNombre = this.formatearNombreArchivo(file_name, '', 12)
+        //     let formatoNombre = this.formatearNombreArchivo(file_name, '', 12)
 
-            if(e.format == 'REFTEK130'){
-              e.status = 'Calibrado'
-            }
+        //     if(e.format == 'REFTEK130'){
+        //       e.status = 'Calibrado'
+        //     }
 
-            this.addedFiles.push({
-              "id": e.id,
-              "uuid": uuid,
-              "projname": this.data.name,
-              "projdesp": this.data.descrip,
-              "file": '', 
-              "fileName": formatoNombre,
-              "originalName": file_name,
-              "status": e.status,
-              "info": e.info,
-              "extension": e.format || extension.toLocaleUpperCase() || 'NO EXT',
-              "string_data": e.string_data,
-              "urlconvert": e.url_gen,
-              "unit": e.unit
-            })
-          });
-        }
+        //     this.addedFiles.push({
+        //       "id": e.id,
+        //       "uuid": uuid,
+        //       "projname": this.data.name,
+        //       "projdesp": this.data.descrip,
+        //       "file": '', 
+        //       "fileName": formatoNombre,
+        //       "originalName": file_name,
+        //       "status": e.status,
+        //       "info": e.info,
+        //       "extension": e.format || extension.toLocaleUpperCase() || 'NO EXT',
+        //       "string_data": e.string_data,
+        //       "urlconvert": e.url_gen,
+        //       "unit": e.unit
+        //     })
+        //   });
+        // }
 
-        this.username = 'admin'
-        this.email = 'admin@example.com'
-        this.idUser = `${1}`
+        // this.username = 'admin'
+        // this.email = 'admin@example.com'
+        // this.idUser = `${1}`
       },
       complete: () => {
 
@@ -209,7 +209,7 @@ export class NewProjectComponent implements OnInit {
           },
           error: err => {
             // TODO: Borrar en Produccion
-            this.idUser = `${1}`
+            //this.idUser = `${1}`
           }
         })
 

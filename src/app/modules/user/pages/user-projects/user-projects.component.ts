@@ -99,33 +99,33 @@ export class UserProjectsComponent implements OnInit {
 
         // TODO: Borrar en Produccion
 
-        this.username = 'admin'
-        this.email = 'admin@example.com'
-        this.usere = 'admin@example.com'
-        this.name = 'admin'
+        // this.username = 'admin'
+        // this.email = 'admin@example.com'
+        // this.usere = 'admin@example.com'
+        // this.name = 'admin'
 
-        this.userService.getProjectuser(this.username, this.email).subscribe({
-          next: value => {
+        // this.userService.getProjectuser(this.username, this.email).subscribe({
+        //   next: value => {
 
-            value.forEach((item: any) => {
-              item.fecha_creacion = new Date(item.fecha_creacion);
-            });
+        //     value.forEach((item: any) => {
+        //       item.fecha_creacion = new Date(item.fecha_creacion);
+        //     });
 
-            this.proyectos = value.sort((a: { fecha_creacion: { getTime: () => number; }; }, b: { fecha_creacion: { getTime: () => number; }; }) => b.fecha_creacion.getTime() - a.fecha_creacion.getTime());
+        //     this.proyectos = value.sort((a: { fecha_creacion: { getTime: () => number; }; }, b: { fecha_creacion: { getTime: () => number; }; }) => b.fecha_creacion.getTime() - a.fecha_creacion.getTime());
 
-            this.pageData = this.proyectos
-            this.totalElementos = this.proyectos.length
-            // console.log('user proj', this.proyectos);
+        //     this.pageData = this.proyectos
+        //     this.totalElementos = this.proyectos.length
+        //     // console.log('user proj', this.proyectos);
 
-          },
-          error: err => {
-            this.snackBar.open(`⚠️ Error en Carga de Proyectos`, 'cerrar', snackBar)
-          },
-          complete: () => {
-            this.loadingSpinner = false
+        //   },
+        //   error: err => {
+        //     this.snackBar.open(`⚠️ Error en Carga de Proyectos`, 'cerrar', snackBar)
+        //   },
+        //   complete: () => {
+        //     this.loadingSpinner = false
 
-          }
-        })
+        //   }
+        // })
 
       },
       complete: () => {

@@ -133,6 +133,8 @@ export class LectorDemoComponent implements OnInit {
   stopMseed: Subscription | any
   stopTxt: Subscription | any
 
+  proyectData: any[] = []
+
   headerText = {
     title: "(DEMO) - Lector de Archivos Acelerográficos",
     preSub: "Podras manipular archivos de diferentes",
@@ -187,10 +189,14 @@ export class LectorDemoComponent implements OnInit {
 
     this.activatedRoute.paramMap.subscribe({
       next: value => {
-        if (value.get('url')! == '' || value.get('url')! == null || undefined) {
+        if (value.get('url')! == '' || value.get('url')! == null || value.get('url')! == undefined) {
+          console.log(value.get('url'));
           this.router.navigateByUrl('/lectorDemo/demo')
         } else {
-          if (this.esURL(decodeURIComponent(value.get('url')!))) {
+          const decodeUrl = atob(atob(value.get('url')!))
+          console.log(decodeUrl);
+
+          if (this.esURL(decodeUrl)) {
             this.headerText = {
               title: "(VISTA) - Lector de Archivos Acelerográficos",
               preSub: "Estas viendo la vista de un",
@@ -198,7 +204,7 @@ export class LectorDemoComponent implements OnInit {
               sufSub: " puedes aplicar algunas funcionalidades",
 
             }
-            this.url = decodeURIComponent(value.get('url')!)
+            this.url = decodeUrl
             this.controlForm.controls['url'].setValue(this.url)
             this.leerArchivo()
           }
@@ -271,6 +277,13 @@ export class LectorDemoComponent implements OnInit {
         if (ext == 'XMR') {
           this.stopXmr = this.obsApi.covertionXMR(archivoValue).subscribe({
             next: value => {
+              this.proyectData.push({
+                "originalName": na,
+                "urlconvert": value.url,
+                "format": '',
+                "unit": ''
+              })
+
               this.leerTxt(value.url)
             },
             error: err => {
@@ -292,9 +305,16 @@ export class LectorDemoComponent implements OnInit {
         this.obsApi.uploadFile(valorNoVacio, this.userInfo).subscribe({
           next: value => {
 
-            localStorage.setItem('urlFileUpload', value.file)
-            localStorage.setItem('urlSearched', value.string_data)
-            this.formatFile = value.f
+            this.proyectData.push({
+              "originalName": na,
+              "urlconvert": value.file || value.string_data,
+              "format": value.f,
+              "unit": ''
+            })
+
+            // localStorage.setItem('urlFileUpload', value.file)
+            // localStorage.setItem('urlSearched', value.string_data)
+            // this.formatFile = value.f
 
           },
           error: err => {
@@ -306,33 +326,41 @@ export class LectorDemoComponent implements OnInit {
           },
           complete: () => {
 
-            let url = ''
+            // let url = ''
+            let url = this.proyectData[0].urlconvert
 
-            if (localStorage.getItem('urlFileUpload')! == null || localStorage.getItem('urlFileUpload')! == 'null') {
-              url = localStorage.getItem('urlSearched')!
-            } else if (localStorage.getItem('urlSearched')! == null || localStorage.getItem('urlSearched')! == 'null') {
-              url = localStorage.getItem('urlFileUpload')!
-            }
+            // if (localStorage.getItem('urlFileUpload')! == null || localStorage.getItem('urlFileUpload')! == 'null') {
+            //   url = localStorage.getItem('urlSearched')!
+            // } else if (localStorage.getItem('urlSearched')! == null || localStorage.getItem('urlSearched')! == 'null') {
+            //   url = localStorage.getItem('urlFileUpload')!
+            // }
 
-            if (ext == 'txt') {
+            if (ext == 'txt' || this.formatFile == 'TXT' || this.proyectData[0].format == 'TXT') {
               this.leerTxt(url)
-            } else if (this.formatFile == 'MSEED' || ext == 'mseed') {
+            } else if (this.proyectData[0].format == 'MSEED' || this.formatFile == 'MSEED' || ext == 'mseed') {
               this.leerMseed(url)
             } else {
               this.obsApi.getData(url).subscribe({
                 next: value => {
 
                   if (value.data[0].und_calib == 'M/S**2') {
-                    localStorage.setItem('ogUnit', 'm')
+                    this.proyectData[0].unit = 'm'
+                    // localStorage.setItem('ogUnit', 'm')
                   } else if (value.data[0].und_calib == 'CM/S**2' || ext == 'evt' || this.formatFile == 'REFTEK130') {
-                    localStorage.setItem('ogUnit', 'gal')
+                    this.proyectData[0].unit = 'gal'
+                    //localStorage.setItem('ogUnit', 'gal')
                   } else if (value.data[0].und_calib == 'G') {
-                    localStorage.setItem('ogUnit', 'g')
+                    this.proyectData[0].unit = 'g'
+                    //localStorage.setItem('ogUnit', 'g')
                   } else {
-                    localStorage.setItem('ogUnit', '')
+                    this.proyectData[0].unit = ''
+                    //localStorage.setItem('ogUnit', '')
                   }
                   this.toggleTabs = true
+
                   this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                  this.proyectData[0].stations = this.groupedData
+
                   this.leer(value.data[0])
                 },
                 error: err => {
@@ -703,23 +731,31 @@ export class LectorDemoComponent implements OnInit {
 
           if (value.url == '') {
 
+            this.proyectData = []
             this.loadingSpinner = false
             this.loadingSpinnerStaInfo = false
             this.btnDisable = false
+            this.router.navigateByUrl('/lectorDemo/demo')
             return
 
           } else {
 
-            this.urlFile = value.url
-            this.original_unit = value.unit
+            this.proyectData[0].urlconvert = value.url
+            this.proyectData[0].unit = value.unit
 
-            localStorage.setItem('urlFileUpload', value.url)
-            localStorage.setItem('ogUnit', value.unit)
+            // this.urlFile = value.url
+            // this.original_unit = value.unit
 
-            this.stopTxt = this.obsApi.getData(value.url).subscribe({
+            // localStorage.setItem('urlFileUpload', value.url)
+            // localStorage.setItem('ogUnit', value.unit)
+
+            this.stopTxt = this.obsApi.getData(this.proyectData[0].urlconvert).subscribe({
               next: value => {
                 this.toggleTabs = true
+
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                this.proyectData[0].stations = this.groupedData
+
                 this.leer(value.data[0])
               },
               error: err => {
@@ -727,6 +763,7 @@ export class LectorDemoComponent implements OnInit {
                 this.loadingSpinner = false
                 this.loadingSpinnerStaInfo = false
                 this.btnDisable = false
+                this.router.navigateByUrl('/lectorDemo/demo')
               },
               complete: () => {
                 this.loadingSpinner = false
@@ -743,9 +780,12 @@ export class LectorDemoComponent implements OnInit {
           this.loadingSpinner = false
           this.loadingSpinnerStaInfo = false
           this.btnDisable = false
+          this.router.navigateByUrl('/lectorDemo/demo')
         },
         complete: () => {
           this.loadingSpinner = false
+          this.loadingSpinnerStaInfo = false
+          this.btnDisable = false
         }
       }
 
@@ -771,6 +811,7 @@ export class LectorDemoComponent implements OnInit {
           // this.toggleTabs = true
           if (valueUrl.url == '') {
 
+            this.proyectData = []
             this.loadingSpinner = false
             this.loadingSpinnerStaInfo = false
             this.btnDisable = false
@@ -778,17 +819,23 @@ export class LectorDemoComponent implements OnInit {
 
           } else {
 
-            this.urlFile = valueUrl.url
-            this.original_unit = valueUrl.unit
+            this.proyectData[0].urlconvert = valueUrl.url
+            this.proyectData[0].unit = valueUrl.unit
 
-            localStorage.setItem('urlFileUpload', valueUrl.url)
-            localStorage.setItem('ogUnit', valueUrl.unit)
+            // this.urlFile = valueUrl.url
+            // this.original_unit = valueUrl.unit
 
-            this.stopMseed = this.obsApi.getData(valueUrl.url).subscribe({
+            // localStorage.setItem('urlFileUpload', valueUrl.url)
+            // localStorage.setItem('ogUnit', valueUrl.unit)
+
+            this.stopMseed = this.obsApi.getData(this.proyectData[0].urlconvert).subscribe({
               next: value => {
                 this.toggleTabs = true
+
                 this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
-                this.leer(value.data[0])
+                this.proyectData[0].stations = this.groupedData
+
+                this.leer(value.data[0], 0)
               },
               error: err => {
                 this.snackBar.open('⚠️ Error al leer el XML', 'cerrar', snackBar)
@@ -820,7 +867,7 @@ export class LectorDemoComponent implements OnInit {
 
   }
 
-  leer(e: any) {
+  leer(e: any, indexFile?: number) {
 
     for (const elem of this.tabs) {
       if (elem.label == `${e.station}.${e.channel}`) {
@@ -836,9 +883,14 @@ export class LectorDemoComponent implements OnInit {
 
     this.stationInfo = e
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
-    var og_unit: string = localStorage.getItem('ogUnit')!
+    var dataFile = this.proyectData[indexFile || 0].urlconvert;
+    var dataString = dataFile;
+    var og_unit: string = this.proyectData[indexFile || 0].unit
+
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
+
+    //var og_unit: string = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -854,10 +906,13 @@ export class LectorDemoComponent implements OnInit {
     this.obsApi.plotGraph(dataToUse, e.station, e.channel, og_unit).subscribe({
       next: val => {
         if (!val.url) {
-          this.createTab(e, val, '')
+          this.createTab(e, val, '', indexFile)
         } else {
-          this.createTab(e, val, val.url)
+          this.createTab(e, val, val.url, indexFile)
         }
+      },
+      error: err => {
+        this.loadingBarGraph = false
       },
       complete: () => {
         this.loadingSpinnerGraph = false
@@ -870,7 +925,7 @@ export class LectorDemoComponent implements OnInit {
 
   // ! Creacion de Tabs
 
-  createTab(e: any, value: any, img: string): void {
+  createTab(e: any, value: any, img: string, indexFilePanel?: number): void {
     this.ToggleGraph = false;
 
     // const graph = this.graphGenerator(e, value, '(RAWDATA)');
@@ -897,6 +952,7 @@ export class LectorDemoComponent implements OnInit {
       entime: e.endtime,
       FilterForm,
       TrimForm,
+      indexFilePanel: indexFilePanel,
       // graph,
       img
     });
@@ -974,9 +1030,15 @@ export class LectorDemoComponent implements OnInit {
     let base = this.baseLineOptions[menuIndex]
     let unit = this.tabs[index].unit || ''
 
-    let dataString: string = localStorage.getItem('urlSearched')!
-    let dataFile: string = localStorage.getItem('urlFileUpload')!
-    let unit_from = localStorage.getItem('ogUnit')!
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
+
+    var dataFile = this.proyectData[indexFilePanel].urlconvert
+    var dataString = dataFile
+    var unit_from: string = this.proyectData[indexFilePanel].unit
+
+    // let dataString: string = localStorage.getItem('urlSearched')!
+    // let dataFile: string = localStorage.getItem('urlFileUpload')!
+    // let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -1071,9 +1133,15 @@ export class LectorDemoComponent implements OnInit {
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
-    let unit_from = localStorage.getItem('ogUnit')!
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
+
+    var dataFile = this.proyectData[indexFilePanel].urlconvert
+    var dataString = dataFile
+    var unit_from: string = this.proyectData[indexFilePanel].unit
+
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
+    // let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -1178,9 +1246,15 @@ export class LectorDemoComponent implements OnInit {
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
-    let unit_from = localStorage.getItem('ogUnit')!
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
+
+    var dataFile = this.proyectData[indexFilePanel].urlconvert
+    var dataString = dataFile
+    var unit_from: string = this.proyectData[indexFilePanel].unit
+
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
+    // let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -1301,10 +1375,16 @@ export class LectorDemoComponent implements OnInit {
     let unit_to = this.unitConvertOptions[menuIndex];
     unit_to = unitMap[unit_to] || '';
 
-    let unit_from = localStorage.getItem('ogUnit')!
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
+    var dataFile = this.proyectData[indexFilePanel].urlconvert
+    var dataString = dataFile
+    var unit_from: string = this.proyectData[indexFilePanel].unit
+
+    // let unit_from = localStorage.getItem('ogUnit')!
+
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -1410,9 +1490,15 @@ export class LectorDemoComponent implements OnInit {
     snackBar.duration = 3 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
-    let unit_from = localStorage.getItem('ogUnit')!
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
+
+    var dataFile = this.proyectData[indexFilePanel].urlconvert
+    var dataString = dataFile
+    var unit_from: string = this.proyectData[indexFilePanel].unit
+
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
+    // let unit_from = localStorage.getItem('ogUnit')!
 
     this.tabs[index].base = 'linear'
     this.tabs[index].unit = 'gal'
@@ -1985,6 +2071,7 @@ export class LectorDemoComponent implements OnInit {
     this.urlFile = ''
     this.stringdata = ''
 
+    this.proyectData = []
     this.tabs = []
     this.actApli = []
 
@@ -2002,6 +2089,7 @@ export class LectorDemoComponent implements OnInit {
     this.urlFile = ''
     this.stringdata = ''
 
+    this.proyectData = []
     this.tabs = []
     this.actApli = []
     this.stationInfo = []
@@ -2012,8 +2100,6 @@ export class LectorDemoComponent implements OnInit {
 
     this.loadingSpinner = false
     this.loadingSpinnerStaInfo = false
-
-    this.fileInput.nativeElement.value = ''
 
     this.groupedData = {}
     this.arch = ''
@@ -2110,11 +2196,17 @@ export class LectorDemoComponent implements OnInit {
     this.matDialog.open(RegisterDialogComponent, matDialogConfig)
   }
 
-  resetGraph(tabInfo: any) {
+  resetGraph(tabInfo: any, index: number) {
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
-    let unit_from = localStorage.getItem('ogUnit')!
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
+
+    var dataFile = this.proyectData[indexFilePanel].urlconvert
+    var dataString = dataFile
+    var unit_from: string = this.proyectData[indexFilePanel].unit
+
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
+    // let unit_from = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
@@ -2211,14 +2303,20 @@ export class LectorDemoComponent implements OnInit {
     })
   }
 
-  donwloadData(tabInfo: any, m: string) {
+  donwloadData(tabInfo: any, m: string, index: number) {
 
     const snackBar = new MatSnackBarConfig();
     snackBar.panelClass = ['snackBar-validator'];
 
-    var dataString: string = localStorage.getItem('urlSearched')!
-    var dataFile: string = localStorage.getItem('urlFileUpload')!
-    var og_unit: string = localStorage.getItem('ogUnit')!
+    let indexFilePanel = this.tabs[index].indexFilePanel || 0
+
+    var dataFile = this.proyectData[indexFilePanel].urlconvert
+    var dataString = dataFile
+    var og_unit: string = this.proyectData[indexFilePanel].unit
+
+    // var dataString: string = localStorage.getItem('urlSearched')!
+    // var dataFile: string = localStorage.getItem('urlFileUpload')!
+    //var og_unit: string = localStorage.getItem('ogUnit')!
 
     let dataToUse: string = dataFile !== "null" ? dataFile : dataString !== "null" ? dataString : "";
 
