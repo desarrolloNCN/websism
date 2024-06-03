@@ -27,8 +27,8 @@ export class HttpHeadersInterceptor implements HttpInterceptor {
       return next.handle(newReq);
     }
 
-    const newUrl = `https://apiqs.ncn.pe/${req.url}`;
-    //const newUrl = `http://localhost:8000/${req.url}`;
+    //const newUrl = `https://apiqs.ncn.pe/${req.url}`;
+    const newUrl = `http://localhost:8000/${req.url}`;
     //const newUrl = `http://192.168.1.88/${req.url}`;
     //const newUrl = `${this.baseUrl}${req.url}`; 
 

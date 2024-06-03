@@ -25,6 +25,7 @@ import {
 } from '@angular-material-components/datetime-picker';
 import { RECAPTCHA_SETTINGS, RECAPTCHA_V3_SITE_KEY, RecaptchaFormsModule, RecaptchaModule, RecaptchaSettings, RecaptchaV3Module } from 'ng-recaptcha';
 import { ReadDataComponent } from './componentes/read-data/read-data.component';
+import { AutotxtreadComponent } from './componentes/autotxtread/autotxtread.component';
 
 
 @NgModule({
@@ -39,7 +40,8 @@ import { ReadDataComponent } from './componentes/read-data/read-data.component';
     RegisterDialogComponent,
     SismosHistoricosComponent,
     AboutUsComponent,
-    ReadDataComponent
+    ReadDataComponent,
+    AutotxtreadComponent
   ],
   imports: [
     CommonModule,
