@@ -16,6 +16,7 @@ import { HttpClient } from '@angular/common/http';
 import { SismosHistoricosComponent } from '../../componentes/sismos-historicos/sismos-historicos.component';
 import { ReCaptchaV3Service } from 'ng-recaptcha';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AutotxtreadComponent } from '../../componentes/autotxtread/autotxtread.component';
 
 @Component({
   selector: 'app-lector-demo',
@@ -143,6 +144,8 @@ export class LectorDemoComponent implements OnInit {
 
   }
 
+  externalLink = false
+
   constructor(
     private activatedRoute: ActivatedRoute,
     private obsApi: ObspyAPIService,
@@ -171,6 +174,9 @@ export class LectorDemoComponent implements OnInit {
   }
 
   ngOnInit(): void {
+
+    this.router.navigateByUrl('/lectorDemo/demo')
+
     localStorage.clear()
 
     // ----------- NO BORRAR -----------------------
@@ -190,24 +196,30 @@ export class LectorDemoComponent implements OnInit {
     this.activatedRoute.paramMap.subscribe({
       next: value => {
         if (value.get('url')! == '' || value.get('url')! == null || value.get('url')! == undefined) {
-          console.log(value.get('url'));
           this.router.navigateByUrl('/lectorDemo/demo')
         } else {
-          const decodeUrl = atob(atob(value.get('url')!))
-          console.log(decodeUrl);
 
-          if (this.esURL(decodeUrl)) {
-            this.headerText = {
-              title: "(VISTA) - Lector de Archivos Acelerográficos",
-              preSub: "Estas viendo la vista de un",
-              redirect: "acelerografo,",
-              sufSub: " puedes aplicar algunas funcionalidades",
+          try {
+            const decodeUrl = atob(atob(value.get('url')!))
 
+            if (this.esURL(decodeUrl)) {
+              this.headerText = {
+                title: "(VISTA) - Lector de Archivos Acelerográficos",
+                preSub: "Estas viendo la vista de un",
+                redirect: "acelerografo,",
+                sufSub: " puedes aplicar algunas funcionalidades",
+
+              }
+              this.url = decodeUrl
+              this.controlForm.controls['url'].setValue(this.url)
+              this.externalLink = true
+              this.leerArchivo()
             }
-            this.url = decodeUrl
-            this.controlForm.controls['url'].setValue(this.url)
-            this.leerArchivo()
+
+          } catch (error) {
+
           }
+
         }
       }
     })
@@ -336,7 +348,11 @@ export class LectorDemoComponent implements OnInit {
             // }
 
             if (ext == 'txt' || this.formatFile == 'TXT' || this.proyectData[0].format == 'TXT') {
-              this.leerTxt(url)
+              if (this.externalLink) {
+                this.leerTxt_2(url)
+              } else {
+                this.leerTxt(url)
+              }
             } else if (this.proyectData[0].format == 'MSEED' || this.formatFile == 'MSEED' || ext == 'mseed') {
               this.leerMseed(url)
             } else {
@@ -707,10 +723,6 @@ export class LectorDemoComponent implements OnInit {
   }
 
 
-
-
-
-
   async leerTxt(url: string) {
 
     const snackBar = new MatSnackBarConfig();
@@ -792,6 +804,99 @@ export class LectorDemoComponent implements OnInit {
       )
 
   }
+
+
+  // ------------- ↓  BORRAR ↓ --------------------
+
+  async leerTxt_2(url: string) {
+
+    const snackBar = new MatSnackBarConfig();
+    snackBar.duration = 5 * 1000;
+    snackBar.panelClass = ['snackBar-validator'];
+
+    const matDialogConfig = new MatDialogConfig()
+    matDialogConfig.disableClose = true;
+    matDialogConfig.data = url
+
+    this.loadingBarGraph = true
+
+    this.loadingSpinnerStaInfo = true
+
+    this.matDialog.open(AutotxtreadComponent, matDialogConfig).afterClosed()
+      .subscribe({
+        next: value => {
+
+          // this.toggleTabs = true
+
+          if (value.url == '') {
+
+            this.proyectData = []
+            this.loadingSpinner = false
+            this.loadingBarGraph = false
+            this.loadingSpinnerStaInfo = false
+            this.btnDisable = false
+            this.router.navigateByUrl('/lectorDemo/demo')
+            return
+
+          } else {
+
+            this.proyectData[0].urlconvert = value.url
+            this.proyectData[0].unit = value.unit
+
+            // this.urlFile = value.url
+            // this.original_unit = value.unit
+
+            // localStorage.setItem('urlFileUpload', value.url)
+            // localStorage.setItem('ogUnit', value.unit)
+
+            this.stopTxt = this.obsApi.getData(this.proyectData[0].urlconvert).subscribe({
+              next: value => {
+                this.toggleTabs = true
+
+                this.groupedData = this.groupByNetworkAndStation(value.data, value.inv)
+                this.proyectData[0].stations = this.groupedData
+
+                this.leer(value.data[0])
+              },
+              error: err => {
+                this.snackBar.open('⚠️ Error al Obtener Datos', 'cerrar', snackBar)
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+                this.loadingBarGraph = false
+                this.btnDisable = false
+                this.router.navigateByUrl('/lectorDemo/demo')
+              },
+              complete: () => {
+                this.loadingBarGraph = false
+                this.loadingSpinner = false
+                this.loadingSpinnerStaInfo = false
+                this.btnDisable = false
+              }
+            })
+
+
+          }
+        },
+        error: err => {
+          this.snackBar.open('⚠️ Error al Transferir Datos', 'cerrar', snackBar)
+          this.loadingSpinner = false
+          this.loadingSpinnerStaInfo = false
+          this.loadingBarGraph = false
+          this.btnDisable = false
+          this.router.navigateByUrl('/lectorDemo/demo')
+        },
+        complete: () => {
+          this.loadingSpinner = false
+          this.loadingSpinnerStaInfo = false
+          this.btnDisable = false
+        }
+      }
+
+      )
+
+  }
+
+  // ------------- ↑  BORRAR ↑ ---------------------
 
   async leerMseed(url: string) {
 

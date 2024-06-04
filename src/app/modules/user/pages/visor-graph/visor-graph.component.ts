@@ -137,7 +137,7 @@ export class VisorGraphComponent implements OnInit {
   usere = ''
 
   // TODO: cambiar esto en Produccion a -1, 1 en dev
-  userId = 1
+  userId = -1
 
   plotedimages: any = []
 
@@ -218,7 +218,7 @@ export class VisorGraphComponent implements OnInit {
 
         if (value.username == null || value.email == null) {
           // TODO: cambiar esto en Produccion a -1, 1 en dev
-          this.userId == 1
+          this.userId == -1
         } else {
           this.group = value.groups
           this.name = value.name
@@ -244,7 +244,7 @@ export class VisorGraphComponent implements OnInit {
       },
       error: err => {
         //TODO: cambiar esto en Produccion a -1, 1 en dev
-        this.userId == 1
+        this.userId == -1
         this.graphClientOption = true
       },
     })

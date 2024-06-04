@@ -23,21 +23,21 @@ export class AuthGuard implements CanActivate {
     snackBar.duration = 5 * 1000;
     snackBar.panelClass = ['snackBar-validator'];
 
-    // return this.authService.getToken().pipe(
-    //   map((data) => {
-    //     if (data.username == null) {
-    //       this.snackBar.open('⚠️ Acceso Denegado', 'cerrar', snackBar)
-    //       this.router.navigateByUrl('/home')
-    //       return false
-    //     } else {
-    //       return true
-    //     }
-    //   }),
-    //   catchError(() => {
-    //     this.router.navigateByUrl('/home')
-    //     return of(false)
-    //   })
-    // )
+    return this.authService.getToken().pipe(
+      map((data) => {
+        if (data.username == null) {
+          this.snackBar.open('⚠️ Acceso Denegado', 'cerrar', snackBar)
+          this.router.navigateByUrl('/home')
+          return false
+        } else {
+          return true
+        }
+      }),
+      catchError(() => {
+        this.router.navigateByUrl('/home')
+        return of(false)
+      })
+    )
     return true
   }
 
